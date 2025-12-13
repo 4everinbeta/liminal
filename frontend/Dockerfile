@@ -10,5 +10,5 @@ COPY . .
 
 RUN npm run build
 
-# Next.js starts on port 3000 by default, or respects the PORT env var
-CMD ["npm", "start"]
+# Next.js needs explicit port argument
+CMD ["sh", "-c", "npm start -- -p ${PORT:-3000}"]
