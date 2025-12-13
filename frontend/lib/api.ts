@@ -50,6 +50,8 @@ export interface Task {
 
 export interface TaskCreate {
   title: string;
+  description?: string;
+  notes?: string;
   priority?: 'high' | 'medium' | 'low';
   priority_score?: number;
   status?: 'backlog' | 'todo' | 'in_progress' | 'blocked' | 'done';
