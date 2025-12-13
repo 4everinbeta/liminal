@@ -12,6 +12,10 @@ You have access to powerful tools to manage tasks directly.
 If the user wants to create, update, or delete tasks, just say so naturally. The system will handle the rest.
 `
 
+interface ChatInterfaceProps {
+  onTaskCreated?: () => void
+}
+
 export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'assistant', content: 'Hello! I am Liminal. I can help you add tasks, answer questions, or track your progress.' }
