@@ -1,11 +1,14 @@
-FROM mcr.microsoft.com/playwright:v1.49.0-jammy
+FROM node:18-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm ci
 
 COPY . .
 
-CMD ["npm", "run", "dev"]
+RUN npm run build
+
+# Next.js starts on port 3000 by default, or respects the PORT env var
+CMD ["npm", "start"]
