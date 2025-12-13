@@ -45,6 +45,7 @@ export default function QuickCapture({ onTaskCreated }: QuickCaptureProps) {
   const { chatMessages, appendChatMessage, setChatMessages } = useAppStore()
   const [isSending, setIsSending] = useState(false)
   const [draft, setDraft] = useState<TaskDraft | null>({
+    title: '', // Added missing title property
     priority: 'medium',
     priority_score: 50,
     status: 'backlog',
