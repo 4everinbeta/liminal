@@ -105,6 +105,7 @@ export default function QuickCapture({ onTaskCreated }: QuickCaptureProps) {
 
   const resetDraft = () => {
     setDraft({
+      title: '', // Added missing title property
       priority: 'medium',
       priority_score: 50,
       status: 'backlog',
