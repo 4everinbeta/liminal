@@ -217,7 +217,7 @@ export default function Home() {
                         task={{
                           id: task.id,
                           title: task.title,
-                          priority: task.priority,
+                          priority_score: task.priority_score,
                           estimatedTime: task.estimated_duration
                         }}
                         onComplete={handleCompleteTask}
