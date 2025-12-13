@@ -1,0 +1,12 @@
+{
+  "extends": ["next/core-web-vitals", "next"],
+  "settings": {
+    "next": {
+      "rootDir": "."
+    }
+  },
+  "env": {
+    "browser": true,
+    "es2022": true
+  }
+}

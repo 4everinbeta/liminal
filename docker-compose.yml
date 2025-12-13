@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: liminal_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: liminal
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - liminal_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d liminal"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: liminal_backend
+    environment:
+      # Use the 'db' service name from docker-compose network
+      DATABASE_URL: postgresql+asyncpg://user:password@db:5432/liminal
+      SECRET_KEY: supersecret_vibe_key
+      # LLM settings (local default can point to DMR/Ollama)
+      LLM_BASE_URL: http://llm:11434/v1/chat/completions
+      # Default to the quantized tag that ships with DMR/Ollama; override via env if needed.
+      LLM_MODEL: llama3.2:latest
+      LLM_PROVIDER: local
+      # For Azure AI Foundry:
+      # LLM_PROVIDER: azure
+      # LLM_BASE_URL: https://<resource>.openai.azure.com/openai/deployments/<deployment>/chat/completions
+      # LLM_API_KEY: <your-azure-key>
+      # AZURE_OPENAI_API_VERSION: 2023-09-01-preview
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      llm:
+        condition: service_started
+    volumes:
+      - ./backend:/app
+    networks:
+      - liminal_net
+    # Reload logic is handled by uvicorn command in Dockerfile or override here
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: liminal_frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - liminal_net
+    command: npm run dev
+
+  llm:
+    image: ollama/ollama:latest
+    container_name: liminal_llm
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./scripts/ollama-init.sh:/usr/local/bin/ollama-init.sh:ro
+      - ./scripts/ollama-models.txt:/init/ollama-models.txt:ro
+    networks:
+      - liminal_net
+    environment:
+      - OLLAMA_MODELS_FILE=/init/ollama-models.txt
+    entrypoint: ["/usr/local/bin/ollama-init.sh"]
+
+volumes:
+  postgres_data:
+  ollama_data:
+
+networks:
+  liminal_net:
