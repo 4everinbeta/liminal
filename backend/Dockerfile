@@ -14,5 +14,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Use shell form explicitly to ensure $PORT is expanded
-CMD sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+# Hardcode port 8000. 
+# You MUST set PORT=8000 in Railway Service Variables for this to work perfectly.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
