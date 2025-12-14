@@ -14,6 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Use shell form to allow variable expansion for $PORT
-# Railway (and others) set PORT dynamically. Default to 8000 if not set.
-CMD sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+# Run uvicorn directly. Railway sets PORT, so we use it.
+# If strict variable expansion is needed, we can fall back to shell, 
+# but let's try to be explicit or use the shell form safer.
+CMD uvicorn app.main:app --host 0.0.0.0 --port $PORT
