@@ -77,6 +77,7 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def on_startup():
+    print(f"DEBUG: Allowed Origins: {origins}")
     await init_db()
 
 
