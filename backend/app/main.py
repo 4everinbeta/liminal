@@ -63,6 +63,7 @@ app = FastAPI(
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://liminal-frontend-production.up.railway.app",
 ]
 
 app.add_middleware(
