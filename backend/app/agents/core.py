@@ -52,7 +52,12 @@ class AgentService:
             "messages": messages, 
             "model": model or self.settings.llm_model, 
             "stream": False,
-            "temperature": 0.2  # Low temperature for actions
+            "temperature": 0.2, # Low temperature for actions
+            # Explicitly disable native tools to prevent "Tool choice is none" errors
+            # when the model tries to be smart but we want raw text JSON.
+            # Note: Azure/OpenAI might complain if 'tools' isn't passed, so we conditionally add it?
+            # Actually, standard OpenAI API allows tool_choice='none' even without tools.
+            "tool_choice": "none" 
         }
 
         async with httpx.AsyncClient(timeout=30.0) as client: # Reduced timeout to 30s
