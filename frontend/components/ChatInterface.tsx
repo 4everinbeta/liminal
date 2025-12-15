@@ -80,24 +80,30 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
 
       const responseContent = await chatWithLlm(context)
       
-      // Parse for command
-      const commandRegex = /:::({.*}):::/s
-      const match = responseContent.match(commandRegex)
+      // Parse for commands (non-greedy, global to handle multiple blocks)
+      const commandRegex = /:::\s*(\{[\s\S]*?\})\s*:::/g
+      let match
       let displayContent = responseContent
+      let actionTaken = false
 
-      if (match) {
-        const jsonCommand = match[1]
-        displayContent = responseContent.replace(match[0], '').trim() // Remove command from visible text
-        const success = await handleToolAction(jsonCommand)
-        
-        if (success) {
-           // Optionally refresh the task list (requires lifting state or using context/swr)
-           // For now, we'll just let the user know via the chat
+      // We need to reset lastIndex if we were reusing a regex object, but here it's created fresh.
+      // However, to replace correctly, we might want to do it differently.
+      
+      // First, extract all commands
+      const commands: string[] = []
+      displayContent = displayContent.replace(commandRegex, (match, group1) => {
+        commands.push(group1)
+        return '' // Remove from display
+      }).trim()
+
+      // Execute commands
+      for (const jsonCommand of commands) {
+         const success = await handleToolAction(jsonCommand)
+         if (success) actionTaken = true
+      }
+
+      if (actionTaken) {
            displayContent += " (Task created ✓)"
-           // Trigger a custom event or use a callback if we need to refresh the parent
-           // But since we are inside a component, maybe we can accept an onTaskCreated prop?
-           // I'll add that below.
-        }
       }
 
       const assistantMsg: ChatMessage = { role: 'assistant', content: displayContent }
