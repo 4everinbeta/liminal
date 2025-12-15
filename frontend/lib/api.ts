@@ -82,20 +82,30 @@ async function ensureDemoUser(): Promise<string> {
   };
 
   try {
-    // 1. Try to create user (might fail if exists, that's fine)
-    await fetch(`${API_BASE_URL}/users`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(demoUser),
-    });
-
-    // 2. Login
-    const loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
+    // 1. Try to login directly
+    let loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
             'Authorization': 'Basic ' + btoa(`${demoUser.email}:${demoUser.password}`)
         }
     });
+
+    // 2. If login fails (likely user doesn't exist), try to create user
+    if (loginResponse.status === 401) {
+        await fetch(`${API_BASE_URL}/users`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(demoUser),
+        });
+
+        // 3. Retry login
+        loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Basic ' + btoa(`${demoUser.email}:${demoUser.password}`)
+            }
+        });
+    }
 
     if (loginResponse.ok) {
         const data = await loginResponse.json();
