@@ -132,14 +132,20 @@ You CANNOT create, update, or delete tasks by just writing text.
 You MUST output a JSON tool command to perform the action.
 
 Tools:
-1. CREATE_TASK(title, priority, duration, value)
+1. CREATE_TASK(title, priority, priority_score, effort_score, value_score)
+   - priority: "low", "medium", "high"
+   - priority_score: 1-100 (Default mapping if not specified: Low=20, Medium=50, High=90)
+   - effort_score: 1-100 (Default: 50)
+   - value_score: 1-100 (Default: 50)
 2. DELETE_TASK(id)
 3. SEARCH_TASKS(query)
 
 Format:
-:::{"tool": "create_task", "args": {"title": "Buy milk", "priority": "medium"}}:::
+:::{"tool": "create_task", "args": {"title": "Buy milk", "priority": "medium", "priority_score": 50, "value_score": 50, "effort_score": 20}}:::
 
 If you need more info (e.g. title is missing), ASK the user.
+If the user provides values like "value of 40", map it to "value_score": 40.
+If the user provides "effort of 30", map it to "effort_score": 30.
 If you are ready to act, OUTPUT THE JSON ONLY.
 """
         }
@@ -174,6 +180,8 @@ If you are ready to act, OUTPUT THE JSON ONLY.
                 refresh_needed = False
                 
                 if tool_name == "create_task":
+                    # Ensure effort_score maps to estimated_duration if needed, or vice-versa
+                    # But the model has effort_score, so let's stick to that.
                     task = await crud.create_task(self.session, TaskCreate(**args), self.user_id)
                     result_text = f"Successfully created task: '{task.title}' (ID: {task.id})."
                     refresh_needed = True
