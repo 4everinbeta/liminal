@@ -21,14 +21,32 @@ class AgentService:
         headers = {"Content-Type": "application/json"}
         params = None
         
-        # Auth headers logic
+        # Determine endpoint and auth based on provider
         if self.settings.llm_provider.lower() == "azure":
             api_version = self.settings.azure_openai_api_version or "2023-09-01-preview"
             params = {"api-version": api_version}
             if self.settings.llm_api_key:
                 headers["api-key"] = self.settings.llm_api_key
-        elif self.settings.llm_api_key:
+            # Azure specific URL structure
+            full_url = f"{base_url}/deployments/{self.settings.llm_model}/chat/completions"
+        elif self.settings.llm_provider.lower() == "groq":
             headers["Authorization"] = f"Bearer {self.settings.llm_api_key}"
+            full_url = f"{base_url}/openai/v1/chat/completions"
+        elif self.settings.llm_provider.lower() == "local":
+            # For local Ollama, the base_url already includes /v1/chat/completions
+            if self.settings.llm_api_key:
+                headers["Authorization"] = f"Bearer {self.settings.llm_api_key}"
+            full_url = base_url
+        else: # Default to OpenAI-compatible API
+            if self.settings.llm_api_key:
+                headers["Authorization"] = f"Bearer {self.settings.llm_api_key}"
+            full_url = f"{base_url}/v1/chat/completions"
+
+        print(f"DEBUG: LLM Provider: {self.settings.llm_provider}")
+        print(f"DEBUG: Requesting URL: {full_url}")
+        print(f"DEBUG: Model: {model or self.settings.llm_model}")
+        masked_key = self.settings.llm_api_key[:4] + "..." if self.settings.llm_api_key else "None"
+        print(f"DEBUG: API Key present: {masked_key}")
 
         body = {
             "messages": messages, 
@@ -37,11 +55,19 @@ class AgentService:
             "temperature": 0.2  # Low temperature for actions
         }
 
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            resp = await client.post(base_url, json=body, headers=headers, params=params)
-            resp.raise_for_status()
-            data = resp.json()
-            return data.get("choices", [{}])[0].get("message", {}).get("content", "")
+        async with httpx.AsyncClient(timeout=30.0) as client: # Reduced timeout to 30s
+            try:
+                resp = await client.post(full_url, json=body, headers=headers, params=params)
+                resp.raise_for_status()
+                data = resp.json()
+                return data.get("choices", [{}])[0].get("message", {}).get("content", "")
+            except httpx.HTTPStatusError as e:
+                print(f"HTTP Status Error from LLM provider: {e.response.status_code} - {e.response.text}")
+                raise
+            except httpx.RequestError as e:
+                print(f"Request Error to LLM provider: {e}")
+                raise
+
 
     async def process_request(self, messages: List[Dict[str, str]]) -> str:
         # 1. Supervisor Step
