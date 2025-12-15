@@ -1,5 +1,6 @@
 import json
 import httpx
+import re
 from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from .. import crud
@@ -145,21 +146,26 @@ If you are ready to act, OUTPUT THE JSON ONLY.
         
         # First attempt
         response = await self._call_llm([system_msg] + messages)
+        print(f"DEBUG: Task Agent Raw Response: '{response}'")
         
+        # Regex to find JSON block: matches ::: { ... } ::: or ::: { ... } ::: with variable whitespace
+        json_match = re.search(r":::\s*(\{.*?\})\s*:::", response, re.DOTALL)
+
         # Retry logic: If LLM claims to have acted but didn't output JSON
-        if ":::{ " not in response and ("created" in response.lower() or "deleted" in response.lower() or "added" in response.lower()):
+        if not json_match and ("created" in response.lower() or "deleted" in response.lower() or "added" in response.lower()):
              # It likely hallucinated. Force it.
              retry_msg = {
                  "role": "system",
                  "content": "ERROR: You did not output the JSON command. Output the JSON command now."
              }
              response = await self._call_llm([system_msg] + messages + [retry_msg])
+             print(f"DEBUG: Task Agent Retry Response: '{response}'")
+             json_match = re.search(r":::\s*(\{.*?\})\s*:::", response, re.DOTALL)
 
-        if ":::{ " in response:
+        if json_match:
             try:
-                start = response.find(":::{") + 3
-                end = response.find("}:::") + 1
-                tool_call = json.loads(response[start:end])
+                json_str = json_match.group(1)
+                tool_call = json.loads(json_str)
                 
                 tool_name = tool_call.get("tool")
                 args = tool_call.get("args", {})
