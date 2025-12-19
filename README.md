@@ -41,20 +41,40 @@ Dockerized services managed via `docker-compose`.
 - **Style:** "Vibe Coding" - readable, minimal, functional.
 
 ## 🔐 Authentication (OIDC)
-This app now expects **OIDC access tokens** (Bearer JWTs) for all API calls; for low/no-cost IDPs, use a hosted free tier (e.g. Zitadel) or self-host (e.g. Keycloak/Authentik) and enable username/password *in the IdP*.
+This app supports a **real OIDC provider**. The backend validates Bearer JWTs via the provider’s JWKS, and the frontend performs the OIDC Authorization Code (PKCE) flow.
 
-Backend env (production):
+### Local Keycloak (recommended dev default)
+`docker-compose.yml` includes a Keycloak service and imports a realm from `keycloak/liminal-realm.json`.
+
+- Keycloak admin console: http://localhost:8080 (admin/admin by default)
+- Realm: `liminal`
+- Frontend client: `liminal-frontend` (public)
+- Demo user: `demo` / `demo-password`
+
+Frontend env (local):
+- `NEXT_PUBLIC_OIDC_AUTHORITY=http://localhost:8080/realms/liminal`
+- `NEXT_PUBLIC_OIDC_CLIENT_ID=liminal-frontend`
+- `NEXT_PUBLIC_OIDC_REDIRECT_URI=http://localhost:3000/auth/callback`
+
+Backend env (local):
+- `OIDC_ISSUER=http://keycloak:8080/realms/liminal`
+- (optional) `OIDC_AUDIENCE=liminal-frontend`
+
+### Production / Railway
+Use any OIDC provider (hosted: Zitadel/Auth0, or self-host: Keycloak/Authentik).
+
+Backend env:
 - `OIDC_ISSUER=https://<your-idp>/realms/<realm>`
-- `OIDC_AUDIENCE=<client-id>` (often required)
+- `OIDC_AUDIENCE=<client-id>` (optional if your provider doesn’t set aud the way you expect)
 - `OIDC_JWKS_URL=<optional>` (otherwise discovered from `/.well-known/openid-configuration`)
 
 Frontend env:
 - `NEXT_PUBLIC_OIDC_AUTHORITY=https://<your-idp>/realms/<realm>`
 - `NEXT_PUBLIC_OIDC_CLIENT_ID=<client-id>`
-- `NEXT_PUBLIC_OIDC_REDIRECT_URI=http://localhost:3000/auth/callback`
+- `NEXT_PUBLIC_OIDC_REDIRECT_URI=https://<your-frontend-domain>/auth/callback`
 
 Dev/test-only local auth:
-- `ENABLE_LOCAL_AUTH=1` to re-enable `/users` + `/auth/login`.
+- `ENABLE_LOCAL_AUTH=1` to re-enable `/users` + `/auth/login`. 
 
 ## 📝 Next Steps
 1. Add a user-facing Settings page wired to `GET /me` and `PATCH /me/settings`.
