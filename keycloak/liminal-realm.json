@@ -11,10 +11,16 @@
       "publicClient": true,
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
-      "redirectUris": ["http://localhost:3000/*", "https://*.up.railway.app/*"],
-      "webOrigins": ["http://localhost:3000", "https://*.up.railway.app"],
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "https://liminal-frontend-production.up.railway.app/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "https://liminal-frontend-production.up.railway.app"
+      ],
       "attributes": {
-        "post.logout.redirect.uris": "http://localhost:3000/login##https://*.up.railway.app/login"
+        "post.logout.redirect.uris": "http://localhost:3000/login##https://liminal-frontend-production.up.railway.app/login"
       }
     }
   ],
