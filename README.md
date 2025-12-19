@@ -63,6 +63,9 @@ Backend env (local):
 ### Production / Railway
 Use any OIDC provider (hosted: Zitadel/Auth0, or self-host: Keycloak/Authentik).
 
+Important (Docker builds): `NEXT_PUBLIC_*` variables must be available **at build time** for Next.js.
+If you’re deploying the frontend with the included `frontend/Dockerfile`, set these as **Railway Build Args** (not only runtime Variables).
+
 Backend env:
 - `OIDC_ISSUER=https://<your-idp>/realms/<realm>`
 - `OIDC_AUDIENCE=<client-id>` (optional if your provider doesn’t set aud the way you expect)
