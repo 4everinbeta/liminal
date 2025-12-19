@@ -10,10 +10,11 @@ const postLogoutRedirectUri =
   process.env.NEXT_PUBLIC_OIDC_POST_LOGOUT_REDIRECT_URI || 'http://localhost:3000/login'
 const scope = process.env.NEXT_PUBLIC_OIDC_SCOPE || 'openid profile email'
 
-export const AUTH_REQUIRED =
-  (process.env.NEXT_PUBLIC_AUTH_REQUIRED || 'true').toLowerCase() !== 'false'
-
 export const OIDC_ENABLED = Boolean(authority && clientId)
+
+const authRequiredDefault = OIDC_ENABLED ? 'true' : 'false'
+export const AUTH_REQUIRED =
+  (process.env.NEXT_PUBLIC_AUTH_REQUIRED || authRequiredDefault).toLowerCase() !== 'false'
 
 export const userManager = OIDC_ENABLED
   ? new UserManager({
