@@ -9,12 +9,14 @@ import ChatInterface from '@/components/ChatInterface'
 import TaskForm from '@/components/TaskForm'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getTasks, updateTask, deleteTask, Task } from '@/lib/api'
-import { Layout, CheckCircle, PauseCircle } from 'lucide-react'
+import { logout } from '@/lib/auth'
+import { Layout, CheckCircle, PauseCircle, LogOut } from 'lucide-react'
 
 export default function Home() {
   const { isFocusMode, activeTaskId, setActiveTaskId } = useAppStore()
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const fetchTasks = async () => {
     setIsLoading(true)
@@ -102,6 +104,17 @@ export default function Home() {
     console.log('Paused task:', activeTask?.title)
   }
 
+  const handleLogout = async () => {
+    if (isLoggingOut) return
+    setIsLoggingOut(true)
+    try {
+      await logout()
+    } catch (err) {
+      console.error('Logout failed', err)
+      setIsLoggingOut(false)
+    }
+  }
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -119,6 +132,14 @@ export default function Home() {
             <span className="text-sm">Board View</span>
           </a>
           <FocusToggle />
+          <button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-full font-medium shadow-sm hover:bg-gray-800 transition-colors disabled:opacity-60"
+          >
+            <LogOut size={16} />
+            <span className="text-sm">{isLoggingOut ? 'Signing out…' : 'Sign out'}</span>
+          </button>
         </div>
       </header>
 
