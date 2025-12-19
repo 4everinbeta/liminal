@@ -87,6 +87,18 @@ def _select_jwk(jwks: dict, kid: Optional[str]) -> Optional[dict]:
     return None
 
 
+def _audience_matches(aud_claim: Any, expected: str) -> bool:
+    if not expected:
+        return True
+    if aud_claim is None:
+        return False
+    if isinstance(aud_claim, str):
+        return aud_claim == expected
+    if isinstance(aud_claim, list):
+        return expected in aud_claim
+    return False
+
+
 async def _decode_oidc_token(token: str) -> dict:
     settings = get_settings()
     jwks = await _get_oidc_jwks(settings)
@@ -114,7 +126,28 @@ async def _decode_oidc_token(token: str) -> dict:
     pem = key.to_pem().decode()
     audience = settings.oidc_audience or None
     issuer = settings.oidc_issuer or None
-    return jwt.decode(token, pem, algorithms=[alg], audience=audience, issuer=issuer)
+
+    try:
+        return jwt.decode(token, pem, algorithms=[alg], audience=audience, issuer=issuer)
+    except JWTError:
+        # Keycloak often places the client_id in `azp` and uses other values in `aud`.
+        # If an explicit audience is configured, accept tokens where aud OR azp matches.
+        if not audience:
+            raise
+
+        payload = jwt.decode(
+            token,
+            pem,
+            algorithms=[alg],
+            issuer=issuer,
+            options={"verify_aud": False},
+        )
+
+        azp = payload.get("azp")
+        if not _audience_matches(payload.get("aud"), audience) and azp != audience:
+            raise
+
+        return payload
 
 
 async def get_current_user(
