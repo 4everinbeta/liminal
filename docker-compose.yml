@@ -74,14 +74,15 @@ services:
     command: npm run dev
 
   keycloak:
-    image: quay.io/keycloak/keycloak:25.0.2
+    build:
+      context: ./keycloak
+      dockerfile: Dockerfile
     container_name: liminal_keycloak
-    command: start-dev --http-port=8080 --import-realm
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
     volumes:
-      - ./keycloak/liminal-realm.json:/opt/keycloak/data/import/liminal-realm.json:ro
+      - keycloak_data:/opt/keycloak/data
     ports:
       - "8080:8080"
     networks:
@@ -105,6 +106,7 @@ services:
 volumes:
   postgres_data:
   ollama_data:
+  keycloak_data:
 
 networks:
   liminal_net:

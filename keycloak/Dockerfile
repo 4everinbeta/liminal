@@ -2,6 +2,7 @@ FROM quay.io/keycloak/keycloak:25.0.2
 
 # Import realm at startup (works on Railway since it builds from repo).
 COPY liminal-realm.json /opt/keycloak/data/import/liminal-realm.json
+COPY themes /opt/keycloak/themes
 
 # Railway is memory-constrained; Keycloak is heavy.
 # Pre-build an optimized server image during docker build and cap heap at runtime.

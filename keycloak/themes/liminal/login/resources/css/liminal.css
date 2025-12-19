@@ -1,0 +1,132 @@
+:root {
+  --liminal-bg: radial-gradient(circle at top, #f7f2ff 0%, #f0f4ff 40%, #eef5ff 100%);
+  --liminal-card-bg: #ffffff;
+  --liminal-border: #e5e7eb;
+  --liminal-primary: #4f46e5;
+  --liminal-primary-dark: #4338ca;
+  --liminal-text: #111827;
+  --liminal-muted: #6b7280;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body.login-pf {
+  background: var(--liminal-bg);
+  color: var(--liminal-text);
+}
+
+#kc-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem 1.5rem;
+}
+
+#kc-content {
+  width: 100%;
+  max-width: 420px;
+}
+
+#kc-content-wrapper {
+  background: var(--liminal-card-bg);
+  border-radius: 28px;
+  border: 1px solid var(--liminal-border);
+  box-shadow:
+    0 20px 60px rgba(79, 70, 229, 0.08),
+    0 8px 24px rgba(17, 24, 39, 0.08);
+  padding: 2.5rem;
+}
+
+#kc-logo {
+  display: none;
+}
+
+#kc-page-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--liminal-text);
+  text-align: left;
+}
+
+#kc-header-wrapper {
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+
+#kc-header h1 {
+  font-size: 1rem;
+  color: var(--liminal-muted);
+  margin: 0;
+}
+
+.pf-c-button.pf-m-primary,
+#kc-login {
+  background: var(--liminal-primary);
+  border: none;
+  border-radius: 999px;
+  padding: 0.9rem 1rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background 0.2s ease, transform 0.15s ease;
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.25);
+}
+
+.pf-c-button.pf-m-primary:hover,
+#kc-login:hover {
+  background: var(--liminal-primary-dark);
+  transform: translateY(-1px);
+}
+
+.pf-c-input-group {
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  background: #f9fafb;
+  transition: border-color 0.2s ease;
+}
+
+.pf-c-form-control {
+  border: none;
+  background: transparent;
+  padding: 1rem 1.2rem;
+  font-size: 1rem;
+}
+
+.pf-c-form-control:focus {
+  box-shadow: none;
+}
+
+.pf-c-form-control::placeholder {
+  color: var(--liminal-muted);
+}
+
+.liminal-header {
+  display: none;
+}
+
+#kc-form-options {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--liminal-muted);
+}
+
+#kc-registration-container {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--liminal-muted);
+}
+
+#kc-registration a {
+  color: var(--liminal-primary);
+  font-weight: 600;
+}
+
+.alert-error {
+  border-radius: 16px;
+  border: 1px solid #fca5a5;
+  background: #fef2f2;
+  color: #dc2626;
+}

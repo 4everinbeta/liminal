@@ -2,6 +2,7 @@
   "realm": "liminal",
   "enabled": true,
   "displayName": "Liminal",
+  "loginTheme": "liminal",
   "sslRequired": "external",
   "registrationAllowed": true,
   "clients": [

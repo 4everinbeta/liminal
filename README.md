@@ -44,13 +44,14 @@ Dockerized services managed via `docker-compose`.
 This app supports a **real OIDC provider**. The backend validates Bearer JWTs via the provider’s JWKS, and the frontend performs the OIDC Authorization Code (PKCE) flow.
 
 ### Local Keycloak (recommended dev default)
-`docker-compose.yml` includes a Keycloak service and imports a realm from `keycloak/liminal-realm.json`.
+`docker-compose.yml` builds the Keycloak image from `keycloak/Dockerfile`, imports the `keycloak/liminal-realm.json` realm, **and mounts a named volume (`keycloak_data`) so users/clients persist between restarts**. Remove that volume (`docker volume rm adhd-planner_keycloak_data`) if you ever need a clean slate.
 
 - Keycloak admin console: http://localhost:8080 (admin/admin by default)
 - Realm: `liminal`
 - Frontend client: `liminal-frontend` (public)
 - Demo user: `demo` / `demo-password`
 - Self-registration: enabled (users can create accounts from the Keycloak login screen)
+- Custom login theme: the `liminal` theme in `keycloak/themes` matches the app’s gradients/buttons and is applied automatically to the realm.
 
 Note: Keycloak does **not** allow wildcard subdomains in redirect URIs (e.g. `https://*.up.railway.app/*`). You must list your exact frontend domain(s) under the client’s redirect URIs.
 
@@ -64,7 +65,7 @@ Backend env (local):
 - (optional) `OIDC_AUDIENCE=liminal-frontend`
 
 ### Production / Railway
-Use any OIDC provider (hosted: Zitadel/Auth0, or self-host: Keycloak/Authentik).
+Use any OIDC provider (hosted: Zitadel/Auth0, or self-host: Keycloak/Authentik). If you deploy Keycloak yourself (e.g., Railway), attach a persistent disk or point it at an external database so that users, themes, and client tweaks survive deploys. To reuse the bundled Liminal theme remotely, copy `keycloak/themes/liminal` into `/opt/keycloak/themes`, then select **Realm Settings → Themes → Login = liminal**.
 
 Important (Railway + Dockerfile): this repo serves OIDC settings from `/api/config` at **runtime**, so you can set `NEXT_PUBLIC_OIDC_*` as normal Railway **Variables** on the frontend service (no special build-args UI required).
 
