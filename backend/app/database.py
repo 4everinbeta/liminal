@@ -36,4 +36,4 @@ async def init_db():
         await conn.execute(text("UPDATE task SET effort_score = COALESCE(effort_score, estimated_duration, 50) WHERE effort_score IS NULL"))
 
         # OIDC migration: issuer support (issuer+sub is the stable identity key)
-        await conn.execute(text("ALTER TABLE user ADD COLUMN IF NOT EXISTS oidc_issuer TEXT"))
+        await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS oidc_issuer TEXT'))
