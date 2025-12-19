@@ -50,6 +50,7 @@ This app supports a **real OIDC provider**. The backend validates Bearer JWTs vi
 - Realm: `liminal`
 - Frontend client: `liminal-frontend` (public)
 - Demo user: `demo` / `demo-password`
+- Self-registration: enabled (users can create accounts from the Keycloak login screen)
 
 Note: Keycloak does **not** allow wildcard subdomains in redirect URIs (e.g. `https://*.up.railway.app/*`). You must list your exact frontend domain(s) under the client’s redirect URIs.
 
