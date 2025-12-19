@@ -1,5 +1,6 @@
 import json
 import httpx
+import os
 import re
 from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,6 +8,8 @@ from .. import crud
 from ..models import TaskCreate, TaskStatus
 from ..config import get_settings
 from .knowledge import LIMINAL_KNOWLEDGE_BASE
+
+DEBUG_AGENT = os.getenv("DEBUG_AGENT", "").lower() in ("1", "true", "yes")
 
 class AgentService:
     def __init__(self, session: AsyncSession, user_id: str):
@@ -43,11 +46,12 @@ class AgentService:
                 headers["Authorization"] = f"Bearer {self.settings.llm_api_key}"
             full_url = f"{base_url}/v1/chat/completions"
 
-        print(f"DEBUG: LLM Provider: {self.settings.llm_provider}")
-        print(f"DEBUG: Requesting URL: {full_url}")
-        print(f"DEBUG: Model: {model or self.settings.llm_model}")
-        masked_key = self.settings.llm_api_key[:4] + "..." if self.settings.llm_api_key else "None"
-        print(f"DEBUG: API Key present: {masked_key}")
+        if DEBUG_AGENT:
+            print(f"DEBUG: LLM Provider: {self.settings.llm_provider}")
+            print(f"DEBUG: Requesting URL: {full_url}")
+            print(f"DEBUG: Model: {model or self.settings.llm_model}")
+            masked_key = self.settings.llm_api_key[:4] + "..." if self.settings.llm_api_key else "None"
+            print(f"DEBUG: API Key present: {masked_key}")
 
         body = {
             "messages": messages, 
@@ -68,17 +72,26 @@ class AgentService:
                 data = resp.json()
                 return data.get("choices", [{}])[0].get("message", {}).get("content", "")
             except httpx.HTTPStatusError as e:
-                print(f"HTTP Status Error from LLM provider: {e.response.status_code} - {e.response.text}")
+                if DEBUG_AGENT:
+                    print(
+                        f"HTTP Status Error from LLM provider: {e.response.status_code} - {e.response.text}"
+                    )
+                else:
+                    print(f"HTTP Status Error from LLM provider: {e.response.status_code}")
                 raise
             except httpx.RequestError as e:
-                print(f"Request Error to LLM provider: {e}")
+                if DEBUG_AGENT:
+                    print(f"Request Error to LLM provider: {e}")
+                else:
+                    print("Request Error to LLM provider")
                 raise
 
 
     async def process_request(self, messages: List[Dict[str, str]]) -> str:
         # 1. Supervisor Step
         intent = await self._classify_intent(messages)
-        print(f"DEBUG: Intent classified as {intent}")
+        if DEBUG_AGENT:
+            print(f"DEBUG: Intent classified as {intent}")
 
         # 2. Hand off to specialized agent
         if intent == "task_management":
@@ -110,7 +123,8 @@ Rules:
         context = messages[-3:] if len(messages) > 3 else messages
         response = await self._call_llm([system_msg] + context)
         
-        print(f"DEBUG: Supervisor Raw Response: '{response}'")
+        if DEBUG_AGENT:
+            print(f"DEBUG: Supervisor Raw Response: '{response}'")
         
         cleaned = response.strip().upper()
         
@@ -152,7 +166,8 @@ If you are ready to act, OUTPUT THE JSON ONLY.
         
         # First attempt
         response = await self._call_llm([system_msg] + messages)
-        print(f"DEBUG: Task Agent Raw Response: '{response}'")
+        if DEBUG_AGENT:
+            print(f"DEBUG: Task Agent Raw Response: '{response}'")
         
         # Regex to find JSON block: matches ::: { ... } ::: or ::: { ... } ::: with variable whitespace
         json_match = re.search(r":::\s*(\{.*?\})\s*:::", response, re.DOTALL)
@@ -165,7 +180,8 @@ If you are ready to act, OUTPUT THE JSON ONLY.
                  "content": "ERROR: You did not output the JSON command. Output the JSON command now."
              }
              response = await self._call_llm([system_msg] + messages + [retry_msg])
-             print(f"DEBUG: Task Agent Retry Response: '{response}'")
+             if DEBUG_AGENT:
+                 print(f"DEBUG: Task Agent Retry Response: '{response}'")
              json_match = re.search(r":::\s*(\{.*?\})\s*:::", response, re.DOTALL)
 
         if json_match:
@@ -221,7 +237,8 @@ If you are ready to act, OUTPUT THE JSON ONLY.
                 return final_response
 
             except Exception as e:
-                print(f"Tool execution failed: {e}")
+                if DEBUG_AGENT:
+                    print(f"Tool execution failed: {e}")
                 return "I encountered an error executing that command."
         
         return response

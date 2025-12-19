@@ -24,4 +24,13 @@ frontend/playwright-report/
 .env.dev
 .env.prod
 .env.qa
+private/
 labenv/
+
+# Local artifacts (screenshots, downloaded files)
+Liminal-screen1.jpg
+board-error.png
+chat-error*.png
+dmr-api-error*.png
+build-args_railway.com
+*:Zone.Identifier

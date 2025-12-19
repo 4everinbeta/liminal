@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional, Literal
+import os
 import uuid
 import httpx
 from pydantic import BaseModel
@@ -21,6 +22,7 @@ from .models import (
     InitiativeCreate,
     UserCreate,
     Token,
+    Settings,
 )
 from .auth import (
     create_access_token,
@@ -77,7 +79,8 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def on_startup():
-    print(f"DEBUG: Allowed Origins: {origins}")
+    if os.getenv("DEBUG_STARTUP", "").lower() in ("1", "true", "yes"):
+        print(f"DEBUG: Allowed Origins: {origins}")
     await init_db()
 
 
@@ -90,13 +93,19 @@ async def root():
 
 @app.post("/auth/login", response_model=Token)
 async def login_basic(user: User = Depends(authenticate_basic_user)):
-    access_token = create_access_token(data={"sub": user.id})
+    settings = get_settings()
+    if not settings.enable_local_auth:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    access_token = create_access_token(data={"sub": user.id, "iss": "local"})
     return Token(access_token=access_token)
 
 
 @app.post("/auth/google", response_model=Token)
 async def login_google(id_token: str, session: AsyncSession = Depends(get_session)):
     settings = get_settings()
+    if os.getenv("ENABLE_GOOGLE_TOKEN_LOGIN", "").lower() not in ("1", "true", "yes"):
+        raise HTTPException(status_code=404, detail="Not found")
     if not google_id_token or not google_requests:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -147,12 +156,16 @@ async def create_user(
     user_data: UserCreate,
     session: AsyncSession = Depends(get_session),
 ):
+    settings = get_settings()
+    if not settings.enable_local_auth:
+        raise HTTPException(status_code=404, detail="Not found")
     statement = select(User).where(User.email == user_data.email)
     result = await session.execute(statement)
     existing = result.scalar_one_or_none()
     if existing:
-        # Allow setting a password if the user exists without one (e.g., demo bootstrap)
-        if user_data.password and not existing.hashed_password:
+        # SECURITY: Disallow unauthenticated password "bootstrap" unless explicitly enabled.
+        allow_bootstrap = os.getenv("ALLOW_PASSWORD_BOOTSTRAP", "").lower() in ("1", "true", "yes")
+        if user_data.password and not existing.hashed_password and allow_bootstrap:
             existing.hashed_password = get_password_hash(user_data.password)
             session.add(existing)
             await session.commit()
@@ -175,6 +188,54 @@ async def create_user(
     await session.commit()
     await session.refresh(new_user)
     return new_user
+
+
+class SettingsUpdate(BaseModel):
+    theme: Optional[str] = None
+    focus_duration: Optional[int] = None
+    break_duration: Optional[int] = None
+    sound_enabled: Optional[bool] = None
+
+
+@app.get("/me")
+async def get_me(
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    statement = select(Settings).where(Settings.user_id == current_user.id)
+    result = await session.execute(statement)
+    settings_row = result.scalar_one_or_none()
+
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "name": current_user.name,
+        "created_at": current_user.created_at,
+        "settings": settings_row,
+    }
+
+
+@app.patch("/me/settings")
+async def update_me_settings(
+    update: SettingsUpdate,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    statement = select(Settings).where(Settings.user_id == current_user.id)
+    result = await session.execute(statement)
+    settings_row = result.scalar_one_or_none()
+
+    if not settings_row:
+        settings_row = Settings(id=str(uuid.uuid4()), user_id=current_user.id)
+
+    payload = update.dict(exclude_unset=True)
+    for k, v in payload.items():
+        setattr(settings_row, k, v)
+
+    session.add(settings_row)
+    await session.commit()
+    await session.refresh(settings_row)
+    return settings_row
 
 
 # --- Tasks ---
@@ -303,6 +364,6 @@ async def chat_with_llm(
         content = await agent.process_request(messages)
         return ChatResponse(content=content)
     except Exception as exc:
-        # Log the full error for debugging
+        # Log server-side; avoid leaking internals to clients.
         print(f"Agent Processing Error: {exc}")
-        raise HTTPException(status_code=500, detail=f"Agent processing failed: {exc}") from exc
+        raise HTTPException(status_code=500, detail="Agent processing failed") from exc

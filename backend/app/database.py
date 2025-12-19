@@ -9,7 +9,11 @@ import os
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://user:password@db:5432/liminal")
 
 # Create Async Engine
-engine = create_async_engine(DATABASE_URL, echo=True, future=True)
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=os.getenv("SQL_ECHO", "").lower() in ("1", "true", "yes"),
+    future=True,
+)
 
 # Create Async Session
 async_session = sessionmaker(
@@ -30,3 +34,6 @@ async def init_db():
         await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS effort_score INTEGER DEFAULT 50"))
         await conn.execute(text("UPDATE task SET priority_score = 50 WHERE priority_score IS NULL"))
         await conn.execute(text("UPDATE task SET effort_score = COALESCE(effort_score, estimated_duration, 50) WHERE effort_score IS NULL"))
+
+        # OIDC migration: issuer support (issuer+sub is the stable identity key)
+        await conn.execute(text("ALTER TABLE user ADD COLUMN IF NOT EXISTS oidc_issuer TEXT"))

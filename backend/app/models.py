@@ -28,7 +28,9 @@ class User(SQLModel, table=True):
     id: Optional[str] = Field(default=None, primary_key=True)
     email: str = Field(unique=True, index=True)
     hashed_password: Optional[str] = Field(default=None, nullable=True)
+    # OIDC subject (works for Google/social + username/password via a real IdP like Keycloak).
     google_sub: Optional[str] = Field(default=None, index=True, nullable=True)
+    oidc_issuer: Optional[str] = Field(default=None, index=True, nullable=True)
     name: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     

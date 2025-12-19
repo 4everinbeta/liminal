@@ -40,7 +40,22 @@ Dockerized services managed via `docker-compose`.
 - **State:** Zustand for clean, client-side state management.
 - **Style:** "Vibe Coding" - readable, minimal, functional.
 
+## 🔐 Authentication (OIDC)
+This app now expects **OIDC access tokens** (Bearer JWTs) for all API calls; for low/no-cost IDPs, use a hosted free tier (e.g. Zitadel) or self-host (e.g. Keycloak/Authentik) and enable username/password *in the IdP*.
+
+Backend env (production):
+- `OIDC_ISSUER=https://<your-idp>/realms/<realm>`
+- `OIDC_AUDIENCE=<client-id>` (often required)
+- `OIDC_JWKS_URL=<optional>` (otherwise discovered from `/.well-known/openid-configuration`)
+
+Frontend env:
+- `NEXT_PUBLIC_OIDC_AUTHORITY=https://<your-idp>/realms/<realm>`
+- `NEXT_PUBLIC_OIDC_CLIENT_ID=<client-id>`
+- `NEXT_PUBLIC_OIDC_REDIRECT_URI=http://localhost:3000/auth/callback`
+
+Dev/test-only local auth:
+- `ENABLE_LOCAL_AUTH=1` to re-enable `/users` + `/auth/login`.
+
 ## 📝 Next Steps
-1. Connect Quick Capture form to `POST /tasks` API.
-2. Implement Auth (OAuth2/JWT) - scaffolded in User model.
-3. Add "Pomodoro" timer to the Focus Mode view.
+1. Add a user-facing Settings page wired to `GET /me` and `PATCH /me/settings`.
+2. Configure an IdP (Keycloak/Authentik/Zitadel) and set the env vars above.

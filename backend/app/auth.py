@@ -1,22 +1,30 @@
 from datetime import datetime, timedelta
-from typing import Optional
+import json
+import time
+from typing import Optional, Any, Dict
+import uuid
 
+import httpx
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, HTTPBasic, HTTPBasicCredentials
-from jose import JWTError, jwt
+from jose import JWTError, jwt, jwk
+from jose.utils import base64url_decode
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from .config import get_settings
 from .database import get_session
-from .models import User, TokenData
+from .models import User, TokenData, Settings as UserSettings
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 basic_scheme = HTTPBasic()
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+
+_JWKS_CACHE: Dict[str, Any] = {"ts": 0.0, "jwks": None, "jwks_url": None}
+_JWKS_TTL_SECONDS = 3600
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -28,6 +36,7 @@ def get_password_hash(password: str) -> str:
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    """Local/dev JWTs only (ENABLE_LOCAL_AUTH=1)."""
     settings = get_settings()
     to_encode = data.copy()
     expire = datetime.utcnow() + (
@@ -38,6 +47,74 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
     return encoded_jwt
+
+
+async def _get_oidc_jwks(settings) -> dict:
+    if not settings.oidc_issuer and not settings.oidc_jwks_url:
+        raise JWTError("OIDC not configured")
+
+    now = time.time()
+    if _JWKS_CACHE["jwks"] and now - _JWKS_CACHE["ts"] < _JWKS_TTL_SECONDS:
+        return _JWKS_CACHE["jwks"]
+
+    jwks_url = settings.oidc_jwks_url
+    if not jwks_url:
+        well_known = settings.oidc_issuer.rstrip("/") + "/.well-known/openid-configuration"
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            r = await client.get(well_known)
+            r.raise_for_status()
+            jwks_url = r.json().get("jwks_uri")
+
+    if not jwks_url:
+        raise JWTError("OIDC JWKS URL not available")
+
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        r = await client.get(jwks_url)
+        r.raise_for_status()
+        jwks = r.json()
+
+    _JWKS_CACHE.update({"ts": now, "jwks": jwks, "jwks_url": jwks_url})
+    return jwks
+
+
+def _select_jwk(jwks: dict, kid: Optional[str]) -> Optional[dict]:
+    keys = jwks.get("keys", [])
+    if not kid:
+        return keys[0] if keys else None
+    for k in keys:
+        if k.get("kid") == kid:
+            return k
+    return None
+
+
+async def _decode_oidc_token(token: str) -> dict:
+    settings = get_settings()
+    jwks = await _get_oidc_jwks(settings)
+
+    header = jwt.get_unverified_header(token)
+    kid = header.get("kid")
+    alg = header.get("alg") or "RS256"
+
+    key_dict = _select_jwk(jwks, kid)
+    if not key_dict:
+        # refresh once
+        _JWKS_CACHE.update({"ts": 0.0, "jwks": None})
+        jwks = await _get_oidc_jwks(settings)
+        key_dict = _select_jwk(jwks, kid)
+
+    if not key_dict:
+        raise JWTError("No matching JWK")
+
+    key = jwk.construct(key_dict)
+    message, encoded_sig = token.rsplit(".", 1)
+    decoded_sig = base64url_decode(encoded_sig.encode())
+    if not key.verify(message.encode(), decoded_sig):
+        raise JWTError("Signature verification failed")
+
+    pem = key.to_pem().decode()
+    audience = settings.oidc_audience or None
+    issuer = settings.oidc_issuer or None
+    return jwt.decode(token, pem, algorithms=[alg], audience=audience, issuer=issuer)
 
 
 async def get_current_user(
@@ -51,20 +128,82 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    try:
-        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
-        user_id: Optional[str] = payload.get("sub")
-        if user_id is None:
+    payload: Optional[dict] = None
+
+    if settings.enable_local_auth:
+        try:
+            payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+        except JWTError:
+            payload = None
+
+    if payload is None:
+        try:
+            payload = await _decode_oidc_token(token)
+        except Exception:
             raise credentials_exception
-        token_data = TokenData(user_id=user_id)
-    except JWTError:
+
+    user_id: Optional[str] = payload.get("sub")
+    if not user_id:
         raise credentials_exception
 
-    statement = select(User).where(User.id == token_data.user_id)
+    # Local auth uses internal user.id in the token
+    if settings.enable_local_auth and (payload.get("iss") is None or payload.get("iss") == "local"):
+        statement = select(User).where(User.id == user_id)
+        result = await session.execute(statement)
+        user = result.scalar_one_or_none()
+        if user is None:
+            raise credentials_exception
+        return user
+
+    # OIDC uses issuer+sub as the stable identity.
+    iss = payload.get("iss") or settings.oidc_issuer
+    email = payload.get(settings.oidc_email_claim) or payload.get("email")
+    name = payload.get(settings.oidc_name_claim) or payload.get("name")
+
+    if not iss:
+        raise credentials_exception
+
+    statement = select(User).where(User.google_sub == user_id, User.oidc_issuer == iss)
     result = await session.execute(statement)
     user = result.scalar_one_or_none()
-    if user is None:
-        raise credentials_exception
+
+    if not user and email:
+        # Link by email on first login.
+        statement = select(User).where(User.email == email)
+        result = await session.execute(statement)
+        user = result.scalar_one_or_none()
+        if user:
+            user.google_sub = user_id
+            user.oidc_issuer = iss
+            session.add(user)
+            await session.commit()
+            await session.refresh(user)
+
+    if not user:
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="OIDC token missing email claim",
+            )
+
+        user = User(
+            id=str(uuid.uuid4()),
+            email=email,
+            name=name,
+            google_sub=user_id,
+            oidc_issuer=iss,
+        )
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+
+        settings_row = UserSettings(
+            id=str(uuid.uuid4()),
+            user_id=user.id,
+        )
+        session.add(settings_row)
+        await session.commit()
+
     return user
 
 
@@ -72,6 +211,10 @@ async def authenticate_basic_user(
     credentials: HTTPBasicCredentials = Depends(basic_scheme),
     session: AsyncSession = Depends(get_session),
 ) -> User:
+    settings = get_settings()
+    if not settings.enable_local_auth:
+        raise HTTPException(status_code=404, detail="Not found")
+
     statement = select(User).where(User.email == credentials.username)
     result = await session.execute(statement)
     user = result.scalar_one_or_none()

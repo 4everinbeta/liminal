@@ -68,78 +68,17 @@ export interface ChatMessage {
   content: string;
 }
 
-/**
- * Ensure demo user exists and is logged in
- */
-async function ensureDemoUser(): Promise<string> {
-  const token = getToken();
-  if (token) return token;
-
-  const demoUser = {
-    email: 'demo@liminal.app',
-    name: 'Demo User',
-    password: 'demopassword123'
-  };
-
-  try {
-    // 1. Try to login directly
-    let loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-            'Authorization': 'Basic ' + btoa(`${demoUser.email}:${demoUser.password}`)
-        }
-    });
-
-    // 2. If login fails (likely user doesn't exist), try to create user
-    if (loginResponse.status === 401) {
-        await fetch(`${API_BASE_URL}/users`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(demoUser),
-        });
-
-        // 3. Retry login
-        loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Basic ' + btoa(`${demoUser.email}:${demoUser.password}`)
-            }
-        });
-    }
-
-    if (loginResponse.ok) {
-        const data = await loginResponse.json();
-        setToken(data.access_token);
-        return data.access_token;
-    }
-  } catch (error) {
-    console.error('Failed to auth demo user:', error);
-  }
-  
-  return '';
-}
-
 async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
-    const token = await ensureDemoUser();
-    const headers = {
-        'Content-Type': 'application/json',
-        ...options.headers,
-        'Authorization': `Bearer ${token}`
-    };
-    const resp = await fetch(url, { ...options, headers } as RequestInit);
+  const token = getToken();
+  if (!token) throw new Error('Not authenticated')
 
-    // Dev convenience: auto-renew demo creds on expiry and retry once.
-    if (resp.status === 401) {
-        clearToken();
-        const freshToken = await ensureDemoUser();
-        const retryHeaders = {
-            ...headers,
-            'Authorization': `Bearer ${freshToken}`
-        };
-        return fetch(url, { ...options, headers: retryHeaders } as RequestInit);
-    }
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+    Authorization: `Bearer ${token}`,
+  }
 
-    return resp;
+  return fetch(url, { ...options, headers } as RequestInit)
 }
 
 /**

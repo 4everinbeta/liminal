@@ -1,6 +1,7 @@
 """
 Pytest configuration and fixtures for API testing.
 """
+import os
 import pytest
 import pytest_asyncio
 from typing import AsyncGenerator
@@ -8,6 +9,9 @@ from httpx import AsyncClient, ASGITransport
 from sqlmodel import SQLModel
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+
+# Tests use local auth; real deployments should use OIDC.
+os.environ.setdefault("ENABLE_LOCAL_AUTH", "1")
 
 from app.main import app
 from app.database import get_session
