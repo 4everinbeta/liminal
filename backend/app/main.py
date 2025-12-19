@@ -62,11 +62,16 @@ app = FastAPI(
 )
 
 # CORS
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://liminal-frontend-production.up.railway.app",
-]
+origins_env = os.getenv("CORS_ORIGINS", "").strip()
+origins = (
+    [o.strip() for o in origins_env.split(",") if o.strip()]
+    if origins_env
+    else [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://liminal-frontend-production.up.railway.app",
+    ]
+)
 
 app.add_middleware(
     CORSMiddleware,

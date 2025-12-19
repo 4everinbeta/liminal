@@ -11,10 +11,10 @@
       "publicClient": true,
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
-      "redirectUris": ["http://localhost:3000/*"],
-      "webOrigins": ["http://localhost:3000"],
+      "redirectUris": ["http://localhost:3000/*", "https://*.up.railway.app/*"],
+      "webOrigins": ["http://localhost:3000", "https://*.up.railway.app"],
       "attributes": {
-        "post.logout.redirect.uris": "http://localhost:3000/login"
+        "post.logout.redirect.uris": "http://localhost:3000/login##https://*.up.railway.app/login"
       }
     }
   ],
