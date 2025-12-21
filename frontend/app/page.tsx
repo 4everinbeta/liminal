@@ -99,6 +99,11 @@ export default function Home() {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr),minmax(0,2fr)]">
         <section className="space-y-6">
+          <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-5">
+            <h3 className="text-base font-semibold text-gray-900 mb-2">Quick capture</h3>
+            <TaskForm onTaskCreated={fetchTasks} />
+          </div>
+
           <div className="bg-white border border-gray-100 shadow-sm rounded-3xl p-6">
             <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
               <div>
@@ -162,37 +167,24 @@ export default function Home() {
             )}
           </div>
 
+        </section>
+
+        <aside className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold text-gray-900">Coach</h3>
+            <a
+              href="/focus"
+              className="inline-flex items-center gap-1 rounded-full border border-primary/30 text-primary text-sm font-semibold px-3 py-1.5 hover:bg-primary/5 transition-colors"
+            >
+              <Target size={14} />
+              Focus mode
+            </a>
+          </div>
           <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Ask the coach</h3>
             <p className="text-sm text-gray-500 mb-4">
               Wondering what to tackle next? Ask about priorities or the backlog.
             </p>
             <ChatInterface />
-          </div>
-        </section>
-
-        <aside className="space-y-6">
-          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Quick capture</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Drop a thought and we’ll score it for you. No complicated forms.
-            </p>
-            <TaskForm onTaskCreated={fetchTasks} />
-          </div>
-
-          <div className="rounded-3xl bg-gradient-to-br from-primary to-primary/80 text-white p-6 shadow-lg">
-            <p className="text-xs uppercase tracking-[0.2em] text-white/70">Deep work</p>
-            <h3 className="text-2xl font-bold mt-1">Ready for focus?</h3>
-            <p className="text-white/80 text-sm mt-2">
-              Jump into a distraction-free space whenever you’re ready.
-            </p>
-            <a
-              href="/focus"
-              className="inline-flex items-center gap-2 bg-white text-primary font-semibold rounded-full px-4 py-2 mt-5"
-            >
-              <Target size={16} />
-              Enter focus mode
-            </a>
           </div>
         </aside>
       </div>
