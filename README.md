@@ -86,6 +86,25 @@ Frontend env:
 - Example: `NEXT_PUBLIC_OIDC_PROVIDERS=default=Continue with Liminal##google=Continue with Google##github=Continue with GitHub`.
 - The backend already accepts any tokens issued by your IdP, so once the provider is configured + listed here, users can authenticate with it.
 
+### Persisting Keycloak in Railway
+The local Docker setup already persists Keycloak via the `keycloak_data` volume. When deploying to Railway you need to attach persistent storage yourself so users and settings survive deploys:
+
+1. In the Railway dashboard open the **Keycloak service → Settings → Volumes** (or “Add Volume”). Mount a disk to `/opt/keycloak/data`. A 1–2 GB disk is plenty.
+2. Redeploy the service so Keycloak writes to that disk. Future deploys reuse the same data.
+3. If you ever need a clean slate, delete the volume from the Railway UI; Keycloak will recreate tables and import the bundled realm on the next deploy.
+
+Alternatively point Keycloak at an external Postgres database (set `KC_DB=postgres` plus connection env vars) so it shares the same managed DB as the backend.
+
+#### Using Postgres instead of the embedded H2
+If you created a separate Postgres database (e.g., a Railway “keycloak-db” service), set these variables on the Keycloak container:
+
+- `KC_DB=postgres`
+- `KC_DB_URL=jdbc:postgresql://<host>:<port>/<database>`
+- `KC_DB_USERNAME=<db-user>`
+- `KC_DB_PASSWORD=<db-password>`
+
+For Railway, the `<host>`, `<port>`, and `<database>` values are shown under the Postgres service’s “Connect” tab. After setting those env vars, redeploy Keycloak—the migration log will show Liquibase creating the schema in Postgres, and all future user/theme changes will live there automatically.
+
 Dev/test-only local auth:
 - `ENABLE_LOCAL_AUTH=1` to re-enable `/users` + `/auth/login`. 
 
