@@ -2,16 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useAppStore } from '@/lib/store'
-import FocusToggle from '@/components/FocusToggle'
-import Pomodoro from '@/components/Pomodoro'
 import ChatInterface from '@/components/ChatInterface'
 import TaskForm from '@/components/TaskForm'
 import { getTasks, updateTask, deleteTask, Task } from '@/lib/api'
 import { logout } from '@/lib/auth'
-import { LogOut, CheckCircle, PauseCircle } from 'lucide-react'
+import { LogOut, Target } from 'lucide-react'
 
 export default function Home() {
-  const { activeTaskId, setActiveTaskId } = useAppStore()
+  const { setActiveTaskId } = useAppStore()
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -32,7 +30,7 @@ export default function Home() {
         })
 
       setTasks(sorted)
-      if (!activeTaskId && sorted.length > 0) {
+      if (sorted.length > 0) {
         setActiveTaskId(sorted[0].id)
       }
     } catch (err) {
@@ -46,23 +44,12 @@ export default function Home() {
     fetchTasks()
   }, [])
 
-  useEffect(() => {
-    if (!activeTaskId && tasks.length > 0) {
-      setActiveTaskId(tasks[0].id)
-    }
-  }, [tasks, activeTaskId, setActiveTaskId])
-
-  const activeTask = tasks.find((task) => task.id === activeTaskId) || tasks[0]
   const urgentTasks = useMemo(() => tasks.slice(0, 4), [tasks])
 
   const handleCompleteTask = async (taskId: string) => {
     try {
       await updateTask(taskId, { status: 'done' })
-      const remaining = tasks.filter((t) => t.id !== taskId)
-      setTasks(remaining)
-      if (activeTaskId === taskId) {
-        setActiveTaskId(remaining.length > 0 ? remaining[0].id : null)
-      }
+      setTasks((prev) => prev.filter((t) => t.id !== taskId))
     } catch (err) {
       console.error('Complete failed', err)
       fetchTasks()
@@ -73,18 +60,10 @@ export default function Home() {
     if (!confirm('Remove this task?')) return
     try {
       await deleteTask(taskId)
-      const remaining = tasks.filter((t) => t.id !== taskId)
-      setTasks(remaining)
-      if (activeTaskId === taskId) {
-        setActiveTaskId(remaining.length > 0 ? remaining[0].id : null)
-      }
+      setTasks((prev) => prev.filter((t) => t.id !== taskId))
     } catch (err) {
       console.error('Delete failed', err)
     }
-  }
-
-  const handlePauseTask = () => {
-    console.log('Paused task:', activeTask?.title)
   }
 
   const handleLogout = async () => {
@@ -99,31 +78,23 @@ export default function Home() {
   }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
-      <header className="py-6 space-y-3">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-primary/70">Liminal</p>
-            <h1 className="text-3xl font-bold text-gray-900">Today’s Horizon</h1>
-            <p className="text-gray-500">
-              One calm surface for urgent work. Capture a thought, focus, or ask for help.
-            </p>
-          </div>
-          <button
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-full font-medium shadow-sm hover:bg-gray-800 transition-colors disabled:opacity-60"
-          >
-            <LogOut size={16} />
-            <span className="text-sm">{isLoggingOut ? 'Signing out…' : 'Sign out'}</span>
-          </button>
+    <div className="space-y-6 max-w-5xl mx-auto px-4 sm:px-6">
+      <header className="py-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-primary/70">Liminal</p>
+          <h1 className="text-3xl font-bold text-gray-900">Today’s board</h1>
+          <p className="text-gray-500">
+            Urgent tasks, quick capture, and a coach in one clean surface.
+          </p>
         </div>
-        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-          <span>{isLoading ? 'Loading focus list…' : `${tasks.length} active tasks`}</span>
-          <a href="/board" className="text-primary font-medium hover:underline">
-            Open full board
-          </a>
-        </div>
+        <button
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-full font-medium shadow-sm hover:bg-gray-800 transition-colors disabled:opacity-60"
+        >
+          <LogOut size={16} />
+          <span className="text-sm">{isLoggingOut ? 'Signing out…' : 'Sign out'}</span>
+        </button>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)]">
@@ -146,7 +117,7 @@ export default function Home() {
 
             {urgentTasks.length === 0 ? (
               <p className="text-gray-500 text-sm">
-                Nothing screaming for attention. Capture a task or take a breath.
+                Nothing urgent. Capture a thought or ask the coach for a suggestion.
               </p>
             ) : (
               <ul className="space-y-3">
@@ -170,17 +141,16 @@ export default function Home() {
                           {task.estimated_duration && <span>{task.estimated_duration}m</span>}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 text-sm">
                         <button
                           onClick={() => handleCompleteTask(task.id)}
-                          className="text-primary text-sm font-medium flex items-center gap-1"
+                          className="text-primary font-medium"
                         >
-                          <CheckCircle size={16} />
                           Done
                         </button>
                         <button
                           onClick={() => handleDeleteTask(task.id)}
-                          className="text-gray-400 text-xs uppercase tracking-wide"
+                          className="text-gray-400 uppercase tracking-wide"
                         >
                           Clear
                         </button>
@@ -203,52 +173,18 @@ export default function Home() {
 
         <aside className="space-y-6">
           <div className="rounded-3xl bg-gradient-to-br from-primary to-primary/80 text-white p-6 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-white/70">Now focusing</p>
-                <h3 className="text-2xl font-bold mt-1">
-                  {activeTask ? activeTask.title : 'Choose a task to focus'}
-                </h3>
-              </div>
-              <FocusToggle />
-            </div>
-            {activeTask && (
-              <p className="text-white/80 text-sm mt-2">
-                {activeTask.estimated_duration
-                  ? `Estimated ${activeTask.estimated_duration} minutes`
-                  : 'No duration set'}
-              </p>
-            )}
-
-            <div className="mt-6 space-y-4">
-              {activeTask ? (
-                <>
-                  <div className="bg-white/10 rounded-2xl p-4 backdrop-blur">
-                    <Pomodoro />
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => handleCompleteTask(activeTask.id!)}
-                      className="flex-1 py-2 rounded-xl bg-white text-primary font-semibold flex items-center justify-center gap-2"
-                    >
-                      <CheckCircle size={18} />
-                      Complete
-                    </button>
-                    <button
-                      onClick={handlePauseTask}
-                      className="flex-1 py-2 rounded-xl border border-white/40 text-white font-semibold flex items-center justify-center gap-2"
-                    >
-                      <PauseCircle size={18} />
-                      Pause
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <p className="text-white/80 text-sm">
-                  Select a task from the urgent list to start a focus block.
-                </p>
-              )}
-            </div>
+            <p className="text-xs uppercase tracking-[0.2em] text-white/70">Deep work</p>
+            <h3 className="text-2xl font-bold mt-1">Ready for focus?</h3>
+            <p className="text-white/80 text-sm mt-2">
+              Jump into a distraction-free space whenever you’re ready.
+            </p>
+            <a
+              href="/focus"
+              className="inline-flex items-center gap-2 bg-white text-primary font-semibold rounded-full px-4 py-2 mt-5"
+            >
+              <Target size={16} />
+              Enter focus mode
+            </a>
           </div>
 
           <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-6">
