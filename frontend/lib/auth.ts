@@ -2,13 +2,20 @@
 
 import { UserManager, WebStorageStateStore } from 'oidc-client-ts'
 
-type AuthConfig = {
+export type AuthProvider = {
+  key: string
+  label: string
+  idpHint?: string
+}
+
+export type AuthConfig = {
   oidcAuthority: string
   oidcClientId: string
   oidcRedirectUri: string
   oidcPostLogoutRedirectUri: string
   oidcScope: string
   authRequired: boolean
+  authProviders: AuthProvider[]
 }
 
 let _configPromise: Promise<AuthConfig> | null = null
@@ -43,10 +50,16 @@ export async function getUserManager(): Promise<UserManager | null> {
   return _userManager
 }
 
-export async function login(): Promise<void> {
+type LoginOptions = {
+  idpHint?: string
+}
+
+export async function login(options?: LoginOptions): Promise<void> {
   const um = await getUserManager()
   if (!um) throw new Error('OIDC is not configured')
-  await um.signinRedirect()
+  await um.signinRedirect({
+    extraQueryParams: options?.idpHint ? { kc_idp_hint: options.idpHint } : undefined,
+  })
 }
 
 export async function handleLoginCallback(): Promise<void> {

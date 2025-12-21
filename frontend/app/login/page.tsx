@@ -1,22 +1,24 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getAuthConfig, login, logout } from '@/lib/auth'
+import { AuthConfig, AuthProvider, getAuthConfig, login, logout } from '@/lib/auth'
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
-  const [oidcEnabled, setOidcEnabled] = useState<boolean | null>(null)
+  const [config, setConfig] = useState<AuthConfig | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     getAuthConfig()
-      .then((cfg) => setOidcEnabled(Boolean(cfg.oidcAuthority && cfg.oidcClientId)))
-      .catch(() => setOidcEnabled(false))
+      .then((cfg) => setConfig(cfg))
+      .catch(() => setConfig(null))
+      .finally(() => setLoading(false))
   }, [])
 
-  const onLogin = async () => {
+  const onLogin = async (provider?: AuthProvider) => {
     try {
       setError(null)
-      await login()
+      await login(provider?.idpHint ? { idpHint: provider.idpHint } : undefined)
     } catch (e: any) {
       setError(e?.message || 'Login failed')
     }
@@ -35,20 +37,23 @@ export default function LoginPage() {
     <div className="max-w-lg mx-auto bg-white rounded-3xl border border-gray-100 shadow-sm p-8 space-y-4">
       <h1 className="text-2xl font-bold text-gray-900">Sign in</h1>
 
-      {oidcEnabled === false && (
+      {loading && <p className="text-sm text-gray-500">Loading login providers…</p>}
+
+      {!loading && !config && (
         <p className="text-sm text-gray-600">
           OIDC is not configured. Set NEXT_PUBLIC_OIDC_AUTHORITY and NEXT_PUBLIC_OIDC_CLIENT_ID in Railway Variables for the frontend.
         </p>
       )}
 
-      {oidcEnabled === true && (
+      {config?.authProviders?.map((provider) => (
         <button
-          onClick={onLogin}
+          key={provider.key}
+          onClick={() => onLogin(provider)}
           className="w-full py-3 rounded-2xl bg-primary text-white font-semibold"
         >
-          Continue with your Identity Provider
+          {provider.label}
         </button>
-      )}
+      ))}
 
       <button
         onClick={onLogout}

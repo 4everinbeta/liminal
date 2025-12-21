@@ -59,6 +59,7 @@ Frontend env (local):
 - `NEXT_PUBLIC_OIDC_AUTHORITY=http://localhost:8080/realms/liminal`
 - `NEXT_PUBLIC_OIDC_CLIENT_ID=liminal-frontend`
 - `NEXT_PUBLIC_OIDC_REDIRECT_URI=http://localhost:3000/auth/callback`
+- `NEXT_PUBLIC_OIDC_PROVIDERS=default=Continue with Liminal##google=Continue with Google` (optional; see “Social logins” below)
 
 Backend env (local):
 - `OIDC_ISSUER=http://keycloak:8080/realms/liminal`
@@ -78,6 +79,12 @@ Frontend env:
 - `NEXT_PUBLIC_OIDC_AUTHORITY=https://<your-idp>/realms/<realm>`
 - `NEXT_PUBLIC_OIDC_CLIENT_ID=<client-id>`
 - `NEXT_PUBLIC_OIDC_REDIRECT_URI=https://<your-frontend-domain>/auth/callback`
+
+### Social / external logins
+- Configure your IdP (e.g., Keycloak) with identity providers for Google, GitHub, etc. When using Keycloak, add each provider under **Identity Providers**, set the “Alias” (e.g., `google`), provide the upstream client ID/secret, and enable it.
+- Expose the buttons you want in the frontend via `NEXT_PUBLIC_OIDC_PROVIDERS` (format: `alias=Button label##other=Another label`). The `alias` should be `default` for the built-in login form or the exact identity-provider alias for social providers so the app can pass `kc_idp_hint`.
+- Example: `NEXT_PUBLIC_OIDC_PROVIDERS=default=Continue with Liminal##google=Continue with Google##github=Continue with GitHub`.
+- The backend already accepts any tokens issued by your IdP, so once the provider is configured + listed here, users can authenticate with it.
 
 Dev/test-only local auth:
 - `ENABLE_LOCAL_AUTH=1` to re-enable `/users` + `/auth/login`. 

@@ -9,11 +9,36 @@ type AuthConfig = {
   oidcPostLogoutRedirectUri: string
   oidcScope: string
   authRequired: boolean
+  authProviders: AuthProvider[]
+}
+
+type AuthProvider = {
+  key: string
+  label: string
+  idpHint?: string
 }
 
 function toBool(value: string | undefined, defaultValue: boolean): boolean {
   if (value == null || value === '') return defaultValue
   return value.toLowerCase() in { '1': true, true: true, yes: true }
+}
+
+function parseProviders(input: string | undefined): AuthProvider[] {
+  if (!input) return []
+
+  return input
+    .split('##')
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const [rawKey, rawLabel] = entry.split('=').map((part) => part?.trim())
+      if (!rawKey) return null
+      const key = rawKey
+      const label = rawLabel || rawKey.replace(/_/g, ' ')
+      const idpHint = key === 'default' ? undefined : key
+      return { key, label, idpHint }
+    })
+    .filter((provider): provider is AuthProvider => Boolean(provider))
 }
 
 export async function GET(req: Request) {
@@ -37,6 +62,13 @@ export async function GET(req: Request) {
 
   const oidcEnabled = Boolean(oidcAuthority && oidcClientId)
   const authRequired = toBool(process.env.NEXT_PUBLIC_AUTH_REQUIRED, oidcEnabled)
+  const providerEnv =
+    process.env.NEXT_PUBLIC_OIDC_PROVIDERS || process.env.OIDC_PROVIDERS || ''
+  const parsedProviders = parseProviders(providerEnv)
+  const authProviders =
+    parsedProviders.length > 0
+      ? parsedProviders
+      : [{ key: 'default', label: 'Continue with Liminal', idpHint: undefined }]
 
   const payload: AuthConfig = {
     oidcAuthority,
@@ -45,6 +77,7 @@ export async function GET(req: Request) {
     oidcPostLogoutRedirectUri,
     oidcScope,
     authRequired,
+    authProviders,
   }
 
   return NextResponse.json(payload)
