@@ -57,10 +57,11 @@ type LoginOptions = {
 export async function login(options?: LoginOptions): Promise<void> {
   const um = await getUserManager()
   if (!um) throw new Error('OIDC is not configured')
-  const request = await um.createSigninRequest({
+  await um.signinRedirect({
+    // Keycloak inspects kc_idp_hint to jump straight into a social provider.
     extraQueryParams: options?.idpHint ? { kc_idp_hint: options.idpHint } : undefined,
+    redirectMethod: 'replace',
   })
-  window.location.assign(request.url)
 }
 
 export async function handleLoginCallback(): Promise<void> {
