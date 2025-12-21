@@ -6,7 +6,23 @@ from sqlalchemy import text
 import os
 
 # Database URL from environment variable
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://user:password@db:5432/liminal")
+# Normalize the URL so SQLAlchemy always uses the asyncpg driver even if the
+# incoming env var uses the shorter `postgres://` or `postgresql://` syntax.
+raw_database_url = os.getenv(
+    "DATABASE_URL", "postgresql+asyncpg://user:password@db:5432/liminal"
+)
+
+def ensure_async_driver(url: str) -> str:
+    """Force asyncpg driver; required when Railway gives postgres:// URLs."""
+    if url.startswith("postgres://"):
+        url = "postgresql://" + url[len("postgres://") :]
+    if url.startswith("postgresql://"):
+        return "postgresql+asyncpg://" + url[len("postgresql://") :]
+    if url.startswith("postgresql+psycopg2://"):
+        return "postgresql+asyncpg://" + url[len("postgresql+psycopg2://") :]
+    return url
+
+DATABASE_URL = ensure_async_driver(raw_database_url)
 
 # Create Async Engine
 engine = create_async_engine(
