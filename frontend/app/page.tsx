@@ -97,7 +97,7 @@ export default function Home() {
         </button>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr),minmax(0,2fr)]">
         <section className="space-y-6">
           <div className="bg-white border border-gray-100 shadow-sm rounded-3xl p-6">
             <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
@@ -163,15 +163,23 @@ export default function Home() {
           </div>
 
           <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Ask the coach</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Wondering what to tackle next? Ask about priorities or the backlog.
+            </p>
+            <ChatInterface />
+          </div>
+        </section>
+
+        <aside className="space-y-6">
+          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Quick capture</h3>
             <p className="text-sm text-gray-500 mb-4">
               Drop a thought and we’ll score it for you. No complicated forms.
             </p>
             <TaskForm onTaskCreated={fetchTasks} />
           </div>
-        </section>
 
-        <aside className="space-y-6">
           <div className="rounded-3xl bg-gradient-to-br from-primary to-primary/80 text-white p-6 shadow-lg">
             <p className="text-xs uppercase tracking-[0.2em] text-white/70">Deep work</p>
             <h3 className="text-2xl font-bold mt-1">Ready for focus?</h3>
@@ -185,14 +193,6 @@ export default function Home() {
               <Target size={16} />
               Enter focus mode
             </a>
-          </div>
-
-          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Ask the coach</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Wondering what to tackle next? Ask about priorities or the backlog.
-            </p>
-            <ChatInterface />
           </div>
         </aside>
       </div>
