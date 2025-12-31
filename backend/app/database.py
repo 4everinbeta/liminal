@@ -47,11 +47,18 @@ async def init_db():
         await conn.run_sync(SQLModel.metadata.create_all)
         
         # --- SAFEGUARD MIGRATIONS ---
-        # Ensure 'user' table has 'oidc_issuer'
+        # Ensure 'user' table has 'oidc_issuer' and 'updated_at'
         await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS oidc_issuer TEXT'))
+        await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
         
-        # Ensure 'theme' table has 'order'
+        # Ensure 'theme' table has 'order', 'created_at', 'updated_at'
         await conn.execute(text('ALTER TABLE theme ADD COLUMN IF NOT EXISTS "order" INTEGER DEFAULT 0'))
+        await conn.execute(text('ALTER TABLE theme ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
+        await conn.execute(text('ALTER TABLE theme ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
+
+        # Ensure 'initiative' table has 'created_at', 'updated_at'
+        await conn.execute(text('ALTER TABLE initiative ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
+        await conn.execute(text('ALTER TABLE initiative ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
         
         # Ensure 'task' table has score columns
         await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS priority_score INTEGER DEFAULT 50"))
