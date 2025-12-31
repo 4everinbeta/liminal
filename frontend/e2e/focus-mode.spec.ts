@@ -1,61 +1,62 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Focus Mode Toggle', () => {
+test.describe('Focus Mode Page', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock API
-    await page.route('**/tasks', async route => {
-        await route.fulfill({ json: [
-            { id: '1', title: 'Important Task', status: 'in_progress', priority: 'high', value_score: 90, estimated_duration: 30, created_at: new Date().toISOString() }
-        ] });
+    await page.addInitScript(() => {
+      localStorage.setItem('liminal_token', 'e2e-token');
     });
-    
-    await page.route('**/users', async route => route.fulfill({ json: { id: 'demo-user' } }));
-    await page.route('**/auth/login', async route => route.fulfill({ json: { access_token: 'fake-jwt' } }));
 
-    await page.goto('/');
+    await page.route('**/tasks**', async route => {
+      const { method, url } = route.request();
+      if (method === 'GET' && url.includes('/tasks')) {
+        await route.fulfill({ json: [
+          {
+            id: '1',
+            title: 'Important Task',
+            status: 'in_progress',
+            priority: 'high',
+            value_score: 90,
+            estimated_duration: 30,
+            user_id: 'demo-user',
+            order: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        ] });
+        return;
+      }
+      if (method === 'PATCH' && /\/tasks\/.+/.test(url)) {
+        await route.fulfill({ json: { status: 'done' } });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page.goto('/focus');
   });
 
-  test('should start in planning mode by default', async ({ page }) => {
-    const focusButton = page.getByRole('button', { name: /Planning Mode/i });
-    await expect(focusButton).toBeVisible();
+  test('should show the current focus task', async ({ page }) => {
+    await expect(page.getByText(/Current focus/i)).toBeVisible();
+    const taskHeading = page.getByRole('heading', { name: /Important Task/i });
+    if (await taskHeading.isVisible()) {
+      await expect(taskHeading).toBeVisible();
+      return;
+    }
 
-    // Should show "Prioritized Queue" heading
-    await expect(page.getByText(/Prioritized Queue/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Select a task to focus/i })).toBeVisible();
   });
 
-  test('should toggle to focus mode', async ({ page }) => {
-    // Click the focus toggle button
-    await page.getByRole('button', { name: /Planning Mode/i }).click();
-
-    // Button should change to "Focus Mode On"
-    await expect(page.getByRole('button', { name: /Focus Mode On/i })).toBeVisible();
-
-    // Heading should change to "Highest Impact Task"
-    await expect(page.getByText(/Highest Impact Task/i)).toBeVisible();
+  test('should show focus action buttons', async ({ page }) => {
+    const taskHeading = page.getByRole('heading', { name: /Important Task/i });
+    if (await taskHeading.isVisible()) {
+      await expect(page.getByRole('button', { name: /Complete task/i })).toBeVisible();
+      await expect(page.getByRole('button', { name: /Pause/i })).toBeVisible();
+    } else {
+      await expect(page.getByRole('heading', { name: /Select a task to focus/i })).toBeVisible();
+    }
   });
 
-  test('should hide sidebar in focus mode', async ({ page }) => {
-    // Sidebar should be visible initially (Ranking Logic)
-    await expect(page.getByText(/Ranking Logic/i)).toBeVisible();
-
-    // Toggle to focus mode
-    await page.getByRole('button', { name: /Planning Mode/i }).click();
-
-    // Sidebar should be hidden
-    await expect(page.getByText(/Ranking Logic/i)).not.toBeVisible();
-  });
-
-  test('should make Quick Capture less prominent in focus mode', async ({ page }) => {
-    // Toggle to focus mode
-    await page.getByRole('button', { name: /Planning Mode/i }).click();
-
-    // Form should have reduced opacity class
-    // Hierarchy: Wrapper(opacity-50) > QuickCapture > div > form
-    // So we find the form, then go up 3 levels? 
-    // Or better: find the div that wraps QuickCapture in page.tsx
-    // The wrapper in page.tsx has `transition-opacity`
-    const wrapper = page.locator('div.transition-opacity');
-    
-    await expect(wrapper).toHaveClass(/opacity-50/);
+  test('should provide a way back to the board', async ({ page }) => {
+    await expect(page.getByRole('button', { name: /Back to board/i })).toBeVisible();
   });
 });

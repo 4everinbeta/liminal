@@ -108,6 +108,41 @@ For Railway, the `<host>`, `<port>`, and `<database>` values are shown under the
 Dev/test-only local auth:
 - `ENABLE_LOCAL_AUTH=1` to re-enable `/users` + `/auth/login`. 
 
+## 📦 Railway Infrastructure-as-Code
+Manual clicks in the Railway UI tend to drift from what is in Git. The repo now contains an executable stack description (`infra/railway/stack.json`) plus a provisioning script (`scripts/provision_railway.py`) that drives Railway’s GraphQL API. The script is idempotent—run it again whenever env vars change and it will bring the remote resources back in sync.
+
+### Requirements
+- Railway personal access token (Settings → Account → Tokens).
+- CLI application machine with outbound HTTPS access (the script uses `requests`).
+- Runtime values exported as env vars **or** placed in one of the `.env.*` files (dev/qa/prod) before running the script:
+  - `RAILWAY_TOKEN` – API token above.
+  - `PROD_FRONTEND_URL` – e.g., `https://liminal-frontend-production.up.railway.app`
+  - `PROD_BACKEND_URL` – e.g., `https://liminal-backend-production.up.railway.app`
+  - `PROD_KEYCLOAK_URL` – e.g., `https://liminal-keycloak-production.up.railway.app`
+  - `SECRET_KEY`, `KEYCLOAK_ADMIN_PASSWORD`, `LLM_BASE_URL`, `LLM_MODEL`, `LLM_PROVIDER`,
+    and any other values referenced by the stack file.
+  - Optional overrides like `NEXT_PUBLIC_OIDC_PROVIDERS`, `KEYCLOAK_ADMIN`, etc.
+- Update `infra/railway/stack.json` with the Railway **workspace name** you want the project created in (the default placeholder is `Default Workspace`).
+
+### Running the provisioner
+```bash
+# load values from .env.prod (env vars override anything in the file)
+python scripts/provision_railway.py --config infra/railway/stack.json --env-file .env.prod
+
+ # or export everything manually:
+# export RAILWAY_TOKEN=rw_XXXXXXXXXXXXXXXX
+# export PROD_FRONTEND_URL=https://liminal-frontend-production.up.railway.app
+# ...
+# python scripts/provision_railway.py --config infra/railway/stack.json
+```
+What it does:
+- Ensures the Railway project (`liminal`) and `production` environment exist.
+- Creates/updates two managed Postgres plugins (`liminal-db` for the app, `keycloak-db` for Keycloak) and reads their credentials for templating.
+- Creates/updates the three main services (backend, frontend, keycloak) with the builder definitions from the stack file.
+- Upserts all per-service env vars defined in the stack after resolving `${env.*}` and `${db.*}` placeholders.
+
+Use `--dry-run` to inspect the GraphQL mutations without executing them. Edit `infra/railway/stack.json` to tweak env vars, build commands, or add more services and re-run the script to apply.
+
 ## 📝 Next Steps
 1. Add a user-facing Settings page wired to `GET /me` and `PATCH /me/settings`.
 2. Configure an IdP (Keycloak/Authentik/Zitadel) and set the env vars above.

@@ -5,6 +5,12 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 console.log('API_BASE_URL:', API_BASE_URL);
 
+const authRequired = (() => {
+  const value = (process.env.NEXT_PUBLIC_AUTH_REQUIRED || '').toLowerCase();
+  if (value === 'false' || value === '0' || value === 'no') return false;
+  return true;
+})();
+
 const getToken = (): string | null => {
   if (typeof window === 'undefined') return null;
   return localStorage.getItem('liminal_token');
@@ -26,6 +32,7 @@ export interface Theme {
   color: string;
   priority: 'high' | 'medium' | 'low';
   user_id: string;
+  order: number;
 }
 
 export interface Task {
@@ -70,82 +77,94 @@ export interface ChatMessage {
 
 async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
   const token = getToken();
-  if (!token) throw new Error('Not authenticated')
+  if (!token && authRequired) throw new Error('Not authenticated')
 
   const headers = {
     'Content-Type': 'application/json',
     ...options.headers,
-    Authorization: `Bearer ${token}`,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   }
 
   return fetch(url, { ...options, headers } as RequestInit)
+}
+
+async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const response = await fetchWithAuth(url, options);
+  if (!response.ok) {
+    let message = 'An unexpected error occurred';
+    try {
+      const errorData = await response.json();
+      if (errorData.detail) {
+        message = typeof errorData.detail === 'string' 
+          ? errorData.detail 
+          : JSON.stringify(errorData.detail);
+      }
+    } catch {
+      message = `Request failed: ${response.status} ${response.statusText}`;
+    }
+    throw new Error(message);
+  }
+  
+  // Handle 204 No Content
+  if (response.status === 204) {
+    return undefined as unknown as T;
+  }
+
+  return response.json();
 }
 
 /**
  * Tasks
  */
 export async function createTask(data: TaskCreate): Promise<Task> {
-  const response = await fetchWithAuth(`${API_BASE_URL}/tasks`, {
+  return request<Task>(`${API_BASE_URL}/tasks`, {
     method: 'POST',
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error('Failed to create task');
-  return response.json();
 }
 
 export async function getTasks(): Promise<Task[]> {
-  const response = await fetchWithAuth(`${API_BASE_URL}/tasks`);
-  if (!response.ok) throw new Error('Failed to fetch tasks');
-  return response.json();
+  return request<Task[]>(`${API_BASE_URL}/tasks`);
 }
 
 export async function updateTask(taskId: string, data: Partial<Task>): Promise<Task> {
-  const response = await fetchWithAuth(`${API_BASE_URL}/tasks/${taskId}`, {
+  return request<Task>(`${API_BASE_URL}/tasks/${taskId}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error('Failed to update task');
-  return response.json();
 }
 
 export async function deleteTask(taskId: string): Promise<void> {
-  const response = await fetchWithAuth(`${API_BASE_URL}/tasks/${taskId}`, {
+  return request<void>(`${API_BASE_URL}/tasks/${taskId}`, {
     method: 'DELETE',
   });
-  if (!response.ok) throw new Error('Failed to delete task');
 }
 
 /**
  * Themes
  */
 export async function getThemes(): Promise<Theme[]> {
-  const response = await fetchWithAuth(`${API_BASE_URL}/themes`);
-  if (!response.ok) throw new Error('Failed to fetch themes');
-  const themes = await response.json();
-  
-  if (themes.length === 0) {
-      // Create defaults if empty
-      const t1 = await fetchWithAuth(`${API_BASE_URL}/themes`, {
-          method: 'POST',
-          body: JSON.stringify({ title: 'AI Enablement', color: '#4F46E5' })
-      }).then(r => r.json());
-      
-      const t2 = await fetchWithAuth(`${API_BASE_URL}/themes`, {
-          method: 'POST',
-          body: JSON.stringify({ title: 'Team Building', color: '#10B981' })
-      }).then(r => r.json());
-      return [t1, t2];
-  }
-  return themes;
+  return request<Theme[]>(`${API_BASE_URL}/themes`);
 }
 
-export async function createTheme(data: Pick<Theme, 'title' | 'color' | 'priority'>): Promise<Theme> {
-  const response = await fetchWithAuth(`${API_BASE_URL}/themes`, {
+export async function createTheme(data: Pick<Theme, 'title' | 'color' | 'priority'> & { order?: number }): Promise<Theme> {
+  return request<Theme>(`${API_BASE_URL}/themes`, {
     method: 'POST',
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error('Failed to create theme');
-  return response.json();
+}
+
+export async function updateTheme(themeId: string, data: Partial<Theme>): Promise<Theme> {
+  return request<Theme>(`${API_BASE_URL}/themes/${themeId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteTheme(themeId: string): Promise<void> {
+  return request<void>(`${API_BASE_URL}/themes/${themeId}`, {
+    method: 'DELETE',
+  });
 }
 
 /**
@@ -204,11 +223,9 @@ export function parseQuickCapture(input: string): TaskCreate {
  * Lightweight LLM client for local/dev use (OpenAI-compatible).
  */
 export async function chatWithLlm(messages: ChatMessage[]): Promise<string> {
-  const response = await fetchWithAuth(`${API_BASE_URL}/llm/chat`, {
+  const data = await request<{ content: string }>(`${API_BASE_URL}/llm/chat`, {
     method: 'POST',
     body: JSON.stringify({ messages }),
   });
-  if (!response.ok) throw new Error('Failed to reach LLM');
-  const data = await response.json();
   return data?.content || '';
 }

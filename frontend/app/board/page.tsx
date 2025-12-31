@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
-import { Plus, MoreHorizontal, AlertTriangle, ArrowRight, ArrowLeft, Trash2, Circle, CheckCircle2, Eye, EyeOff } from 'lucide-react'
-import { getTasks, getThemes, updateTask, deleteTask, Task, Theme } from '@/lib/api'
+import { Plus, MoreHorizontal, AlertTriangle, ArrowRight, ArrowLeft, Trash2, Circle, CheckCircle2, Eye, EyeOff, Edit2, X } from 'lucide-react'
+import { getTasks, getThemes, updateTask, deleteTask, createTheme, updateTheme, deleteTheme, Task, Theme } from '@/lib/api'
 
 export default function BoardPage() {
   const [tasks, setTasks] = useState<Task[]>([])
@@ -15,6 +15,12 @@ export default function BoardPage() {
   // Validation Modal State
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   
+  // New Theme State
+  const [isCreatingTheme, setIsCreatingTheme] = useState(false)
+  const [newThemeTitle, setNewThemeTitle] = useState('')
+  const [editingThemeId, setEditingThemeId] = useState<string | null>(null)
+  const [editingThemeTitle, setEditingThemeTitle] = useState('')
+
   useEffect(() => {
     const animation = requestAnimationFrame(() => setEnabled(true))
     fetchData()
@@ -28,34 +34,96 @@ export default function BoardPage() {
     try {
       const [t, th] = await Promise.all([getTasks(), getThemes()])
       setTasks(t)
-      setThemes(th)
+      setThemes(th.sort((a, b) => a.order - b.order))
     } catch (err) {
       console.error("Failed to load board data:", err)
       setError("Unable to connect to Liminal Core. Please ensure the backend service is running.")
     }
   }
 
-  // Columns: Threshold (Backlog) + Themes
-  const columns = [
-    { id: 'backlog', title: 'The Threshold', color: 'border-gray-200' },
-    ...themes.map(t => ({ id: t.id, title: t.title, color: 'border-primary' }))
-  ]
+  const handleCreateTheme = async (e: React.FormEvent) => {
+      e.preventDefault()
+      if (!newThemeTitle.trim()) return
+      
+      try {
+          const order = themes.length > 0 ? Math.max(...themes.map(t => t.order)) + 1 : 0
+          const theme = await createTheme({ 
+              title: newThemeTitle, 
+              color: '#4F46E5', 
+              priority: 'medium',
+              order 
+          })
+          setThemes([...themes, theme])
+          setNewThemeTitle('')
+          setIsCreatingTheme(false)
+      } catch (err) {
+          console.error("Failed to create theme", err)
+      }
+  }
+
+  const handleUpdateThemeTitle = async (themeId: string) => {
+      if (!editingThemeTitle.trim()) return
+      
+      // Optimistic
+      setThemes(prev => prev.map(t => t.id === themeId ? { ...t, title: editingThemeTitle } : t))
+      setEditingThemeId(null)
+      
+      try {
+          await updateTheme(themeId, { title: editingThemeTitle })
+      } catch (err) {
+          console.error("Failed to update theme", err)
+          fetchData() // Revert
+      }
+  }
+
+  const handleDeleteTheme = async (themeId: string) => {
+      if (!confirm("Delete this column? Tasks will be moved to Backlog.")) return
+      
+      // Move tasks to backlog optimistically
+      setTasks(prev => prev.map(t => t.theme_id === themeId ? { ...t, theme_id: undefined, status: 'backlog' } : t))
+      setThemes(prev => prev.filter(t => t.id !== themeId))
+      
+      try {
+          await deleteTheme(themeId)
+          // Ideally backend handles task reassignment, but we should refresh to be sure
+          fetchData() 
+      } catch (err) {
+          console.error("Failed to delete theme", err)
+          fetchData()
+      }
+  }
 
   const onDragEnd = async (result: DropResult) => {
-    const { destination, source, draggableId } = result
+    const { destination, source, draggableId, type } = result
     if (!destination) return
 
     if (destination.droppableId === source.droppableId && destination.index === source.index) return
 
+    // --- COLUMN REORDERING ---
+    if (type === 'COLUMN') {
+        const newThemes = Array.from(themes)
+        const [movedTheme] = newThemes.splice(source.index, 1)
+        newThemes.splice(destination.index, 0, movedTheme)
+        
+        // Update local state immediately
+        const reorderedThemes = newThemes.map((t, index) => ({ ...t, order: index }))
+        setThemes(reorderedThemes)
+        
+        // Persist order
+        try {
+            // In a real app, send batch update. Here loop (not efficient but works for MVP)
+            await Promise.all(reorderedThemes.map(t => updateTheme(t.id, { order: t.order })))
+        } catch (err) {
+            console.error("Failed to reorder themes", err)
+        }
+        return
+    }
+
+    // --- TASK REORDERING ---
     const task = tasks.find(t => t.id === draggableId)
     if (!task) return
 
-    // Logic: 
-    // If moving from Backlog -> Theme, Check gates.
-    // If moving to Backlog -> Clear theme.
-    // If moving between Themes -> Update theme.
-
-    const targetThemeId = destination.droppableId === 'backlog' ? null : destination.droppableId
+    const targetThemeId = destination.droppableId === 'backlog' ? undefined : destination.droppableId
     const targetStatus: Task['status'] = targetThemeId ? 'in_progress' : 'backlog'
     
     // GATING CHECK: If leaving backlog, must have Value & Estimate
@@ -64,7 +132,7 @@ export default function BoardPage() {
         const isValid = task.value_score > 0 && effort && effort > 0
         if (!isValid) {
             setEditingTask(task) // Open Modal
-            return // Cancel drop visually (React state won't update yet)
+            return 
         }
     }
 
@@ -74,7 +142,7 @@ export default function BoardPage() {
             return { 
                 ...t, 
                 status: targetStatus,
-                theme_id: targetThemeId || undefined
+                theme_id: targetThemeId
             }
         }
         return t
@@ -84,7 +152,7 @@ export default function BoardPage() {
     // API Call
     await updateTask(draggableId, { 
         status: targetStatus,
-        theme_id: targetThemeId || undefined
+        theme_id: targetThemeId
     })
   }
 
@@ -118,9 +186,6 @@ export default function BoardPage() {
     e.preventDefault()
     if (!editingTask) return
 
-    // Save and move to "In Progress" (we assume user was trying to move it)
-    // For simplicity, we just save the data. The user has to drag again.
-    // OR we could auto-move, but we lost the drop destination.
     await updateTask(editingTask.id, {
         title: editingTask.title,
         priority: editingTask.priority,
@@ -131,7 +196,6 @@ export default function BoardPage() {
         notes: editingTask.notes
     })
     
-    // Refresh local state
     const newTasks = tasks.map(t => t.id === editingTask.id ? editingTask : t)
     setTasks(newTasks)
     setEditingTask(null)
@@ -179,105 +243,165 @@ export default function BoardPage() {
         </div>
       </header>
 
-      <div className="flex gap-6 h-[calc(100vh-200px)] min-w-max">
-        <DragDropContext onDragEnd={onDragEnd}>
-            {columns.map((col) => {
-                // Filter tasks: 
-                // Backlog col gets 'backlog' status.
-                // Theme cols get 'in_progress' or 'done' status AND matching theme_id
-                const colTasks = tasks.filter(t => {
-                    if (!showCompleted && t.status === 'done') return false
-                    
-                    if (col.id === 'backlog') {
-                        // Backlog column shows backlog items OR done items that have no theme
-                        if (t.status === 'done' && !t.theme_id) return true
-                        return t.status === 'backlog'
-                    }
-                    
-                    // Theme columns show items with that theme_id (in_progress or done)
-                    return t.theme_id === col.id && t.status !== 'backlog'
-                })
-                const sortedTasks = colTasks
-
-                return (
-                    <div key={col.id} className="w-80 flex-shrink-0 flex flex-col">
-                         <div className={`flex items-center justify-between mb-4 px-2 border-b-2 pb-2 ${col.id === 'backlog' ? 'border-gray-200' : 'border-primary/50'}`}>
-                            <h3 className="font-bold text-gray-700">{col.title}</h3>
-                            <span className="bg-gray-100 text-xs px-2 py-1 rounded-full">{sortedTasks.length}</span>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="board" direction="horizontal" type="COLUMN">
+            {(provided) => (
+                <div 
+                    ref={provided.innerRef} 
+                    {...provided.droppableProps}
+                    className="flex gap-6 h-[calc(100vh-200px)] min-w-max"
+                >
+                    {/* Fixed Backlog Column */}
+                    <div className="w-80 flex-shrink-0 flex flex-col">
+                        <div className="flex items-center justify-between mb-4 px-2 border-b-2 pb-2 border-gray-200">
+                            <h3 className="font-bold text-gray-700">The Threshold</h3>
+                            <span className="bg-gray-100 text-xs px-2 py-1 rounded-full">
+                                {tasks.filter(t => t.status === 'backlog').length}
+                            </span>
                         </div>
-                        
-                        <Droppable droppableId={col.id}>
+                        <Droppable droppableId="backlog" type="TASK">
                             {(provided, snapshot) => (
                                 <div
                                     ref={provided.innerRef}
                                     {...provided.droppableProps}
                                     className={`flex-1 bg-gray-50/50 rounded-xl p-3 transition-colors ${snapshot.isDraggingOver ? 'bg-blue-50' : ''}`}
                                 >
-                                    {sortedTasks.map((task, index) => (
-                                        <Draggable key={task.id} draggableId={task.id} index={index}>
-                                            {(provided) => (
-                                                <div
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    {...provided.dragHandleProps}
-                                                    onClick={() => setEditingTask(task)}
-                                                    className={`mb-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-primary transition-all group cursor-pointer flex gap-3 items-start ${task.status === 'done' ? 'opacity-60 bg-gray-50' : ''}`}
-                                                    style={provided.draggableProps.style}
-                                                >
-                                                    <button 
-                                                        onClick={(e) => handleComplete(e, task)}
-                                                        className="mt-1 text-gray-300 hover:text-secondary transition-colors shrink-0"
-                                                    >
-                                                        {task.status === 'done' ? <CheckCircle2 size={20} className="text-green-500" /> : <Circle size={20} />}
-                                                    </button>
-
-                                                    <div className="flex-1 min-w-0">
-                                                        <h4 className={`font-medium mb-2 ${task.status === 'done' ? 'line-through text-muted' : ''}`}>{task.title}</h4>
-                                                        <div className="flex justify-between items-center text-xs text-muted">
-                                                            <div className="flex gap-2">
-                                                                {task.value_score > 0 && <span className="text-green-600 font-mono">v:{task.value_score}</span>}
-                                                                {(task.effort_score || task.estimated_duration) && (
-                                                                <span className="text-blue-600 font-mono">e:{task.effort_score ?? task.estimated_duration}</span>
-                                                                )}
-                                                            </div>
-                                                            <span className="w-2 h-2 rounded-full bg-gray-300" />
-                                                        </div>
-                                                        
-                                                        {/* Missing Data Warning */}
-                                                        {col.id === 'backlog' && task.status !== 'done' && (!task.value_score || !(task.effort_score ?? task.estimated_duration)) && (
-                                                            <div className="mt-2 text-[10px] text-orange-500 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                <AlertTriangle size={10} /> Needs details to start
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    <button
-                                                        onClick={(e) => handleDelete(e, task.id)}
-                                                        className="mt-1 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                                                        title="Delete"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </Draggable>
+                                    {tasks.filter(t => t.status === 'backlog').map((task, index) => (
+                                        <TaskItem 
+                                            key={task.id} 
+                                            task={task} 
+                                            index={index} 
+                                            handleComplete={handleComplete} 
+                                            handleDelete={handleDelete} 
+                                            setEditingTask={setEditingTask} 
+                                            isBacklog={true}
+                                        />
                                     ))}
                                     {provided.placeholder}
                                 </div>
                             )}
                         </Droppable>
                     </div>
-                )
-            })}
-        </DragDropContext>
-      </div>
 
-      {/* Edit Modal */}
+                    {/* Draggable Theme Columns */}
+                    {themes.map((theme, index) => (
+                        <Draggable key={theme.id} draggableId={theme.id} index={index}>
+                            {(provided) => (
+                                <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    className="w-80 flex-shrink-0 flex flex-col group/col"
+                                >
+                                    <div 
+                                        {...provided.dragHandleProps}
+                                        className="flex items-center justify-between mb-4 px-2 border-b-2 pb-2 border-primary/50 cursor-grab active:cursor-grabbing hover:bg-gray-50 rounded-t-lg transition-colors"
+                                    >
+                                        {editingThemeId === theme.id ? (
+                                            <div className="flex items-center gap-2 flex-1 mr-2">
+                                                <input 
+                                                    autoFocus
+                                                    className="w-full px-2 py-1 text-sm border rounded"
+                                                    value={editingThemeTitle}
+                                                    onChange={e => setEditingThemeTitle(e.target.value)}
+                                                    onKeyDown={e => {
+                                                        if (e.key === 'Enter') handleUpdateThemeTitle(theme.id)
+                                                        if (e.key === 'Escape') setEditingThemeId(null)
+                                                    }}
+                                                    onBlur={() => handleUpdateThemeTitle(theme.id)}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-2">
+                                                <h3 
+                                                    className="font-bold text-gray-700 cursor-pointer hover:text-primary"
+                                                    onClick={() => {
+                                                        setEditingThemeId(theme.id)
+                                                        setEditingThemeTitle(theme.title)
+                                                    }}
+                                                >
+                                                    {theme.title}
+                                                </h3>
+                                                <span className="bg-gray-100 text-xs px-2 py-1 rounded-full">
+                                                    {tasks.filter(t => t.theme_id === theme.id && t.status !== 'backlog').length}
+                                                </span>
+                                            </div>
+                                        )}
+                                        
+                                        <button 
+                                            onClick={() => handleDeleteTheme(theme.id)}
+                                            className="text-gray-300 hover:text-red-500 opacity-0 group-hover/col:opacity-100 transition-opacity"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                    
+                                    <Droppable droppableId={theme.id} type="TASK">
+                                        {(provided, snapshot) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.droppableProps}
+                                                className={`flex-1 bg-gray-50/50 rounded-xl p-3 transition-colors ${snapshot.isDraggingOver ? 'bg-blue-50' : ''}`}
+                                            >
+                                                {tasks
+                                                    .filter(t => t.theme_id === theme.id && t.status !== 'backlog')
+                                                    .filter(t => showCompleted || t.status !== 'done')
+                                                    .map((task, index) => (
+                                                        <TaskItem 
+                                                            key={task.id} 
+                                                            task={task} 
+                                                            index={index} 
+                                                            handleComplete={handleComplete} 
+                                                            handleDelete={handleDelete} 
+                                                            setEditingTask={setEditingTask} 
+                                                        />
+                                                    ))}
+                                                {provided.placeholder}
+                                            </div>
+                                        )}
+                                    </Droppable>
+                                </div>
+                            )}
+                        </Draggable>
+                    ))}
+                    
+                    {provided.placeholder}
+
+                    {/* Add Column Button */}
+                    <div className="w-80 flex-shrink-0">
+                        {isCreatingTheme ? (
+                            <form onSubmit={handleCreateTheme} className="bg-gray-50 p-4 rounded-xl border-2 border-dashed border-gray-200">
+                                <input 
+                                    autoFocus
+                                    placeholder="Theme Name..."
+                                    className="w-full px-3 py-2 rounded border border-gray-300 mb-2"
+                                    value={newThemeTitle}
+                                    onChange={e => setNewThemeTitle(e.target.value)}
+                                />
+                                <div className="flex gap-2">
+                                    <button type="submit" className="flex-1 bg-primary text-white py-1.5 rounded text-sm font-medium">Add</button>
+                                    <button type="button" onClick={() => setIsCreatingTheme(false)} className="flex-1 bg-gray-200 text-gray-700 py-1.5 rounded text-sm font-medium">Cancel</button>
+                                </div>
+                            </form>
+                        ) : (
+                            <button 
+                                onClick={() => setIsCreatingTheme(true)}
+                                className="w-full h-12 flex items-center justify-center gap-2 text-muted hover:text-primary hover:bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 transition-colors"
+                            >
+                                <Plus size={20} />
+                                <span className="font-medium">Add Theme</span>
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
+        </Droppable>
+      </DragDropContext>
+
+      {/* Edit Modal (reused from before) */}
       {editingTask && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-2xl shadow-xl max-w-md w-full">
                 <h3 className="text-lg font-bold mb-4">Edit Task</h3>
-                
                 <form onSubmit={saveTaskDetails} className="space-y-4">
                     <div>
                         <label className="block text-xs font-bold uppercase text-muted mb-1">Title</label>
@@ -289,7 +413,6 @@ export default function BoardPage() {
                             required
                         />
                     </div>
-                    
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-xs font-bold uppercase text-muted mb-1">Value (1-100)</label>
@@ -312,7 +435,6 @@ export default function BoardPage() {
                             />
                         </div>
                     </div>
-
                     <div>
                         <label className="block text-xs font-bold uppercase text-muted mb-1">Priority</label>
                         <div className="flex gap-2">
@@ -336,7 +458,6 @@ export default function BoardPage() {
                             ))}
                         </div>
                     </div>
-
                     <div>
                         <label className="block text-xs font-bold uppercase text-muted mb-1">Notes</label>
                         <textarea 
@@ -345,7 +466,6 @@ export default function BoardPage() {
                             onChange={e => setEditingTask({...editingTask, notes: e.target.value})}
                         />
                     </div>
-
                     <div className="flex gap-3 pt-4">
                         <button type="button" onClick={() => setEditingTask(null)} className="flex-1 px-4 py-2 text-muted hover:bg-gray-100 rounded-lg">Cancel</button>
                         <button type="submit" className="flex-1 px-4 py-2 bg-primary text-white rounded-lg">Save Changes</button>
@@ -356,4 +476,61 @@ export default function BoardPage() {
       )}
     </div>
   )
+}
+
+// Extracted Task Item Component for cleaner render loop
+function TaskItem({ task, index, handleComplete, handleDelete, setEditingTask, isBacklog = false }: any) {
+    return (
+        <Draggable draggableId={task.id} index={index}>
+            {(provided) => (
+                <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    onClick={() => setEditingTask(task)}
+                    className={`mb-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-primary transition-all group cursor-pointer flex gap-3 items-start ${task.status === 'done' ? 'opacity-60 bg-gray-50' : ''}`}
+                    style={provided.draggableProps.style}
+                >
+                    <button 
+                        onClick={(e) => handleComplete(e, task)}
+                        className="mt-1 text-gray-300 hover:text-secondary transition-colors shrink-0"
+                    >
+                        {task.status === 'done' ? <CheckCircle2 size={20} className="text-green-500" /> : <Circle size={20} />}
+                    </button>
+
+                    <div className="flex-1 min-w-0">
+                        <h4 className={`font-medium mb-2 ${task.status === 'done' ? 'line-through text-muted' : ''}`}>{task.title}</h4>
+                        <div className="flex justify-between items-center text-xs text-muted">
+                            <div className="flex gap-2">
+                                {task.value_score > 0 && <span className="text-green-600 font-mono">v:{task.value_score}</span>}
+                                {(task.effort_score || task.estimated_duration) && (
+                                <span className="text-blue-600 font-mono">e:{task.effort_score ?? task.estimated_duration}</span>
+                                )}
+                            </div>
+                            {/* Visual indicator for priority */}
+                             <span className={`w-2 h-2 rounded-full ${
+                                task.priority_score >= 90 ? 'bg-red-400' :
+                                task.priority_score >= 60 ? 'bg-yellow-400' : 'bg-blue-400'
+                             }`} />
+                        </div>
+                        
+                        {/* Missing Data Warning */}
+                        {isBacklog && task.status !== 'done' && (!task.value_score || !(task.effort_score ?? task.estimated_duration)) && (
+                            <div className="mt-2 text-[10px] text-orange-500 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <AlertTriangle size={10} /> Needs details to start
+                            </div>
+                        )}
+                    </div>
+
+                    <button
+                        onClick={(e) => handleDelete(e, task.id)}
+                        className="mt-1 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                        title="Delete"
+                    >
+                        <Trash2 size={16} />
+                    </button>
+                </div>
+            )}
+        </Draggable>
+    )
 }

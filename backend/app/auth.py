@@ -150,6 +150,79 @@ async def _decode_oidc_token(token: str) -> dict:
         return payload
 
 
+async def _get_local_user(user_id: str, session: AsyncSession) -> Optional[User]:
+    statement = select(User).where(User.id == user_id)
+    result = await session.execute(statement)
+    return result.scalar_one_or_none()
+
+
+async def _get_oidc_user(
+    payload: dict,
+    session: AsyncSession,
+    settings: Any
+) -> User:
+    user_id = payload.get("sub")
+    iss = payload.get("iss") or settings.oidc_issuer
+    email = payload.get(settings.oidc_email_claim) or payload.get("email")
+    name = payload.get(settings.oidc_name_claim) or payload.get("name")
+
+    if not user_id or not iss:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token missing sub or iss claims"
+        )
+
+    # 1. Try finding by stable identity (sub + issuer)
+    statement = select(User).where(User.google_sub == user_id, User.oidc_issuer == iss)
+    result = await session.execute(statement)
+    user = result.scalar_one_or_none()
+
+    if user:
+        return user
+
+    # 2. Link by email on first login if allowed
+    if email:
+        statement = select(User).where(User.email == email)
+        result = await session.execute(statement)
+        user = result.scalar_one_or_none()
+        if user:
+            # Auto-link existing user
+            user.google_sub = user_id
+            user.oidc_issuer = iss
+            session.add(user)
+            await session.commit()
+            await session.refresh(user)
+            return user
+
+    # 3. Create new user (JIT Provisioning)
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="OIDC token missing email claim for new user creation",
+        )
+
+    new_user = User(
+        id=str(uuid.uuid4()),
+        email=email,
+        name=name,
+        google_sub=user_id,
+        oidc_issuer=iss,
+    )
+    session.add(new_user)
+    await session.commit()
+    await session.refresh(new_user)
+
+    # Initialize settings for new user
+    settings_row = UserSettings(
+        id=str(uuid.uuid4()),
+        user_id=new_user.id,
+    )
+    session.add(settings_row)
+    await session.commit()
+
+    return new_user
+
+
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
     session: AsyncSession = Depends(get_session),
@@ -161,83 +234,43 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    payload: Optional[dict] = None
-
-    if settings.enable_local_auth:
-        try:
-            payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
-        except JWTError:
-            payload = None
-
-    if payload is None:
-        try:
-            payload = await _decode_oidc_token(token)
-        except Exception:
-            raise credentials_exception
-
-    user_id: Optional[str] = payload.get("sub")
-    if not user_id:
+    # 1. Peek at claims to determine token type (Local vs OIDC)
+    try:
+        unverified_claims = jwt.get_unverified_claims(token)
+    except JWTError:
         raise credentials_exception
 
-    # Local auth uses internal user.id in the token
-    if settings.enable_local_auth and (payload.get("iss") is None or payload.get("iss") == "local"):
-        statement = select(User).where(User.id == user_id)
-        result = await session.execute(statement)
-        user = result.scalar_one_or_none()
+    iss = unverified_claims.get("iss")
+    
+    # 2. Local Auth Path
+    # Local tokens either have no 'iss' (legacy) or iss='liminal-local' (future)
+    is_local = (
+        settings.enable_local_auth 
+        and (iss is None or iss == "liminal-local" or iss == "local")
+    )
+
+    if is_local:
+        try:
+            payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+            user_id: str = payload.get("sub")
+            if user_id is None:
+                raise credentials_exception
+        except JWTError:
+            raise credentials_exception
+            
+        user = await _get_local_user(user_id, session)
         if user is None:
             raise credentials_exception
         return user
 
-    # OIDC uses issuer+sub as the stable identity.
-    iss = payload.get("iss") or settings.oidc_issuer
-    email = payload.get(settings.oidc_email_claim) or payload.get("email")
-    name = payload.get(settings.oidc_name_claim) or payload.get("name")
-
-    if not iss:
+    # 3. OIDC Path
+    try:
+        payload = await _decode_oidc_token(token)
+    except Exception as e:
+        # Log error here in a real app
         raise credentials_exception
 
-    statement = select(User).where(User.google_sub == user_id, User.oidc_issuer == iss)
-    result = await session.execute(statement)
-    user = result.scalar_one_or_none()
-
-    if not user and email:
-        # Link by email on first login.
-        statement = select(User).where(User.email == email)
-        result = await session.execute(statement)
-        user = result.scalar_one_or_none()
-        if user:
-            user.google_sub = user_id
-            user.oidc_issuer = iss
-            session.add(user)
-            await session.commit()
-            await session.refresh(user)
-
-    if not user:
-        if not email:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="OIDC token missing email claim",
-            )
-
-        user = User(
-            id=str(uuid.uuid4()),
-            email=email,
-            name=name,
-            google_sub=user_id,
-            oidc_issuer=iss,
-        )
-        session.add(user)
-        await session.commit()
-        await session.refresh(user)
-
-        settings_row = UserSettings(
-            id=str(uuid.uuid4()),
-            user_id=user.id,
-        )
-        session.add(settings_row)
-        await session.commit()
-
-    return user
+    return await _get_oidc_user(payload, session, settings)
 
 
 async def authenticate_basic_user(

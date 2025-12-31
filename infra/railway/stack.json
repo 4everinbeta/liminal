@@ -1,0 +1,80 @@
+{
+  "workspace": "4everinbeta's Projects",
+  "project": "carefree-charisma",
+  "environment": "production",
+  "databases": [
+    {
+      "name": "app-db",
+      "serviceName": "liminal-db",
+      "plugin": "postgresql"
+    },
+    {
+      "name": "keycloak-db",
+      "serviceName": "keycloak-db",
+      "plugin": "postgresql"
+    }
+  ],
+  "services": [
+    {
+      "name": "liminal-backend",
+      "root": "backend",
+      "builder": "NIXPACKS",
+      "buildCommand": "pip install --no-cache-dir -r requirements.txt",
+      "startCommand": "uvicorn app.main:app --host 0.0.0.0 --port 8000",
+      "ports": [
+        8000
+      ],
+      "variables": {
+        "DATABASE_URL": "postgresql+asyncpg://${db.app-db.user}:${db.app-db.password}@${db.app-db.host}:${db.app-db.port}/${db.app-db.database}",
+        "SECRET_KEY": "${env.SECRET_KEY}",
+        "OIDC_ISSUER": "${env.PROD_KEYCLOAK_URL}/realms/liminal",
+        "OIDC_AUDIENCE": "liminal-frontend",
+        "LLM_BASE_URL": "${env.LLM_BASE_URL}",
+        "LLM_MODEL": "${env.LLM_MODEL}",
+        "LLM_PROVIDER": "${env.LLM_PROVIDER}",
+        "NEXT_PUBLIC_FRONTEND_BASE_URL": "${env.PROD_FRONTEND_URL}"
+      }
+    },
+    {
+      "name": "liminal-frontend",
+      "root": "frontend",
+      "builder": "NIXPACKS",
+      "buildCommand": "npm install --legacy-peer-deps && npm run build",
+      "startCommand": "npm run start -- -p 3000",
+      "ports": [
+        3000
+      ],
+      "variables": {
+        "NEXT_PUBLIC_API_URL": "${env.PROD_BACKEND_URL}",
+        "NEXT_PUBLIC_OIDC_AUTHORITY": "${env.PROD_KEYCLOAK_URL}/realms/liminal",
+        "NEXT_PUBLIC_OIDC_CLIENT_ID": "liminal-frontend",
+        "NEXT_PUBLIC_OIDC_REDIRECT_URI": "${env.PROD_FRONTEND_URL}/auth/callback",
+        "NEXT_PUBLIC_OIDC_POST_LOGOUT_REDIRECT_URI": "${env.PROD_FRONTEND_URL}/login",
+        "NEXT_PUBLIC_OIDC_PROVIDERS": "${env.NEXT_PUBLIC_OIDC_PROVIDERS|default=default=Continue with Liminal##google=Continue with Google}"
+      }
+    },
+    {
+      "name": "liminal-keycloak",
+      "root": "keycloak",
+      "builder": "DOCKERFILE",
+      "dockerfile": "Dockerfile",
+      "ports": [
+        8080
+      ],
+      "variables": {
+        "KEYCLOAK_ADMIN": "${env.KEYCLOAK_ADMIN|default=admin}",
+        "KEYCLOAK_ADMIN_PASSWORD": "${env.KEYCLOAK_ADMIN_PASSWORD}",
+        "KC_PROXY": "edge",
+        "KC_PROXY_HEADERS": "xforwarded",
+        "KC_HOSTNAME": "${env.PROD_KEYCLOAK_URL}",
+        "KC_HOSTNAME_STRICT": "false",
+        "KC_HTTP_ENABLED": "true",
+        "KC_SPI_THEME_LOGIN_THEME": "liminal",
+        "KC_DB": "postgres",
+        "KC_DB_URL": "jdbc:postgresql://${db.keycloak-db.host}:${db.keycloak-db.port}/${db.keycloak-db.database}",
+        "KC_DB_USERNAME": "${db.keycloak-db.user}",
+        "KC_DB_PASSWORD": "${db.keycloak-db.password}"
+      }
+    }
+  ]
+}

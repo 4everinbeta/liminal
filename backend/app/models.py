@@ -33,6 +33,7 @@ class User(SQLModel, table=True):
     oidc_issuer: Optional[str] = Field(default=None, index=True, nullable=True)
     name: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow, sa_column_kwargs={"onupdate": datetime.utcnow})
     
     tasks: List["Task"] = Relationship(back_populates="user")
     themes: List["Theme"] = Relationship(back_populates="user")
@@ -56,12 +57,16 @@ class Theme(SQLModel, table=True):
     title: str
     color: str = Field(default="#4F46E5") # Hex color for UI
     priority: Priority = Field(default=Priority.medium) # Strategic priority of the theme itself
+    order: int = Field(default=0)
     
     user_id: str = Field(foreign_key="user.id")
     user: User = Relationship(back_populates="themes")
     
     initiatives: List["Initiative"] = Relationship(back_populates="theme")
     tasks: List["Task"] = Relationship(back_populates="theme")
+    
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow, sa_column_kwargs={"onupdate": datetime.utcnow})
 
 class Initiative(SQLModel, table=True):
     """Key Initiatives that belong to a Theme"""
@@ -77,6 +82,9 @@ class Initiative(SQLModel, table=True):
     user: User = Relationship(back_populates="initiatives")
     
     tasks: List["Task"] = Relationship(back_populates="initiative")
+    
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow, sa_column_kwargs={"onupdate": datetime.utcnow})
 
 class Task(SQLModel, table=True):
     id: Optional[str] = Field(default=None, primary_key=True)
@@ -113,8 +121,8 @@ class Task(SQLModel, table=True):
     user_id: str = Field(foreign_key="user.id")
     user: User = Relationship(back_populates="tasks")
     
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
+    updated_at: datetime = Field(default_factory=datetime.utcnow, sa_column_kwargs={"onupdate": datetime.utcnow})
 
 class FocusSession(SQLModel, table=True):
     id: Optional[str] = Field(default=None, primary_key=True)
@@ -149,6 +157,7 @@ class ThemeCreate(SQLModel):
     title: str
     color: Optional[str] = None
     priority: Priority = Priority.medium
+    order: int = 0
     # user_id inferred from auth
 
 class InitiativeCreate(SQLModel):
@@ -168,3 +177,15 @@ class Token(SQLModel):
 
 class TokenData(SQLModel):
     user_id: Optional[str] = None
+
+class ChatMessage(SQLModel):
+    role: str # "system", "user", "assistant"
+    content: str
+
+class ChatRequest(SQLModel):
+    messages: List[ChatMessage]
+    model: Optional[str] = None
+
+class ChatResponse(SQLModel):
+    content: str
+

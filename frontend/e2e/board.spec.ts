@@ -2,6 +2,10 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Horizon View - Kanban Board', () => {
   test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('liminal_token', 'e2e-token');
+    });
+
     // Mock API
     await page.route('**/tasks', async route => {
         if (route.request().method() === 'GET') {
@@ -34,17 +38,20 @@ test.describe('Horizon View - Kanban Board', () => {
 
   test('should display The Threshold and Theme columns', async ({ page }) => {
     // "The Threshold" is the backlog
-    await expect(page.getByText('The Threshold')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'The Threshold' })).toBeVisible();
     
     // Default themes
-    await expect(page.getByText('AI Enablement')).toBeVisible();
-    await expect(page.getByText('Team Building')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'AI Enablement' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Team Building' })).toBeVisible();
   });
 
   test('should show task counts in column headers', async ({ page }) => {
     // Just check that the badge exists
-    const thresholdHeader = page.locator('div').filter({ hasText: 'The Threshold' }).first();
-    await expect(thresholdHeader.locator('span')).toBeVisible();
+    const thresholdBadge = page
+      .getByRole('heading', { name: 'The Threshold' })
+      .locator('..')
+      .locator('span');
+    await expect(thresholdBadge).toHaveText('1');
   });
 
   test('should have link back to Focus Mode', async ({ page }) => {

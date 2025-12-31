@@ -43,13 +43,8 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 async def init_db():
     async with engine.begin() as conn:
         # In production, use Alembic for migrations. 
-        # For scaffolding/dev, this creates tables automatically.
+        # For scaffolding/dev, this creates tables automatically if they don't exist.
+        # NOTE: Schema changes should be handled via `alembic revision --autogenerate`
+        # and `alembic upgrade head`.
         await conn.run_sync(SQLModel.metadata.create_all)
-        # Minimal migration: ensure new score columns exist
-        await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS priority_score INTEGER DEFAULT 50"))
-        await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS effort_score INTEGER DEFAULT 50"))
-        await conn.execute(text("UPDATE task SET priority_score = 50 WHERE priority_score IS NULL"))
-        await conn.execute(text("UPDATE task SET effort_score = COALESCE(effort_score, estimated_duration, 50) WHERE effort_score IS NULL"))
 
-        # OIDC migration: issuer support (issuer+sub is the stable identity key)
-        await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS oidc_issuer TEXT'))
