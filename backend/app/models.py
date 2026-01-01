@@ -39,6 +39,7 @@ class User(SQLModel, table=True):
     themes: List["Theme"] = Relationship(back_populates="user")
     initiatives: List["Initiative"] = Relationship(back_populates="user")
     focus_sessions: List["FocusSession"] = Relationship(back_populates="user")
+    chat_sessions: List["ChatSession"] = Relationship(back_populates="user")
     settings: Optional["Settings"] = Relationship(back_populates="user")
 
 class Settings(SQLModel, table=True):
@@ -133,6 +134,27 @@ class FocusSession(SQLModel, table=True):
     user_id: str = Field(foreign_key="user.id")
     user: User = Relationship(back_populates="focus_sessions")
 
+class ChatSession(SQLModel, table=True):
+    id: Optional[str] = Field(default=None, primary_key=True)
+    user_id: str = Field(foreign_key="user.id")
+    title: Optional[str] = Field(default="New Chat")
+    
+    user: User = Relationship(back_populates="chat_sessions")
+    messages: List["ChatMessage"] = Relationship(back_populates="session", sa_relationship_kwargs={"cascade": "all, delete"})
+    
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow, sa_column_kwargs={"onupdate": datetime.utcnow})
+
+class ChatMessage(SQLModel, table=True):
+    id: Optional[str] = Field(default=None, primary_key=True)
+    session_id: str = Field(foreign_key="chatsession.id")
+    role: str # "system", "user", "assistant"
+    content: str
+    
+    session: ChatSession = Relationship(back_populates="messages")
+    
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
 # --- API DTOs ---
 
 class TaskCreate(SQLModel):
@@ -178,14 +200,16 @@ class Token(SQLModel):
 class TokenData(SQLModel):
     user_id: Optional[str] = None
 
-class ChatMessage(SQLModel):
+class ChatMessageDTO(SQLModel):
     role: str # "system", "user", "assistant"
     content: str
 
 class ChatRequest(SQLModel):
-    messages: List[ChatMessage]
+    messages: List[ChatMessageDTO]
+    session_id: Optional[str] = None
     model: Optional[str] = None
 
 class ChatResponse(SQLModel):
     content: str
+    session_id: Optional[str] = None
 

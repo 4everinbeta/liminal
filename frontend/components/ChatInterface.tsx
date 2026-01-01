@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Bot, User as UserIcon, Loader2, PlusCircle } from 'lucide-react'
-import { chatWithLlm, ChatMessage, createTask, TaskCreate } from '@/lib/api'
+import { chatWithLlm, ChatMessage, createTask, TaskCreate, getChatHistory } from '@/lib/api'
 
 // System prompt to guide the LLM's behavior
 const SYSTEM_PROMPT = `
@@ -17,12 +17,39 @@ interface ChatInterfaceProps {
 }
 
 export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'assistant', content: 'Hello! I am Liminal. I can help you add tasks, answer questions, or track your progress.' }
-  ])
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [sessionId, setSessionId] = useState<string | null>(null)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  // Load session on mount
+  useEffect(() => {
+    const savedSessionId = localStorage.getItem('liminal_chat_session_id')
+    if (savedSessionId) {
+      setSessionId(savedSessionId)
+      setLoading(true)
+      getChatHistory(savedSessionId)
+        .then(history => {
+            if (history && history.length > 0) {
+                // Map backend history to frontend format if needed, but they match closely
+                setMessages(history)
+            } else {
+                // Fallback initial message
+                setMessages([{ role: 'assistant', content: 'Welcome back! How can I help?' }])
+            }
+        })
+        .catch(() => {
+            // If failed (e.g. 404), clear session
+            localStorage.removeItem('liminal_chat_session_id')
+            setSessionId(null)
+            setMessages([{ role: 'assistant', content: 'Hello! I am Liminal. I can help you add tasks, answer questions, or track your progress.' }])
+        })
+        .finally(() => setLoading(false))
+    } else {
+       setMessages([{ role: 'assistant', content: 'Hello! I am Liminal. I can help you add tasks, answer questions, or track your progress.' }])
+    }
+  }, [])
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -70,15 +97,28 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
     setLoading(true)
 
     try {
-      // Build context: System Prompt + Last 5 messages
-      const recentHistory = messages.slice(-5).filter(m => !m.content.includes(':::')) // Filter out raw commands from history if desired, or keep them
+      // Build context: System Prompt + Last 5 messages (or full history if we trust backend context window handling, but safer to limit)
+      // Actually, since we persist, backend HAS history. We can just send the new message if the backend handled stateful logic perfectly.
+      // BUT current AgentService implementation re-reads context from the `messages` argument provided.
+      // To support "contextual memory" fully, we should ideally let backend load full history from DB.
+      // But we are sending `messages`. Let's stick to sending `recentHistory` for now to keep tokens low, 
+      // but since we persist, next time we load, we get full history.
+      
+      const recentHistory = messages.slice(-5).filter(m => !m.content.includes(':::')) 
       const context: ChatMessage[] = [
         { role: 'system', content: SYSTEM_PROMPT },
         ...recentHistory,
         userMsg
       ]
 
-      const responseContent = await chatWithLlm(context)
+      const response = await chatWithLlm(context, sessionId || undefined)
+      
+      if (response.session_id && response.session_id !== sessionId) {
+          setSessionId(response.session_id)
+          localStorage.setItem('liminal_chat_session_id', response.session_id)
+      }
+
+      const responseContent = response.content
       
       // Parse for commands (non-greedy, global to handle multiple blocks)
       const commandRegex = /:::\s*(\{[\s\S]*?\})\s*:::/g
@@ -86,9 +126,6 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
       let displayContent = responseContent
       let actionTaken = false
 
-      // We need to reset lastIndex if we were reusing a regex object, but here it's created fresh.
-      // However, to replace correctly, we might want to do it differently.
-      
       // First, extract all commands
       const commands: string[] = []
       displayContent = displayContent.replace(commandRegex, (match, group1) => {

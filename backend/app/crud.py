@@ -3,7 +3,36 @@ from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, col, or_
 import uuid
-from .models import Task, TaskCreate, TaskStatus, Priority
+from .models import Task, TaskCreate, TaskStatus, Priority, ChatSession, ChatMessage
+
+# ... existing imports ...
+
+# ... existing task functions ...
+
+async def get_chat_session(session: AsyncSession, session_id: str, user_id: str) -> Optional[ChatSession]:
+    statement = select(ChatSession).where(ChatSession.id == session_id, ChatSession.user_id == user_id)
+    result = await session.execute(statement)
+    return result.scalar_one_or_none()
+
+async def create_chat_session(session: AsyncSession, user_id: str, title: str = "New Chat") -> ChatSession:
+    chat_session = ChatSession(id=str(uuid.uuid4()), user_id=user_id, title=title)
+    session.add(chat_session)
+    await session.commit()
+    await session.refresh(chat_session)
+    return chat_session
+
+async def add_chat_message(session: AsyncSession, session_id: str, role: str, content: str) -> ChatMessage:
+    msg = ChatMessage(id=str(uuid.uuid4()), session_id=session_id, role=role, content=content)
+    session.add(msg)
+    await session.commit()
+    await session.refresh(msg)
+    return msg
+
+async def get_chat_history(session: AsyncSession, session_id: str) -> List[ChatMessage]:
+    statement = select(ChatMessage).where(ChatMessage.session_id == session_id).order_by(ChatMessage.created_at)
+    result = await session.execute(statement)
+    return result.scalars().all()
+
 
 async def create_task(session: AsyncSession, task_data: TaskCreate, user_id: str) -> Task:
     def score_to_priority_label(score: int) -> Priority:

@@ -22,6 +22,25 @@ class AgentService:
         self.session = session
         self.user_id = user_id
         self.settings = get_settings()
+        self.user_context = None
+
+    async def _fetch_user_context(self):
+        # We need a crud method for this or direct query
+        # For simplicity, assuming crud or direct execution
+        from sqlmodel import select
+        from ..models import User
+        stmt = select(User).where(User.id == self.user_id)
+        result = await self.session.execute(stmt)
+        user = result.scalar_one_or_none()
+        if user:
+            self.user_context = {
+                "name": user.name or "User",
+                # "theme": user.settings.theme if user.settings else "default" 
+            }
+
+    async def process_request(self, messages: List[Dict[str, str]], session_id: Optional[str] = None) -> str:
+        await self._fetch_user_context()
+        # ... rest of the method ...
 
     async def _call_llm(self, messages: List[Dict[str, str]], model: Optional[str] = None) -> str:
         base_url = self.settings.llm_base_url
@@ -93,22 +112,47 @@ class AgentService:
         except json.JSONDecodeError:
             return None
 
-    async def process_request(self, messages: List[Dict[str, str]]) -> str:
+    async def process_request(self, messages: List[Dict[str, str]], session_id: Optional[str] = None) -> Dict[str, Any]:
+        # 1. Handle Persistence
+        user_msg_content = messages[-1]["content"] if messages else ""
+        
+        chat_session = None
+        if session_id:
+            chat_session = await crud.get_chat_session(self.session, session_id, self.user_id)
+        
+        if not chat_session:
+            chat_session = await crud.create_chat_session(self.session, self.user_id, title=user_msg_content[:30])
+        
+        if user_msg_content:
+            await crud.add_chat_message(self.session, chat_session.id, "user", user_msg_content)
+
+        # 2. Supervisor Step
         intent = await self._classify_intent(messages)
         if DEBUG_AGENT:
             print(f"DEBUG: Intent classified as {intent}")
 
+        response = ""
         if intent == "task_management":
-            return await self._handle_task_management(messages)
+            response = await self._handle_task_management(messages)
         elif intent == "general_qa":
-            return await self._handle_qa(messages)
+            response = await self._handle_qa(messages)
         elif intent == "tracking":
-            return await self._handle_tracking(messages)
+            response = await self._handle_tracking(messages)
         else:
-            return await self._call_llm(messages)
+            response = await self._call_llm(messages)
+            
+        # 3. Save Response
+        if response:
+            await crud.add_chat_message(self.session, chat_session.id, "assistant", response)
+            
+        return {"content": response, "session_id": chat_session.id}
 
     async def _classify_intent(self, messages: List[Dict[str, str]]) -> str:
-        system_msg = {"role": "system", "content": SUPERVISOR_SYSTEM_PROMPT}
+        content = SUPERVISOR_SYSTEM_PROMPT
+        if self.user_context:
+            content = f"User Context: {self.user_context}\n\n" + content
+            
+        system_msg = {"role": "system", "content": content}
         context = messages[-3:] if len(messages) > 3 else messages
         response = await self._call_llm([system_msg] + context)
         
