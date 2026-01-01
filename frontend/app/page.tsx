@@ -4,15 +4,14 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAppStore } from '@/lib/store'
 import ChatInterface from '@/components/ChatInterface'
 import TaskForm from '@/components/TaskForm'
+import TaskActionMenu from '@/components/TaskActionMenu'
 import { getTasks, updateTask, deleteTask, Task } from '@/lib/api'
-import { logout } from '@/lib/auth'
-import { LogOut, Target } from 'lucide-react'
+import { Target } from 'lucide-react'
 
 export default function Home() {
   const { setActiveTaskId } = useAppStore()
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const fetchTasks = async () => {
     setIsLoading(true)
@@ -66,17 +65,6 @@ export default function Home() {
     }
   }
 
-  const handleLogout = async () => {
-    if (isLoggingOut) return
-    setIsLoggingOut(true)
-    try {
-      await logout()
-    } catch (err) {
-      console.error('Logout failed', err)
-      setIsLoggingOut(false)
-    }
-  }
-
   return (
     <div className="space-y-6 max-w-5xl mx-auto px-4 sm:px-6">
       <header className="py-6 flex flex-wrap items-center justify-between gap-4">
@@ -87,14 +75,6 @@ export default function Home() {
             Urgent tasks, quick capture, and a coach in one clean surface.
           </p>
         </div>
-        <button
-          onClick={handleLogout}
-          disabled={isLoggingOut}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-full font-medium shadow-sm hover:bg-gray-800 transition-colors disabled:opacity-60"
-        >
-          <LogOut size={16} />
-          <span className="text-sm">{isLoggingOut ? 'Signing out…' : 'Sign out'}</span>
-        </button>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr),minmax(0,2fr)]">
@@ -129,7 +109,7 @@ export default function Home() {
                 {urgentTasks.map((task) => (
                   <li
                     key={task.id}
-                    className="border border-gray-100 rounded-2xl px-4 py-3 bg-gray-50/60 hover:bg-white transition-colors"
+                    className="border border-gray-100 rounded-2xl px-4 py-3 bg-gray-50/60 hover:bg-white transition-colors group"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -146,20 +126,11 @@ export default function Home() {
                           {task.estimated_duration && <span>{task.estimated_duration}m</span>}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <button
-                          onClick={() => handleCompleteTask(task.id)}
-                          className="text-primary font-medium"
-                        >
-                          Done
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTask(task.id)}
-                          className="text-gray-400 uppercase tracking-wide"
-                        >
-                          Clear
-                        </button>
-                      </div>
+                      <TaskActionMenu 
+                        onDelete={() => handleDeleteTask(task.id)}
+                        onToggleComplete={() => handleCompleteTask(task.id)}
+                        isCompleted={false}
+                      />
                     </div>
                   </li>
                 ))}

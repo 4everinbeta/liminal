@@ -48,14 +48,7 @@ export default function FocusPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-      <header className="flex items-center justify-between mb-8">
-        <button
-          onClick={() => router.push('/')}
-          className="inline-flex items-center gap-2 text-gray-500 hover:text-primary transition-colors"
-        >
-          <ArrowLeft size={18} />
-          Back to board
-        </button>
+      <header className="flex items-center justify-end mb-8">
         <p className="text-xs uppercase tracking-[0.3em] text-primary/70">deep work</p>
       </header>
 

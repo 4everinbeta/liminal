@@ -1,6 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import AuthGate from '@/components/AuthGate'
+import AppSidebar from '@/components/AppSidebar'
 
 export const metadata: Metadata = {
   title: 'Liminal',
@@ -14,9 +15,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="font-sans">
+      <body className="font-sans bg-gray-50 text-text antialiased">
         <AuthGate>
-          <main className="min-h-screen p-4 md:p-8 max-w-5xl mx-auto">{children}</main>
+          <AppSidebar />
+          <main className="min-h-screen md:pl-16 pb-20 md:pb-0">
+            {children}
+          </main>
         </AuthGate>
       </body>
     </html>

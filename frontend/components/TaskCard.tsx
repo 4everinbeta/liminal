@@ -1,8 +1,9 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { CheckCircle2, Circle, Trash2 } from 'lucide-react'
+import { CheckCircle2, Circle } from 'lucide-react'
 import { forwardRef, useState } from 'react'
+import TaskActionMenu from './TaskActionMenu'
 
 interface TaskProps {
   task: {
@@ -83,15 +84,13 @@ const TaskCard = forwardRef<HTMLDivElement, TaskProps>(({ task, onComplete, onDe
         )}
       </div>
 
-      {onDelete && (
-        <button
-          onClick={() => onDelete(task.id)}
-          className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-2"
-          title="Delete Task"
-        >
-          <Trash2 size={18} />
-        </button>
-      )}
+      <div onClick={e => e.stopPropagation()}>
+        <TaskActionMenu 
+            onDelete={onDelete ? () => onDelete(task.id) : undefined}
+            onToggleComplete={onComplete ? handleComplete : undefined}
+            isCompleted={false} 
+        />
+      </div>
     </motion.div>
   )
 })
