@@ -6,7 +6,7 @@ import ChatInterface from '@/components/ChatInterface'
 import TaskForm from '@/components/TaskForm'
 import TaskActionMenu from '@/components/TaskActionMenu'
 import { getTasks, updateTask, deleteTask, Task } from '@/lib/api'
-import { Target } from 'lucide-react'
+import { Target, Calendar, CheckCircle2, CircleDashed } from 'lucide-react'
 
 export default function Home() {
   const { setActiveTaskId } = useAppStore()
@@ -43,6 +43,17 @@ export default function Home() {
     fetchTasks()
   }, [])
 
+  const stats = useMemo(() => {
+    const today = new Date().toDateString()
+    // Note: updated_at is needed for "Done Today" accuracy, but assuming backend provides it
+    // If backend doesn't provide updated_at for tasks, this will be NaN. 
+    // We safeguarded backend to provide it.
+    const doneToday = tasks.filter(t => t.status === 'done' && new Date(t.updated_at).toDateString() === today).length
+    const backlog = tasks.filter(t => t.status === 'backlog').length
+    const inProgress = tasks.filter(t => t.status === 'in_progress').length
+    return { doneToday, backlog, inProgress }
+  }, [tasks])
+
   const urgentTasks = useMemo(() => tasks.slice(0, 4), [tasks])
 
   const handleCompleteTask = async (taskId: string) => {
@@ -76,6 +87,37 @@ export default function Home() {
           </p>
         </div>
       </header>
+
+      {/* Stats Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">
+            <div className="p-2 bg-green-100 text-green-600 rounded-lg">
+                <CheckCircle2 size={20} />
+            </div>
+            <div>
+                <p className="text-2xl font-bold text-gray-900">{stats.doneToday}</p>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Done Today</p>
+            </div>
+        </div>
+        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">
+            <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                <Target size={20} />
+            </div>
+            <div>
+                <p className="text-2xl font-bold text-gray-900">{stats.inProgress}</p>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">In Focus</p>
+            </div>
+        </div>
+         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">
+            <div className="p-2 bg-gray-100 text-gray-600 rounded-lg">
+                <CircleDashed size={20} />
+            </div>
+            <div>
+                <p className="text-2xl font-bold text-gray-900">{stats.backlog}</p>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Backlog</p>
+            </div>
+        </div>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr),minmax(0,2fr)]">
         <section className="space-y-6">
