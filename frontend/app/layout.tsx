@@ -2,10 +2,10 @@ import './globals.css'
 import type { Metadata } from 'next'
 import AuthGate from '@/components/AuthGate'
 import AppSidebar from '@/components/AppSidebar'
+import TrustedTypesPolyfill from '@/components/TrustedTypesPolyfill'
 
 export const metadata: Metadata = {
-  title: 'Liminal',
-  description: 'ADHD-friendly productivity',
+// ... existing metadata ...
 }
 
 export default function RootLayout({
@@ -16,6 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans bg-gray-50 text-text antialiased">
+        <TrustedTypesPolyfill />
         <AuthGate>
           <AppSidebar />
           <main className="min-h-screen md:pl-16 pb-20 md:pb-0">
