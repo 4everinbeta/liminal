@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { Plus, MoreHorizontal, AlertTriangle, ArrowRight, ArrowLeft, Trash2, Circle, CheckCircle2, Eye, EyeOff, Edit2, X } from 'lucide-react'
 import { getTasks, getThemes, updateTask, deleteTask, createTheme, updateTheme, deleteTheme, Task, Theme } from '@/lib/api'
+import TaskActionMenu from '@/components/TaskActionMenu'
+import { useAppStore } from '@/lib/store'
 
 export default function BoardPage() {
+  const { lastUpdate } = useAppStore()
   const [tasks, setTasks] = useState<Task[]>([])
   const [themes, setThemes] = useState<Theme[]>([])
   const [enabled, setEnabled] = useState(false)
@@ -28,7 +31,7 @@ export default function BoardPage() {
         cancelAnimationFrame(animation)
         setEnabled(false)
     }
-  }, [])
+  }, [lastUpdate])
 
   const fetchData = async () => {
     try {
@@ -474,126 +477,58 @@ export default function BoardPage() {
   )
 }
 
-import TaskActionMenu from '@/components/TaskActionMenu'
-
-
-
-// ... existing imports
-
-
-
-// ... existing BoardPage code
-
-
-
-// Extracted Task Item Component for cleaner render loop
-
 function TaskItem({ task, index, handleComplete, handleDelete, setEditingTask, isBacklog = false }: any) {
-
     return (
-
         <Draggable draggableId={task.id} index={index}>
-
             {(provided) => (
-
                 <div
-
                     ref={provided.innerRef}
-
                     {...provided.draggableProps}
-
                     {...provided.dragHandleProps}
-
                     onClick={() => setEditingTask(task)}
-
                     className={`mb-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-primary transition-all group cursor-pointer flex gap-3 items-start ${task.status === 'done' ? 'opacity-60 bg-gray-50' : ''}`}
-
                     style={provided.draggableProps.style}
-
                 >
-
                     <button 
-
                         onClick={(e) => handleComplete(e, task)}
-
                         className="mt-1 text-gray-300 hover:text-secondary transition-colors shrink-0"
-
                     >
-
                         {task.status === 'done' ? <CheckCircle2 size={20} className="text-green-500" /> : <Circle size={20} />}
-
                     </button>
 
-
-
                     <div className="flex-1 min-w-0">
-
                         <h4 className={`font-medium mb-2 ${task.status === 'done' ? 'line-through text-muted' : ''}`}>{task.title}</h4>
-
                         <div className="flex justify-between items-center text-xs text-muted">
-
                             <div className="flex gap-2">
-
                                 {task.value_score > 0 && <span className="text-green-600 font-mono">v:{task.value_score}</span>}
-
                                 {(task.effort_score || task.estimated_duration) && (
-
                                 <span className="text-blue-600 font-mono">e:{task.effort_score ?? task.estimated_duration}</span>
-
                                 )}
-
                             </div>
-
                             {/* Visual indicator for priority */}
-
                              <span className={`w-2 h-2 rounded-full ${
-
                                 task.priority_score >= 90 ? 'bg-red-400' :
-
                                 task.priority_score >= 60 ? 'bg-yellow-400' : 'bg-blue-400'
-
                              }`} />
-
                         </div>
-
                         
-
                         {/* Missing Data Warning */}
-
                         {isBacklog && task.status !== 'done' && (!task.value_score || !(task.effort_score ?? task.estimated_duration)) && (
-
                             <div className="mt-2 text-[10px] text-orange-500 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-
                                 <AlertTriangle size={10} /> Needs details to start
-
                             </div>
-
                         )}
-
                     </div>
-
-
 
                     <div onClick={e => e.stopPropagation()}>
-
                         <TaskActionMenu 
-
                             onDelete={() => handleDelete({ stopPropagation: () => {} }, task.id)}
-
                             onEdit={() => setEditingTask(task)}
-
                             isCompleted={task.status === 'done'}
-
                         />
-
                     </div>
-
                 </div>
-
             )}
-
         </Draggable>
-
     )
-
 }

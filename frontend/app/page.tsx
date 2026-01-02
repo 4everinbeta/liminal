@@ -2,46 +2,23 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useAppStore } from '@/lib/store'
-import ChatInterface from '@/components/ChatInterface'
 import TaskForm from '@/components/TaskForm'
 import TaskActionMenu from '@/components/TaskActionMenu'
 import { getTasks, updateTask, deleteTask, Task } from '@/lib/api'
 import { Target, Calendar, CheckCircle2, CircleDashed } from 'lucide-react'
 
 export default function Home() {
-  const { setActiveTaskId } = useAppStore()
+  const { setActiveTaskId, lastUpdate } = useAppStore()
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   const fetchTasks = async () => {
-    setIsLoading(true)
-    try {
-      const fetchedTasks = await getTasks()
-      const priorityMap = { high: 3, medium: 2, low: 1 }
-      const sorted = fetchedTasks
-        .filter((task) => task.status !== 'done')
-        .sort((a, b) => {
-          const pA = priorityMap[a.priority] || 0
-          const pB = priorityMap[b.priority] || 0
-          if (pA !== pB) return pB - pA
-          if (a.value_score !== b.value_score) return b.value_score - a.value_score
-          return (a.estimated_duration || 0) - (b.estimated_duration || 0)
-        })
-
-      setTasks(sorted)
-      if (sorted.length > 0) {
-        setActiveTaskId(sorted[0].id)
-      }
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setIsLoading(false)
-    }
+    // ... existing ...
   }
 
   useEffect(() => {
     fetchTasks()
-  }, [])
+  }, [lastUpdate])
 
   const stats = useMemo(() => {
     const today = new Date().toDateString()
@@ -185,19 +162,12 @@ export default function Home() {
         <aside className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold text-gray-900">Coach</h3>
-            <a
-              href="/focus"
-              className="inline-flex items-center gap-1 rounded-full border border-primary/30 text-primary text-sm font-semibold px-3 py-1.5 hover:bg-primary/5 transition-colors"
-            >
-              <Target size={14} />
-              Focus mode
-            </a>
+            {/* Coach is now global, but we can keep a "Tip" or prompt here? */}
+            {/* Removing ChatInterface from here. */}
           </div>
-          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-6">
-            <p className="text-sm text-gray-500 mb-4">
-              Wondering what to tackle next? Ask about priorities or the backlog.
-            </p>
-            <ChatInterface onTaskCreated={fetchTasks} />
+          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-6 text-center text-gray-500 text-sm">
+            <p className="mb-2">Need help prioritizing?</p>
+            <p>Click the chat bubble in the corner to talk to your AI Coach.</p>
           </div>
         </aside>
       </div>

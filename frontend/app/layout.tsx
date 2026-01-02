@@ -3,9 +3,11 @@ import type { Metadata } from 'next'
 import AuthGate from '@/components/AuthGate'
 import AppSidebar from '@/components/AppSidebar'
 import TrustedTypesPolyfill from '@/components/TrustedTypesPolyfill'
+import GlobalChatWidget from '@/components/GlobalChatWidget'
 
 export const metadata: Metadata = {
-// ... existing metadata ...
+  title: 'Liminal',
+  description: 'ADHD-friendly productivity',
 }
 
 export default function RootLayout({
@@ -19,6 +21,7 @@ export default function RootLayout({
         <TrustedTypesPolyfill />
         <AuthGate>
           <AppSidebar />
+          <GlobalChatWidget />
           <main className="min-h-screen md:pl-16 pb-20 md:pb-0">
             {children}
           </main>

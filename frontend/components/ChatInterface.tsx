@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Bot, User as UserIcon, Loader2, PlusCircle } from 'lucide-react'
 import { chatWithLlm, ChatMessage, createTask, TaskCreate, getChatHistory } from '@/lib/api'
+import { useAppStore } from '@/lib/store'
 
 // System prompt to guide the LLM's behavior
 const SYSTEM_PROMPT = `
@@ -17,6 +18,7 @@ interface ChatInterfaceProps {
 }
 
 export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
+  const { triggerUpdate } = useAppStore()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [input, setInput] = useState('')
@@ -71,12 +73,14 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
           status: 'backlog'
         }
         await createTask(taskData)
+        triggerUpdate()
         if (onTaskCreated) onTaskCreated()
         return true
       }
       
       // Server-side signal
       if (command.action === 'refresh_board') {
+        triggerUpdate()
         if (onTaskCreated) onTaskCreated()
         return true
       }

@@ -34,14 +34,17 @@ interface AppState {
   appendChatMessage: (msg: ChatMessage) => void
   setChatMessages: (msgs: ChatMessage[]) => void
   resetChatMessages: () => void
+
+  // Global Refresh Signal
+  lastUpdate: number
+  triggerUpdate: () => void
 }
 
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
       isFocusMode: false,
-      toggleFocusMode: () => set((state) => ({ isFocusMode: !state.isFocusMode })),
-
+      // ... existing ...
       activeTaskId: null,
       setActiveTaskId: (id) => set({ activeTaskId: id }),
 
@@ -66,6 +69,9 @@ export const useAppStore = create<AppState>()(
           chatMessages: msgs.length ? msgs : INITIAL_CHAT_MESSAGES,
         }),
       resetChatMessages: () => set({ chatMessages: INITIAL_CHAT_MESSAGES }),
+
+      lastUpdate: 0,
+      triggerUpdate: () => set({ lastUpdate: Date.now() }),
     }),
     {
       name: 'liminal-app',
