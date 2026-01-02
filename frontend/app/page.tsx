@@ -197,7 +197,7 @@ export default function Home() {
             <p className="text-sm text-gray-500 mb-4">
               Wondering what to tackle next? Ask about priorities or the backlog.
             </p>
-            <ChatInterface />
+            <ChatInterface onTaskCreated={fetchTasks} />
           </div>
         </aside>
       </div>
