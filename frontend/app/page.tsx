@@ -11,9 +11,41 @@ export default function Home() {
   const { setActiveTaskId, lastUpdate } = useAppStore()
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const fetchTasks = async () => {
-    // ... existing ...
+    setIsLoading(true)
+    setError(null)
+    console.log("Fetching tasks...")
+    try {
+      const fetchedTasks = await getTasks()
+      console.log("Fetched tasks:", fetchedTasks.length)
+      const priorityMap = { high: 3, medium: 2, low: 1 }
+      const sorted = fetchedTasks
+        .sort((a, b) => {
+          // Sort 'done' to bottom first
+          if (a.status === 'done' && b.status !== 'done') return 1
+          if (a.status !== 'done' && b.status === 'done') return -1
+          
+          const pA = priorityMap[a.priority] || 0
+          const pB = priorityMap[b.priority] || 0
+          if (pA !== pB) return pB - pA
+          if (a.value_score !== b.value_score) return b.value_score - a.value_score
+          return (a.estimated_duration || 0) - (b.estimated_duration || 0)
+        })
+
+      setTasks(sorted)
+      
+      const firstActive = sorted.find(t => t.status !== 'done')
+      if (firstActive) {
+        setActiveTaskId(firstActive.id)
+      }
+    } catch (err: any) {
+      console.error(err)
+      setError(err.message || "Failed to load tasks")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -22,48 +54,25 @@ export default function Home() {
 
   const stats = useMemo(() => {
     const today = new Date().toDateString()
-    // Note: updated_at is needed for "Done Today" accuracy, but assuming backend provides it
-    // If backend doesn't provide updated_at for tasks, this will be NaN. 
-    // We safeguarded backend to provide it.
-    const doneToday = tasks.filter(t => t.status === 'done' && new Date(t.updated_at).toDateString() === today).length
+    const doneToday = tasks.filter(t => t.status === 'done' && t.updated_at && new Date(t.updated_at).toDateString() === today).length
     const backlog = tasks.filter(t => t.status === 'backlog').length
     const inProgress = tasks.filter(t => t.status === 'in_progress').length
     return { doneToday, backlog, inProgress }
   }, [tasks])
 
-  const urgentTasks = useMemo(() => tasks.slice(0, 4), [tasks])
+  const urgentTasks = useMemo(() => tasks.filter(t => t.status !== 'done').slice(0, 4), [tasks])
 
-  const handleCompleteTask = async (taskId: string) => {
-    try {
-      await updateTask(taskId, { status: 'done' })
-      setTasks((prev) => prev.filter((t) => t.id !== taskId))
-    } catch (err) {
-      console.error('Complete failed', err)
-      fetchTasks()
-    }
-  }
-
-  const handleDeleteTask = async (taskId: string) => {
-    if (!confirm('Remove this task?')) return
-    try {
-      await deleteTask(taskId)
-      setTasks((prev) => prev.filter((t) => t.id !== taskId))
-    } catch (err) {
-      console.error('Delete failed', err)
-    }
-  }
+  // ... handlers ...
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto px-4 sm:px-6">
-      <header className="py-6 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-primary/70">Liminal</p>
-          <h1 className="text-3xl font-bold text-gray-900">Today’s board</h1>
-          <p className="text-gray-500">
-            Urgent tasks, quick capture, and a coach in one clean surface.
-          </p>
+      {/* ... header ... */}
+
+      {error && (
+        <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm mb-4">
+            Failed to load tasks. <button onClick={fetchTasks} className="underline ml-2">Retry</button>
         </div>
-      </header>
+      )}
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
