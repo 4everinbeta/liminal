@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { useAppStore } from '@/lib/store'
 import TaskForm from '@/components/TaskForm'
 import TaskActionMenu from '@/components/TaskActionMenu'
+import EditTaskModal from '@/components/EditTaskModal'
 import { getTasks, updateTask, deleteTask, Task } from '@/lib/api'
 import { Target, Calendar, CheckCircle2, CircleDashed, Flame } from 'lucide-react'
 
@@ -12,6 +14,9 @@ export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  // Edit Modal State
+  const [editingTask, setEditingTask] = useState<Task | null>(null)
 
   const fetchTasks = async () => {
     setIsLoading(true)
@@ -91,11 +96,53 @@ export default function Home() {
 
   const urgentTasks = useMemo(() => tasks.filter(t => t.status !== 'done').slice(0, 4), [tasks])
 
-  // ... handlers ...
+  const handleCompleteTask = async (taskId: string) => {
+    try {
+      await updateTask(taskId, { status: 'done' })
+      setTasks((prev) => prev.filter((t) => t.id !== taskId)) // Optimistic remove from urgent
+      // Actually, since we keep all tasks, we should update status in place
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'done', updated_at: new Date().toISOString() } : t))
+    } catch (err) {
+      console.error('Complete failed', err)
+      fetchTasks()
+    }
+  }
+
+  const handleDeleteTask = async (taskId: string) => {
+    if (!confirm('Remove this task?')) return
+    try {
+      await deleteTask(taskId)
+      setTasks((prev) => prev.filter((t) => t.id !== taskId))
+    } catch (err) {
+      console.error('Delete failed', err)
+    }
+  }
+  
+  const handleSaveTask = async (task: Task) => {
+      await updateTask(task.id, {
+        title: task.title,
+        priority: task.priority,
+        priority_score: task.priority_score,
+        value_score: task.value_score,
+        estimated_duration: task.estimated_duration,
+        effort_score: task.effort_score,
+        notes: task.notes
+      })
+      fetchTasks()
+      setEditingTask(null)
+  }
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto px-4 sm:px-6">
-      {/* ... header ... */}
+      <header className="py-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-primary/70">Liminal</p>
+          <h1 className="text-3xl font-bold text-gray-900">Today’s board</h1>
+          <p className="text-gray-500">
+            Urgent tasks, quick capture, and a coach in one clean surface.
+          </p>
+        </div>
+      </header>
 
       {error && (
         <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm mb-4">
@@ -105,7 +152,7 @@ export default function Home() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">
+        <Link href="/board" className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
             <div className="p-2 bg-green-100 text-green-600 rounded-lg">
                 <CheckCircle2 size={20} />
             </div>
@@ -113,7 +160,7 @@ export default function Home() {
                 <p className="text-2xl font-bold text-gray-900">{stats.doneToday}</p>
                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Done Today</p>
             </div>
-        </div>
+        </Link>
         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">
             <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
                 <Flame size={20} />
@@ -123,7 +170,7 @@ export default function Home() {
                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Day Streak</p>
             </div>
         </div>
-        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">
+        <Link href="/focus" className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
             <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
                 <Target size={20} />
             </div>
@@ -131,8 +178,8 @@ export default function Home() {
                 <p className="text-2xl font-bold text-gray-900">{stats.inProgress}</p>
                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">In Focus</p>
             </div>
-        </div>
-         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">
+        </Link>
+        <Link href="/board" className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
             <div className="p-2 bg-gray-100 text-gray-600 rounded-lg">
                 <CircleDashed size={20} />
             </div>
@@ -140,7 +187,7 @@ export default function Home() {
                 <p className="text-2xl font-bold text-gray-900">{stats.backlog}</p>
                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Backlog</p>
             </div>
-        </div>
+        </Link>
       </div>
 
       <div className="grid gap-6">
@@ -179,7 +226,7 @@ export default function Home() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <button
-                          onClick={() => setActiveTaskId(task.id)}
+                          onClick={() => setEditingTask(task)}
                           className="text-left text-base font-semibold text-gray-900 hover:text-primary"
                         >
                           {task.title}
@@ -194,6 +241,7 @@ export default function Home() {
                       <TaskActionMenu 
                         onDelete={() => handleDeleteTask(task.id)}
                         onToggleComplete={() => handleCompleteTask(task.id)}
+                        onEdit={() => setEditingTask(task)}
                         isCompleted={false}
                       />
                     </div>
@@ -203,6 +251,14 @@ export default function Home() {
             )}
           </div>
       </div>
+      
+      {editingTask && (
+        <EditTaskModal 
+            task={editingTask} 
+            onClose={() => setEditingTask(null)} 
+            onSave={handleSaveTask} 
+        />
+      )}
     </div>
   )
 }

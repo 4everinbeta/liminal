@@ -5,6 +5,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { Plus, MoreHorizontal, AlertTriangle, ArrowRight, ArrowLeft, Trash2, Circle, CheckCircle2, Eye, EyeOff, Edit2, X } from 'lucide-react'
 import { getTasks, getThemes, updateTask, deleteTask, createTheme, updateTheme, deleteTheme, Task, Theme } from '@/lib/api'
 import TaskActionMenu from '@/components/TaskActionMenu'
+import EditTaskModal from '@/components/EditTaskModal'
 import { useAppStore } from '@/lib/store'
 
 export default function BoardPage() {
@@ -160,7 +161,8 @@ export default function BoardPage() {
   }
 
   const handleDelete = async (e: React.MouseEvent, taskId: string) => {
-    e.stopPropagation()
+    // Note: TaskItem wraps this, e is optional there, but here we can keep it standard
+    e?.stopPropagation()
     if (!confirm("Delete this task?")) return
     try {
         await deleteTask(taskId)
@@ -171,7 +173,7 @@ export default function BoardPage() {
   }
 
   const handleComplete = async (e: React.MouseEvent, task: Task) => {
-    e.stopPropagation()
+    e?.stopPropagation()
     const newStatus = task.status === 'done' ? 'in_progress' : 'done'
     
     // Optimistic
@@ -185,21 +187,18 @@ export default function BoardPage() {
     }
   }
 
-  const saveTaskDetails = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!editingTask) return
-
-    await updateTask(editingTask.id, {
-        title: editingTask.title,
-        priority: editingTask.priority,
-        priority_score: editingTask.priority_score,
-        value_score: editingTask.value_score,
-        estimated_duration: editingTask.estimated_duration,
-        effort_score: editingTask.effort_score,
-        notes: editingTask.notes
+  const handleSaveTask = async (task: Task) => {
+    await updateTask(task.id, {
+        title: task.title,
+        priority: task.priority,
+        priority_score: task.priority_score,
+        value_score: task.value_score,
+        estimated_duration: task.estimated_duration,
+        effort_score: task.effort_score,
+        notes: task.notes
     })
     
-    const newTasks = tasks.map(t => t.id === editingTask.id ? editingTask : t)
+    const newTasks = tasks.map(t => t.id === task.id ? task : t)
     setTasks(newTasks)
     setEditingTask(null)
   }
@@ -396,82 +395,13 @@ export default function BoardPage() {
         </Droppable>
       </DragDropContext>
 
-      {/* Edit Modal (reused from before) */}
+      {/* Shared Edit Modal */}
       {editingTask && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-2xl shadow-xl max-w-md w-full">
-                <h3 className="text-lg font-bold mb-4">Edit Task</h3>
-                <form onSubmit={saveTaskDetails} className="space-y-4">
-                    <div>
-                        <label className="block text-xs font-bold uppercase text-muted mb-1">Title</label>
-                        <input 
-                            type="text" 
-                            className="w-full p-2 border rounded-lg"
-                            value={editingTask.title}
-                            onChange={e => setEditingTask({...editingTask, title: e.target.value})}
-                            required
-                        />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-xs font-bold uppercase text-muted mb-1">Value (1-100)</label>
-                            <input 
-                                type="number" min="1" max="100" 
-                                className="w-full p-2 border rounded-lg"
-                                value={editingTask.value_score || ''}
-                                onChange={e => setEditingTask({...editingTask, value_score: parseInt(e.target.value)})}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-bold uppercase text-muted mb-1">Effort (1-100)</label>
-                            <input 
-                                type="number" min="1" max="100"
-                                className="w-full p-2 border rounded-lg"
-                                value={editingTask.effort_score || ''}
-                                onChange={e => setEditingTask({...editingTask, effort_score: parseInt(e.target.value), estimated_duration: parseInt(e.target.value)})}
-                                required
-                            />
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold uppercase text-muted mb-1">Priority</label>
-                        <div className="flex gap-2">
-                            {[30, 60, 90].map(p => (
-                                <button
-                                    key={p}
-                                    type="button"
-                                    onClick={() => setEditingTask({
-                                        ...editingTask,
-                                        priority_score: p,
-                                        priority: p >= 67 ? 'high' : p >= 34 ? 'medium' : 'low'
-                                    })}
-                                    className={`flex-1 py-2 rounded-lg capitalize border ${
-                                        editingTask.priority_score === p 
-                                            ? 'bg-primary text-white border-primary' 
-                                            : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-                                    }`}
-                                >
-                                    {p}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold uppercase text-muted mb-1">Notes</label>
-                        <textarea 
-                            className="w-full p-2 border rounded-lg h-24 resize-none"
-                            value={editingTask.notes || ''}
-                            onChange={e => setEditingTask({...editingTask, notes: e.target.value})}
-                        />
-                    </div>
-                    <div className="flex gap-3 pt-4">
-                        <button type="button" onClick={() => setEditingTask(null)} className="flex-1 px-4 py-2 text-muted hover:bg-gray-100 rounded-lg">Cancel</button>
-                        <button type="submit" className="flex-1 px-4 py-2 bg-primary text-white rounded-lg">Save Changes</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <EditTaskModal 
+            task={editingTask} 
+            onClose={() => setEditingTask(null)} 
+            onSave={handleSaveTask} 
+        />
       )}
     </div>
   )
@@ -505,14 +435,12 @@ function TaskItem({ task, index, handleComplete, handleDelete, setEditingTask, i
                                 <span className="text-blue-600 font-mono">e:{task.effort_score ?? task.estimated_duration}</span>
                                 )}
                             </div>
-                            {/* Visual indicator for priority */}
                              <span className={`w-2 h-2 rounded-full ${
                                 task.priority_score >= 90 ? 'bg-red-400' :
                                 task.priority_score >= 60 ? 'bg-yellow-400' : 'bg-blue-400'
                              }`} />
                         </div>
                         
-                        {/* Missing Data Warning */}
                         {isBacklog && task.status !== 'done' && (!task.value_score || !(task.effort_score ?? task.estimated_duration)) && (
                             <div className="mt-2 text-[10px] text-orange-500 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <AlertTriangle size={10} /> Needs details to start
