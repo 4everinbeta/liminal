@@ -39,9 +39,42 @@ class AgentService:
                 # "theme": user.settings.theme if user.settings else "default" 
             }
 
-    async def process_request(self, messages: List[Dict[str, str]], session_id: Optional[str] = None) -> str:
+    async def process_request(self, messages: List[Dict[str, str]], session_id: Optional[str] = None) -> Dict[str, Any]:
         await self._fetch_user_context()
-        # ... rest of the method ...
+        
+        # 1. Handle Persistence
+        user_msg_content = messages[-1]["content"] if messages else ""
+        
+        chat_session = None
+        if session_id:
+            chat_session = await crud.get_chat_session(self.session, session_id, self.user_id)
+        
+        if not chat_session:
+            chat_session = await crud.create_chat_session(self.session, self.user_id, title=user_msg_content[:30])
+        
+        if user_msg_content:
+            await crud.add_chat_message(self.session, chat_session.id, "user", user_msg_content)
+
+        # 2. Supervisor Step
+        intent = await self._classify_intent(messages)
+        if DEBUG_AGENT:
+            print(f"DEBUG: Intent classified as {intent}")
+
+        response = ""
+        if intent == "task_management":
+            response = await self._handle_task_management(messages)
+        elif intent == "general_qa":
+            response = await self._handle_qa(messages)
+        elif intent == "tracking":
+            response = await self._handle_tracking(messages)
+        else:
+            response = await self._call_llm(messages)
+            
+        # 3. Save Response
+        if response:
+            await crud.add_chat_message(self.session, chat_session.id, "assistant", response)
+            
+        return {"content": response, "session_id": chat_session.id}
 
     async def _call_llm(self, messages: List[Dict[str, str]], model: Optional[str] = None) -> str:
         base_url = self.settings.llm_base_url
@@ -95,7 +128,6 @@ class AgentService:
     def _extract_json(self, text: str) -> Optional[Dict[str, Any]]:
         """
         Robustly extract JSON from text. 
-        Handles markdown code blocks (```json ... ```) and raw JSON.
         """
         try:
             # 1. Try finding markdown code blocks first
@@ -103,50 +135,16 @@ class AgentService:
             if code_block:
                 return json.loads(code_block.group(1))
             
-            # 2. Try finding raw JSON object
-            # Matches { ... } that looks like a valid object
-            json_match = re.search(r"(\{.*\})", text, re.DOTALL)
-            if json_match:
-                return json.loads(json_match.group(1))
+            # 2. Try finding raw JSON object (first { to last })
+            start = text.find('{')
+            end = text.rfind('}')
+            if start != -1 and end != -1 and end > start:
+                json_str = text[start:end+1]
+                return json.loads(json_str)
                 
             return None
         except json.JSONDecodeError:
             return None
-
-    async def process_request(self, messages: List[Dict[str, str]], session_id: Optional[str] = None) -> Dict[str, Any]:
-        # 1. Handle Persistence
-        user_msg_content = messages[-1]["content"] if messages else ""
-        
-        chat_session = None
-        if session_id:
-            chat_session = await crud.get_chat_session(self.session, session_id, self.user_id)
-        
-        if not chat_session:
-            chat_session = await crud.create_chat_session(self.session, self.user_id, title=user_msg_content[:30])
-        
-        if user_msg_content:
-            await crud.add_chat_message(self.session, chat_session.id, "user", user_msg_content)
-
-        # 2. Supervisor Step
-        intent = await self._classify_intent(messages)
-        if DEBUG_AGENT:
-            print(f"DEBUG: Intent classified as {intent}")
-
-        response = ""
-        if intent == "task_management":
-            response = await self._handle_task_management(messages)
-        elif intent == "general_qa":
-            response = await self._handle_qa(messages)
-        elif intent == "tracking":
-            response = await self._handle_tracking(messages)
-        else:
-            response = await self._call_llm(messages)
-            
-        # 3. Save Response
-        if response:
-            await crud.add_chat_message(self.session, chat_session.id, "assistant", response)
-            
-        return {"content": response, "session_id": chat_session.id}
 
     async def _classify_intent(self, messages: List[Dict[str, str]]) -> str:
         content = SUPERVISOR_SYSTEM_PROMPT
@@ -170,13 +168,20 @@ class AgentService:
         tool_data = self._extract_json(response)
 
         # Retry logic
-        if not tool_data and any(k in response.lower() for k in ["created", "deleted", "added"]):
+        if not tool_data and ('"tool":' in response or "'tool':" in response):
+             # Likely malformed JSON or missed by extractor
              retry_msg = {
                  "role": "system",
-                 "content": "ERROR: You did not output the valid JSON command. Output JSON ONLY."
+                 "content": "ERROR: JSON parsing failed. Output VALID JSON ONLY inside markdown code blocks."
              }
              response = await self._call_llm([system_msg] + messages + [retry_msg])
              tool_data = self._extract_json(response)
+
+        if not tool_data:
+            # Fallback: If it still looks like a tool call, don't show raw text.
+            if '"tool":' in response:
+                return "I'm sorry, I tried to perform that action but got confused by my own internal data. Could you try again?"
+            return response
 
         if tool_data:
             try:
