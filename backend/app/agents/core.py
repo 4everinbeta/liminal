@@ -195,7 +195,7 @@ class AgentService:
                     args = CreateTaskArgs(**tool_call.args)
                     task = await crud.create_task(self.session, TaskCreate(**args.dict()), self.user_id)
                     await manager.broadcast("refresh", self.user_id)
-                    result_text = f"Successfully created task: '{task.title}' (ID: {task.id})."
+                    result_text = f"Successfully created task: '{task.title}' (Priority: {task.priority_score}, Effort: {task.effort_score})."
                     refresh_needed = True
                     
                 elif tool_call.tool == "search_tasks":
