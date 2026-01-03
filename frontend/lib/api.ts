@@ -88,6 +88,18 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
   return fetch(url, { ...options, headers } as RequestInit)
 }
 
+export async function registerUser(idToken: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id_token: idToken }),
+  });
+  if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.detail || 'Registration failed');
+  }
+}
+
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   const response = await fetchWithAuth(url, options);
   
@@ -97,6 +109,17 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
       window.location.href = '/login';
     }
     throw new Error('Session expired');
+  }
+
+  if (response.status === 403) {
+      // Check if it's the "User not registered" case
+      const errorData = await response.clone().json().catch(() => ({}));
+      if (errorData.detail === "User not registered") {
+          if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/register')) {
+              window.location.href = '/register';
+          }
+          throw new Error('User not registered');
+      }
   }
 
   if (!response.ok) {

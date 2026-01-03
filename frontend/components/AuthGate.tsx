@@ -17,7 +17,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (authRequired !== true) return
-    if (pathname === '/login' || pathname === '/auth/callback') return
+    if (pathname === '/login' || pathname === '/auth/callback' || pathname === '/register') return
 
     const token = localStorage.getItem('liminal_token')
     if (!token) router.replace('/login')

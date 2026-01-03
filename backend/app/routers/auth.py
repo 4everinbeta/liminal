@@ -13,7 +13,9 @@ from ..auth import (
     create_password_reset_token,
     verify_password_reset_token,
     get_password_hash,
+    _decode_oidc_token,
 )
+from ..models import User, Token, Settings as UserSettings
 from ..config import get_settings
 
 try:
@@ -24,6 +26,65 @@ except ImportError:
     google_requests = None
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+class RegisterRequest(BaseModel):
+    id_token: str
+
+@router.post("/register", response_model=Token)
+async def register_user(
+    payload: RegisterRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    settings = get_settings()
+    try:
+        claims = await _decode_oidc_token(payload.id_token)
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
+
+    user_id = claims.get("sub")
+    email = claims.get("email")
+    name = claims.get("name")
+    iss = claims.get("iss") or settings.oidc_issuer
+
+    if not email:
+        raise HTTPException(status_code=400, detail="Token missing email")
+
+    # Check existence
+    statement = select(User).where(User.email == email)
+    result = await session.execute(statement)
+    existing = result.scalar_one_or_none()
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="User already registered")
+
+    # Create
+    new_user = User(
+        id=str(uuid.uuid4()),
+        email=email,
+        name=name,
+        google_sub=user_id,
+        oidc_issuer=iss,
+    )
+    session.add(new_user)
+    await session.commit()
+    await session.refresh(new_user)
+
+    # Init settings
+    settings_row = UserSettings(id=str(uuid.uuid4()), user_id=new_user.id)
+    session.add(settings_row)
+    await session.commit()
+
+    # Return access token (though frontend likely uses the OIDC one, we conform to Token model)
+    # Actually, we don't issue tokens for OIDC users, they use the OIDC token.
+    # But for compatibility with `Token` response model...
+    # We can just return the SAME token or a dummy one if we are purely OIDC.
+    # But `login_google` returns `create_access_token`. 
+    # Wait, `login_google` creates a LOCAL token?
+    # Yes. `access_token = create_access_token(data={"sub": user.id})`.
+    # So we should do the same.
+    
+    access_token = create_access_token(data={"sub": new_user.id})
+    return Token(access_token=access_token)
 
 class PasswordResetRequest(BaseModel):
     email: EmailStr

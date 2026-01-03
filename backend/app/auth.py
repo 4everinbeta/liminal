@@ -211,33 +211,12 @@ async def _get_oidc_user(
             await session.refresh(user)
             return user
 
-    # 3. Create new user (JIT Provisioning)
-    if not email:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="OIDC token missing email claim for new user creation",
-        )
-
-    new_user = User(
-        id=str(uuid.uuid4()),
-        email=email,
-        name=name,
-        google_sub=user_id,
-        oidc_issuer=iss,
+    # 3. Create new user (JIT Provisioning) - DISABLED
+    # If we get here, the user exists neither by ID nor by email.
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="User not registered",
     )
-    session.add(new_user)
-    await session.commit()
-    await session.refresh(new_user)
-
-    # Initialize settings for new user
-    settings_row = UserSettings(
-        id=str(uuid.uuid4()),
-        user_id=new_user.id,
-    )
-    session.add(settings_row)
-    await session.commit()
-
-    return new_user
 
 
 async def get_current_user(
