@@ -135,8 +135,41 @@ class AgentService:
             return None
 
     def _sanitize_response(self, text: str) -> str:
+        """
+        Remove JSON code blocks and raw tool JSON from the text to ensure 
+        only natural language reaches the user. Handles nested braces.
+        """
+        # 1. Remove markdown blocks first
         text = re.sub(r"```(?:json)?\s*\{.*?\}\s*```", "", text, flags=re.DOTALL | re.IGNORECASE)
-        text = re.sub(r"\{{[^{{}}]*?\"tool\":.*?\}}[^{{}}]*", "", text, flags=re.DOTALL | re.IGNORECASE)
+
+        # 2. Iteratively remove JSON objects that contain "tool":
+        while True:
+            start = text.find('{')
+            if start == -1:
+                break
+            
+            balance = 0
+            end = -1
+            for i in range(start, len(text)):
+                char = text[i]
+                if char == '{':
+                    balance += 1
+                elif char == '}':
+                    balance -= 1
+                    if balance == 0:
+                        end = i
+                        break
+            
+            if end != -1:
+                json_candidate = text[start:end+1]
+                if '"tool":' in json_candidate or "'tool':" in json_candidate:
+                    text = text[:start] + text[end+1:]
+                else:
+                    # Strip any top-level JSON just to be safe
+                    text = text[:start] + text[end+1:]
+            else:
+                break
+        
         return text.strip()
 
     async def _classify_intent(self, messages: List[Dict[str, str]]) -> str:
@@ -175,7 +208,7 @@ class AgentService:
 
         if tool_data:
             try:
-                tool_call = ToolCall(**tool_data)
+                tool_call = ToolCall(**tool_data) 
                 
                 result_text = ""
                 refresh_needed = False
