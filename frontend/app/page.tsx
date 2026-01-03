@@ -5,7 +5,7 @@ import { useAppStore } from '@/lib/store'
 import TaskForm from '@/components/TaskForm'
 import TaskActionMenu from '@/components/TaskActionMenu'
 import { getTasks, updateTask, deleteTask, Task } from '@/lib/api'
-import { Target, Calendar, CheckCircle2, CircleDashed } from 'lucide-react'
+import { Target, Calendar, CheckCircle2, CircleDashed, Flame } from 'lucide-react'
 
 export default function Home() {
   const { setActiveTaskId, lastUpdate } = useAppStore()
@@ -53,11 +53,40 @@ export default function Home() {
   }, [lastUpdate])
 
   const stats = useMemo(() => {
-    const today = new Date().toDateString()
-    const doneToday = tasks.filter(t => t.status === 'done' && t.updated_at && new Date(t.updated_at).toDateString() === today).length
+    const today = new Date()
+    const todayStr = today.toDateString()
+    
+    // Done Today
+    const doneToday = tasks.filter(t => t.status === 'done' && t.updated_at && new Date(t.updated_at).toDateString() === todayStr).length
+    
+    // Counts
     const backlog = tasks.filter(t => t.status === 'backlog').length
     const inProgress = tasks.filter(t => t.status === 'in_progress').length
-    return { doneToday, backlog, inProgress }
+
+    // Streak Calculation
+    const completedDates = new Set(
+        tasks
+        .filter(t => t.status === 'done' && t.updated_at)
+        .map(t => new Date(t.updated_at!).toDateString())
+    )
+    
+    let streak = 0
+    // Check up to 365 days back
+    for (let i = 0; i < 365; i++) {
+        const d = new Date()
+        d.setDate(d.getDate() - i)
+        const dStr = d.toDateString()
+        
+        if (completedDates.has(dStr)) {
+            streak++
+        } else if (i === 0 && !completedDates.has(dStr)) {
+            continue 
+        } else {
+            break
+        }
+    }
+    
+    return { doneToday, backlog, inProgress, streak }
   }, [tasks])
 
   const urgentTasks = useMemo(() => tasks.filter(t => t.status !== 'done').slice(0, 4), [tasks])
@@ -83,6 +112,15 @@ export default function Home() {
             <div>
                 <p className="text-2xl font-bold text-gray-900">{stats.doneToday}</p>
                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Done Today</p>
+            </div>
+        </div>
+        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">
+            <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
+                <Flame size={20} />
+            </div>
+            <div>
+                <p className="text-2xl font-bold text-gray-900">{stats.streak}</p>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Day Streak</p>
             </div>
         </div>
         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">

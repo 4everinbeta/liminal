@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, CheckCircle, PauseCircle } from 'lucide-react'
 import Pomodoro from '@/components/Pomodoro'
+import NoisePlayer from '@/components/NoisePlayer'
 import { useAppStore } from '@/lib/store'
 import { getTasks, updateTask, Task } from '@/lib/api'
 
@@ -67,20 +68,26 @@ export default function FocusPage() {
 
         {activeTask ? (
           <>
-            <div className="bg-gray-50 rounded-2xl p-6">
-              <Pomodoro />
+            <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-gray-50 rounded-2xl p-6">
+                    <Pomodoro />
+                </div>
+                <div className="flex flex-col justify-center">
+                    <NoisePlayer />
+                </div>
             </div>
+            
             <div className="flex gap-4">
               <button
                 onClick={handleCompleteTask}
-                className="flex-1 py-3 rounded-xl bg-primary text-white font-semibold flex items-center justify-center gap-2"
+                className="flex-1 py-3 rounded-xl bg-primary text-white font-semibold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
               >
                 <CheckCircle size={18} />
                 Complete task
               </button>
               <button
                 onClick={handlePause}
-                className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold flex items-center justify-center gap-2"
+                className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
               >
                 <PauseCircle size={18} />
                 Pause
