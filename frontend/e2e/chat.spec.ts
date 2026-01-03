@@ -55,6 +55,14 @@ test.describe('Chat Interface', () => {
     });
 
     await page.goto('/');
+    
+    // Open Global Chat Widget
+    // The FAB is fixed bottom right. We can find it by the MessageSquare icon (hidden to accessibility?)
+    // Or just find the button that isn't the task form button.
+    // Let's use a specific locator based on the container class or similar.
+    const fab = page.locator('.fixed.bottom-6.right-6 button');
+    await fab.click();
+
     await expect(page.getByText('Liminal Assistant')).toBeVisible();
   });
 

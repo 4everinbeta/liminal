@@ -105,8 +105,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr),minmax(0,2fr)]">
-        <section className="space-y-6">
+      <div className="grid gap-6">
           <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-5">
             <h3 className="text-base font-semibold text-gray-900 mb-2">Quick capture</h3>
             <TaskForm onTaskCreated={fetchTasks} />
@@ -165,20 +164,6 @@ export default function Home() {
               </ul>
             )}
           </div>
-
-        </section>
-
-        <aside className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">Coach</h3>
-            {/* Coach is now global, but we can keep a "Tip" or prompt here? */}
-            {/* Removing ChatInterface from here. */}
-          </div>
-          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-6 text-center text-gray-500 text-sm">
-            <p className="mb-2">Need help prioritizing?</p>
-            <p>Click the chat bubble in the corner to talk to your AI Coach.</p>
-          </div>
-        </aside>
       </div>
     </div>
   )
