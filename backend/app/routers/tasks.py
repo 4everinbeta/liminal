@@ -6,6 +6,7 @@ from ..database import get_session
 from ..models import Task, TaskCreate, User
 from ..auth import get_current_user
 from .. import crud
+from ..websockets import manager
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -15,7 +16,9 @@ async def create_task(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    return await crud.create_task(session, task_data, current_user.id)
+    task = await crud.create_task(session, task_data, current_user.id)
+    await manager.broadcast("refresh", current_user.id)
+    return task
 
 @router.get("", response_model=List[Task])
 async def get_tasks(
@@ -35,7 +38,9 @@ async def update_task(
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     
-    return await crud.update_task(session, task, task_update)
+    updated_task = await crud.update_task(session, task, task_update)
+    await manager.broadcast("refresh", current_user.id)
+    return updated_task
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_task(
@@ -48,4 +53,5 @@ async def delete_task(
         raise HTTPException(status_code=404, detail="Task not found")
 
     await crud.delete_task(session, task)
+    await manager.broadcast("refresh", current_user.id)
     return None

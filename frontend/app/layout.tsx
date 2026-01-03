@@ -4,6 +4,7 @@ import AuthGate from '@/components/AuthGate'
 import AppSidebar from '@/components/AppSidebar'
 import TrustedTypesPolyfill from '@/components/TrustedTypesPolyfill'
 import GlobalChatWidget from '@/components/GlobalChatWidget'
+import WebSocketManager from '@/components/WebSocketManager'
 
 export const metadata: Metadata = {
   title: 'Liminal',
@@ -19,6 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="font-sans bg-gray-50 text-text antialiased">
         <TrustedTypesPolyfill />
+        <WebSocketManager />
         <AuthGate>
           <AppSidebar />
           <GlobalChatWidget />

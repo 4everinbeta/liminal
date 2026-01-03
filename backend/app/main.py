@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 
 from .database import init_db
-from .routers import auth, users, tasks, themes, llm
+from .routers import auth, users, tasks, themes, llm, ws
 
 app = FastAPI(
     title="Liminal API",
@@ -56,3 +56,4 @@ app.include_router(users.router)
 app.include_router(tasks.router)
 app.include_router(themes.router)
 app.include_router(llm.router)
+app.include_router(ws.router)

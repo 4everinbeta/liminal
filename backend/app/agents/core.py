@@ -14,6 +14,7 @@ from .prompts import (
     TRACKING_AGENT_SYSTEM_PROMPT
 )
 from .tools import ToolCall, CreateTaskArgs, DeleteTaskArgs, SearchTasksArgs
+from ..websockets import manager
 
 DEBUG_AGENT = os.getenv("DEBUG_AGENT", "").lower() in ("1", "true", "yes")
 
@@ -188,6 +189,7 @@ class AgentService:
                 if tool_call.tool == "create_task":
                     args = CreateTaskArgs(**tool_call.args)
                     task = await crud.create_task(self.session, TaskCreate(**args.dict()), self.user_id)
+                    await manager.broadcast("refresh", self.user_id)
                     result_text = f"Successfully created task: '{task.title}' (ID: {task.id})."
                     refresh_needed = True
                     
@@ -204,6 +206,7 @@ class AgentService:
                     task = await crud.get_task_by_id(self.session, args.id, self.user_id)
                     if task:
                         await crud.delete_task(self.session, task)
+                        await manager.broadcast("refresh", self.user_id)
                         result_text = f"Deleted task '{task.title}'."
                         refresh_needed = True
                     else:
