@@ -35,6 +35,23 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
+def create_password_reset_token(email: str) -> str:
+    settings = get_settings()
+    expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode = {"sub": email, "type": "reset", "exp": expire}
+    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+    return encoded_jwt
+
+def verify_password_reset_token(token: str) -> Optional[str]:
+    settings = get_settings()
+    try:
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+        if payload.get("type") != "reset":
+            return None
+        return payload.get("sub")
+    except JWTError:
+        return None
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Local/dev JWTs only (ENABLE_LOCAL_AUTH=1)."""
     settings = get_settings()

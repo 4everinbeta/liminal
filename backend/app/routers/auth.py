@@ -6,9 +6,13 @@ import uuid
 
 from ..database import get_session
 from ..models import User, Token
+from pydantic import BaseModel, EmailStr
 from ..auth import (
     authenticate_basic_user,
     create_access_token,
+    create_password_reset_token,
+    verify_password_reset_token,
+    get_password_hash,
 )
 from ..config import get_settings
 
@@ -20,6 +24,65 @@ except ImportError:
     google_requests = None
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: str
+
+@router.post("/forgot-password")
+async def forgot_password(
+    payload: PasswordResetRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    settings = get_settings()
+    if not settings.enable_local_auth:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    statement = select(User).where(User.email == payload.email)
+    result = await session.execute(statement)
+    user = result.scalar_one_or_none()
+
+    if user:
+        # Generate token
+        token = create_password_reset_token(user.email)
+        # Mock sending email
+        print(f"==========================================")
+        print(f"MOCK EMAIL TO: {user.email}")
+        print(f"SUBJECT: Password Reset Request")
+        print(f"LINK: http://localhost:3000/reset-password?token={token}")
+        print(f"==========================================")
+    
+    # Always return 200 for security (prevent email enumeration)
+    return {"message": "If the email exists, a reset link has been sent."}
+
+@router.post("/reset-password")
+async def reset_password(
+    payload: PasswordResetConfirm,
+    session: AsyncSession = Depends(get_session),
+):
+    settings = get_settings()
+    if not settings.enable_local_auth:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    email = verify_password_reset_token(payload.token)
+    if not email:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+
+    statement = select(User).where(User.email == email)
+    result = await session.execute(statement)
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.hashed_password = get_password_hash(payload.new_password)
+    session.add(user)
+    await session.commit()
+
+    return {"message": "Password updated successfully"}
 
 @router.post("/login", response_model=Token)
 async def login_basic(user: User = Depends(authenticate_basic_user)):

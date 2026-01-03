@@ -90,6 +90,15 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
 
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   const response = await fetchWithAuth(url, options);
+  
+  if (response.status === 401) {
+    clearToken();
+    if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+      window.location.href = '/login';
+    }
+    throw new Error('Session expired');
+  }
+
   if (!response.ok) {
     let message = 'An unexpected error occurred';
     try {
