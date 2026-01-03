@@ -26,8 +26,6 @@ class AgentService:
         self.user_context = None
 
     async def _fetch_user_context(self):
-        # We need a crud method for this or direct query
-        # For simplicity, assuming crud or direct execution
         from sqlmodel import select
         from ..models import User
         stmt = select(User).where(User.id == self.user_id)
@@ -36,13 +34,11 @@ class AgentService:
         if user:
             self.user_context = {
                 "name": user.name or "User",
-                # "theme": user.settings.theme if user.settings else "default" 
             }
 
     async def process_request(self, messages: List[Dict[str, str]], session_id: Optional[str] = None) -> Dict[str, Any]:
         await self._fetch_user_context()
         
-        # 1. Handle Persistence
         user_msg_content = messages[-1]["content"] if messages else ""
         
         chat_session = None
@@ -55,7 +51,6 @@ class AgentService:
         if user_msg_content:
             await crud.add_chat_message(self.session, chat_session.id, "user", user_msg_content)
 
-        # 2. Supervisor Step
         intent = await self._classify_intent(messages)
         if DEBUG_AGENT:
             print(f"DEBUG: Intent classified as {intent}")
@@ -70,7 +65,6 @@ class AgentService:
         else:
             response = await self._call_llm(messages)
             
-        # 3. Save Response
         if response:
             await crud.add_chat_message(self.session, chat_session.id, "assistant", response)
             
@@ -84,7 +78,6 @@ class AgentService:
         headers = {"Content-Type": "application/json"}
         params = None
         
-        # Determine endpoint and auth based on provider
         if self.settings.llm_provider.lower() == "azure":
             api_version = self.settings.azure_openai_api_version or "2023-09-01-preview"
             params = {"api-version": api_version}
@@ -98,7 +91,7 @@ class AgentService:
             if self.settings.llm_api_key:
                 headers["Authorization"] = f"Bearer {self.settings.llm_api_key}"
             full_url = base_url
-        else: # Default to OpenAI-compatible API
+        else:
             if self.settings.llm_api_key:
                 headers["Authorization"] = f"Bearer {self.settings.llm_api_key}"
             full_url = f"{base_url}/v1/chat/completions"
@@ -126,16 +119,11 @@ class AgentService:
                 raise
 
     def _extract_json(self, text: str) -> Optional[Dict[str, Any]]:
-        """
-        Robustly extract JSON from text. 
-        """
         try:
-            # 1. Try finding markdown code blocks first
             code_block = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL | re.IGNORECASE)
             if code_block:
                 return json.loads(code_block.group(1))
             
-            # 2. Try finding raw JSON object (first { to last })
             start = text.find('{')
             end = text.rfind('}')
             if start != -1 and end != -1 and end > start:
@@ -145,6 +133,11 @@ class AgentService:
             return None
         except json.JSONDecodeError:
             return None
+
+    def _sanitize_response(self, text: str) -> str:
+        text = re.sub(r"```(?:json)?\s*\{.*?\}\s*```", "", text, flags=re.DOTALL | re.IGNORECASE)
+        text = re.sub(r"\{{[^{{}}]*?\"tool\":.*?\}}[^{{}}]*", "", text, flags=re.DOTALL | re.IGNORECASE)
+        return text.strip()
 
     async def _classify_intent(self, messages: List[Dict[str, str]]) -> str:
         content = SUPERVISOR_SYSTEM_PROMPT
@@ -167,9 +160,7 @@ class AgentService:
         response = await self._call_llm([system_msg] + messages)
         tool_data = self._extract_json(response)
 
-        # Retry logic
         if not tool_data and ('"tool":' in response or "'tool':" in response):
-             # Likely malformed JSON or missed by extractor
              retry_msg = {
                  "role": "system",
                  "content": "ERROR: JSON parsing failed. Output VALID JSON ONLY inside markdown code blocks."
@@ -178,14 +169,12 @@ class AgentService:
              tool_data = self._extract_json(response)
 
         if not tool_data:
-            # Fallback: If it still looks like a tool call, don't show raw text.
             if '"tool":' in response:
-                return "I'm sorry, I tried to perform that action but got confused by my own internal data. Could you try again?"
+                return "I'm sorry, I tried to perform that action but got confused. Could you try again?"
             return response
 
         if tool_data:
             try:
-                # Validate with Pydantic
                 tool_call = ToolCall(**tool_data)
                 
                 result_text = ""
@@ -224,11 +213,14 @@ class AgentService:
                 
                 final_response = await self._call_llm([system_msg] + messages + [tool_result_msg])
                 
+                clean_response = self._sanitize_response(final_response)
+                if not clean_response and refresh_needed:
+                    clean_response = "Action completed successfully."
+
                 if refresh_needed:
-                    # Append client-side action trigger
-                    final_response += " :::{\"action\": \"refresh_board\"}:::"
+                    clean_response += " :::{\"action\": \"refresh_board\"}:::"
                 
-                return final_response
+                return clean_response
 
             except Exception as e:
                 if DEBUG_AGENT:

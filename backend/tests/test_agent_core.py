@@ -28,11 +28,11 @@ async def test_agent_task_creation_flow():
             last_msg = messages[-1]["content"]
             if "Supervisor" in str(messages[0]["content"]):
                 return "TASK"
-            if "Task Database" in str(messages[0]["content"]):
+            if "Task Management Agent" in str(messages[0]["content"]):
                 # Check if we are in the "Result" phase
                 if "Tool execution result" in str(messages[-1]["content"]):
                     return "I have created the task 'Buy milk'."
-                return '```json\n{"tool": "create_task", "args": {"title": "Buy milk", "priority": "medium"}}\n```'
+                return '```json\n{"tool": "create_task", "args": {"title": "Buy milk", "priority_score": 50}}\n```'
             return "I don't know."
 
         service._call_llm = mock_call_llm
