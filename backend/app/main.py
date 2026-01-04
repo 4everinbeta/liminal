@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import asyncio
 
-from .database import init_db
+from .database import init_db, async_session
 from .routers import auth, users, tasks, themes, llm, ws
+from .agents.monitor import TaskMonitor
 
 app = FastAPI(
     title="Liminal API",
@@ -44,6 +46,10 @@ async def on_startup():
     if os.getenv("DEBUG_STARTUP", "").lower() in ("1", "true", "yes"):
         print(f"DEBUG: Allowed Origins: {origins}")
     await init_db()
+    
+    # Start the monitor as a background task
+    monitor = TaskMonitor(async_session)
+    asyncio.create_task(monitor.start())
 
 
 @app.get("/")

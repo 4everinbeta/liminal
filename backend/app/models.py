@@ -96,6 +96,7 @@ class Task(SQLModel, table=True):
     status: TaskStatus = Field(default=TaskStatus.backlog)
     priority: Priority = Field(default=Priority.medium)
     priority_score: int = Field(default=50, ge=1, le=100)  # 1-100 numeric priority
+    start_date: Optional[datetime] = None
     due_date: Optional[datetime] = None
     
     # Ranking Metrics
@@ -163,6 +164,7 @@ class TaskCreate(SQLModel):
     priority: Priority = Priority.medium
     priority_score: int = Field(default=50, ge=1, le=100)
     status: TaskStatus = TaskStatus.backlog
+    start_date: Optional[datetime] = None
     due_date: Optional[datetime] = None
     order: int = 0
     estimated_duration: Optional[int] = None
