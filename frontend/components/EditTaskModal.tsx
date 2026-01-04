@@ -11,10 +11,34 @@ interface EditTaskModalProps {
 
 export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalProps) {
   const [editedTask, setEditedTask] = useState<Task>(task)
+  const [startDateNatural, setStartDateNatural] = useState('')
+  const [dueDateNatural, setDueDateNatural] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSave(editedTask)
+    // Include natural language dates if provided
+    const taskWithDates = {
+      ...editedTask,
+      ...(startDateNatural && { start_date_natural: startDateNatural }),
+      ...(dueDateNatural && { due_date_natural: dueDateNatural }),
+    }
+    onSave(taskWithDates)
+  }
+
+  // Format existing dates for display
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return ''
+    try {
+      const date = new Date(dateString)
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+      })
+    } catch {
+      return ''
+    }
   }
 
   return (
@@ -24,13 +48,41 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label className="block text-xs font-bold uppercase text-muted mb-1">Title</label>
-                    <input 
-                        type="text" 
+                    <input
+                        type="text"
                         className="w-full p-2 border rounded-lg"
                         value={editedTask.title}
                         onChange={e => setEditedTask({...editedTask, title: e.target.value})}
                         required
                     />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-xs font-bold uppercase text-muted mb-1">Start Date</label>
+                        <input
+                            type="text"
+                            className="w-full p-2 border rounded-lg text-sm"
+                            placeholder="tomorrow, next Mon, Jan 15"
+                            value={startDateNatural}
+                            onChange={e => setStartDateNatural(e.target.value)}
+                        />
+                        {editedTask.start_date && !startDateNatural && (
+                            <div className="text-xs text-muted mt-1">Current: {formatDate(editedTask.start_date)}</div>
+                        )}
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold uppercase text-muted mb-1">Due Date</label>
+                        <input
+                            type="text"
+                            className="w-full p-2 border rounded-lg text-sm"
+                            placeholder="Friday, in 2 weeks, Feb 1"
+                            value={dueDateNatural}
+                            onChange={e => setDueDateNatural(e.target.value)}
+                        />
+                        {editedTask.due_date && !dueDateNatural && (
+                            <div className="text-xs text-muted mt-1">Current: {formatDate(editedTask.due_date)}</div>
+                        )}
+                    </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>

@@ -43,6 +43,7 @@ export interface Task {
   status: 'backlog' | 'todo' | 'in_progress' | 'blocked' | 'done';
   priority: 'high' | 'medium' | 'low';
   priority_score?: number; // 1-100
+  start_date?: string;
   due_date?: string;
   value_score: number; // 1-100
   order: number;
@@ -63,6 +64,10 @@ export interface TaskCreate {
   priority?: 'high' | 'medium' | 'low';
   priority_score?: number;
   status?: 'backlog' | 'todo' | 'in_progress' | 'blocked' | 'done';
+  start_date?: string;
+  due_date?: string;
+  start_date_natural?: string;
+  due_date_natural?: string;
   estimated_duration?: number;
   effort_score?: number;
   value_score?: number;
