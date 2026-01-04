@@ -166,6 +166,9 @@ class TaskCreate(SQLModel):
     status: TaskStatus = TaskStatus.backlog
     start_date: Optional[datetime] = None
     due_date: Optional[datetime] = None
+    # Natural language date fields (parsed by backend)
+    start_date_natural: Optional[str] = None
+    due_date_natural: Optional[str] = None
     order: int = 0
     estimated_duration: Optional[int] = None
     effort_score: int = Field(default=50, ge=1, le=100)

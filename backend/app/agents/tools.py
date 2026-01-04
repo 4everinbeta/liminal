@@ -8,6 +8,9 @@ class CreateTaskArgs(BaseModel):
     effort_score: int = Field(default=50, ge=1, le=100)
     value_score: int = Field(default=50, ge=1, le=100)
     notes: Optional[str] = None
+    # Natural language date fields
+    start_date_natural: Optional[str] = None
+    due_date_natural: Optional[str] = None
 
 class DeleteTaskArgs(BaseModel):
     id: str

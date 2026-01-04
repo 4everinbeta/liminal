@@ -42,6 +42,8 @@ async def clear_chat_history(session: AsyncSession, session_id: str) -> None:
 
 
 async def create_task(session: AsyncSession, task_data: TaskCreate, user_id: str) -> Task:
+    from .utils.date_parser import parse_natural_date, validate_date_not_past
+
     def score_to_priority_label(score: int) -> Priority:
         if score >= 67:
             return Priority.high
@@ -52,7 +54,7 @@ async def create_task(session: AsyncSession, task_data: TaskCreate, user_id: str
     # Normalize numeric <-> enum for compatibility
     normalized_priority_score = task_data.priority_score or 50
     normalized_priority = score_to_priority_label(normalized_priority_score)
-    
+
     if task_data.priority:
         if task_data.priority == Priority.high:
             normalized_priority_score = max(normalized_priority_score, 90)
@@ -63,6 +65,29 @@ async def create_task(session: AsyncSession, task_data: TaskCreate, user_id: str
 
     normalized_effort = task_data.effort_score or task_data.estimated_duration or 50
 
+    # Parse natural language dates
+    parsed_start_date = None
+    parsed_due_date = None
+
+    if task_data.start_date_natural:
+        parsed_start_date = parse_natural_date(task_data.start_date_natural)
+        if not parsed_start_date:
+            print(f"Warning: Could not parse start_date: '{task_data.start_date_natural}'")
+
+    if task_data.due_date_natural:
+        parsed_due_date = parse_natural_date(task_data.due_date_natural)
+        if not parsed_due_date:
+            print(f"Warning: Could not parse due_date: '{task_data.due_date_natural}'")
+        elif parsed_due_date:
+            # Validate not in past (but don't block creation)
+            is_valid, warning = validate_date_not_past(parsed_due_date, require_confirmation=False)
+            if warning:
+                print(f"Note: {warning} for due_date: '{task_data.due_date_natural}'")
+
+    # Prefer parsed dates over direct datetime inputs
+    final_start_date = parsed_start_date or task_data.start_date
+    final_due_date = parsed_due_date or task_data.due_date
+
     new_task = Task(
         id=str(uuid.uuid4()),
         title=task_data.title,
@@ -71,7 +96,8 @@ async def create_task(session: AsyncSession, task_data: TaskCreate, user_id: str
         status=task_data.status or TaskStatus.backlog,
         priority=normalized_priority,
         priority_score=normalized_priority_score,
-        due_date=task_data.due_date,
+        start_date=final_start_date,
+        due_date=final_due_date,
         value_score=task_data.value_score,
         order=task_data.order,
         estimated_duration=task_data.estimated_duration or normalized_effort,

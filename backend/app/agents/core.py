@@ -214,10 +214,46 @@ class AgentService:
                 refresh_needed = False
                 
                 if tool_call.tool == "create_task":
+                    from datetime import datetime
+                    from ..utils.date_parser import parse_natural_date, format_date_for_user, get_weekday_name
+
                     args = CreateTaskArgs(**tool_call.args)
+
+                    # Pre-validate dates and handle past date confirmation
+                    if args.due_date_natural:
+                        parsed_due = parse_natural_date(args.due_date_natural)
+                        if not parsed_due:
+                            return f"I couldn't understand the due date '{args.due_date_natural}'. Could you rephrase? (e.g., 'tomorrow', 'next Monday', 'January 15')"
+
+                        # Check if past date (user preference: require confirmation)
+                        if parsed_due < datetime.utcnow():
+                            # Check if user already confirmed
+                            last_msg = messages[-1]["content"].lower() if messages else ""
+                            if "yes" not in last_msg and "confirm" not in last_msg:
+                                weekday = get_weekday_name(parsed_due)
+                                return f"The date '{args.due_date_natural}' is in the past. Did you mean next {weekday} instead? Reply 'yes' to confirm past date or provide a new date."
+
+                    if args.start_date_natural:
+                        parsed_start = parse_natural_date(args.start_date_natural)
+                        if not parsed_start:
+                            return f"I couldn't understand the start date '{args.start_date_natural}'. Could you rephrase?"
+
+                    # Create task
                     task = await crud.create_task(self.session, TaskCreate(**args.dict()), self.user_id)
                     await manager.broadcast("refresh", self.user_id)
-                    result_text = f"Successfully created task: '{task.title}' (Priority: {task.priority_score}, Effort: {task.effort_score})."
+
+                    # Build confirmation with date info
+                    parts = [f"Successfully created task: '{task.title}'"]
+                    if task.priority_score:
+                        parts.append(f"Priority: {task.priority_score}")
+                    if task.effort_score:
+                        parts.append(f"Effort: {task.effort_score}")
+                    if task.due_date:
+                        parts.append(f"Due: {format_date_for_user(task.due_date)}")
+                    if task.start_date:
+                        parts.append(f"Starts: {format_date_for_user(task.start_date)}")
+
+                    result_text = " | ".join(parts) + "."
                     refresh_needed = True
                     
                 elif tool_call.tool == "search_tasks":

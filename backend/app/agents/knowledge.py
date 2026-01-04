@@ -34,6 +34,19 @@ Tasks are prioritized automatically based on:
 - **Tracking:** "What's on my plate?", "Do I have any stale tasks?".
 - **Guidance:** "How do I use the board?".
 
+### 5. Date Support
+You can specify dates naturally when creating tasks:
+- **Relative:** "tomorrow", "in 3 days", "next week", "in 2 hours"
+- **Weekdays:** "Monday", "Friday" (always means next occurrence)
+- **Absolute:** "January 15", "Jan 15", "2026-01-15"
+- **With times:** "tomorrow at 3pm", "Friday morning", "Monday at 2pm"
+
+Examples:
+- "Create task to review PR by Friday"
+- "Add reminder to call mom tomorrow"
+- "Meeting prep due January 15 at 2pm"
+- "Start project tomorrow, due next week"
+
 ## Best Practices
 - **Capture Everything:** Use the chat or Quick Add to dump thoughts immediately.
 - **Refine Later:** Use the Board View to assign scores and themes when you have energy.
