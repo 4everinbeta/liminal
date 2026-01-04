@@ -31,7 +31,7 @@ async def get_user_from_token(token: str, session: AsyncSession) -> str:
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, token: str):
-    # Note: We use a raw `token` query param for simplicity in this Vibe Coding session.
+    # Note: We use a raw `token` query param for simplicity.
     # In prod, consider HTTP-only cookies or ticket-based auth for WS.
     
     # We need a session to verify user if needed, but get_user_from_token logic 

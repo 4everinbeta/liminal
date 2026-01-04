@@ -38,7 +38,7 @@ Dockerized services managed via `docker-compose`.
 - **Validation:** `class-validator` in NestJS.
 - **ORM:** Prisma prevents SQL injection.
 - **State:** Zustand for clean, client-side state management.
-- **Style:** "Vibe Coding" - readable, minimal, functional.
+- **Style:** Readable, minimal, functional.
 
 ## 🔐 Authentication (OIDC)
 This app supports a **real OIDC provider**. The backend validates Bearer JWTs via the provider’s JWKS, and the frontend performs the OIDC Authorization Code (PKCE) flow.

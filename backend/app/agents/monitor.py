@@ -82,9 +82,9 @@ class TaskMonitor:
             return
 
         message_content = "\n".join(lines)
-        
-        # Check if we recently alerted to avoid spam? 
-        # For MVP/Vibe, we'll just alert. In prod, check last alert timestamp.
-        
+
+        # Check if we recently alerted to avoid spam?
+        # For MVP, we'll just alert. In prod, check last alert timestamp.
+
         await crud.add_chat_message(session, chat_session.id, "assistant", message_content)
         await manager.broadcast("refresh", user_id) # Notify frontend to refresh chat/tasks

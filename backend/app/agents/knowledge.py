@@ -3,7 +3,7 @@ LIMINAL_KNOWLEDGE_BASE = """
 
 ## Core Philosophy
 Liminal is designed to reduce cognitive load and provide immediate feedback.
-It uses a "Vibe Coding" methodology: clean, expressive, and forgiving.
+It uses clean, expressive, and forgiving code practices.
 
 ## Key Features
 

@@ -34,3 +34,8 @@ chat-error*.png
 dmr-api-error*.png
 build-args_railway.com
 *:Zone.Identifier
+
+# AI Agent Instructions
+AGENTS.md
+CLAUDE.md
+GEMINI.md
