@@ -23,6 +23,19 @@ async def get_chat_history(
     
     return await crud.get_chat_history(session, session_id)
 
+@router.delete("/history/{session_id}", status_code=204)
+async def delete_chat_history(
+    session_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    chat_session = await crud.get_chat_session(session, session_id, current_user.id)
+    if not chat_session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    await crud.clear_chat_history(session, session_id)
+    return None
+
 @router.post("/chat", response_model=ChatResponse)
 async def chat_with_llm(
     payload: ChatRequest,

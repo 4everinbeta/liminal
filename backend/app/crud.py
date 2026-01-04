@@ -33,6 +33,13 @@ async def get_chat_history(session: AsyncSession, session_id: str) -> List[ChatM
     result = await session.execute(statement)
     return result.scalars().all()
 
+async def clear_chat_history(session: AsyncSession, session_id: str) -> None:
+    statement = select(ChatMessage).where(ChatMessage.session_id == session_id)
+    result = await session.execute(statement)
+    for msg in result.scalars().all():
+        await session.delete(msg)
+    await session.commit()
+
 
 async def create_task(session: AsyncSession, task_data: TaskCreate, user_id: str) -> Task:
     def score_to_priority_label(score: int) -> Priority:

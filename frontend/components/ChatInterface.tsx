@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Send, Bot, User as UserIcon, Loader2, PlusCircle } from 'lucide-react'
+import { Send, Bot, User as UserIcon, Loader2, PlusCircle, RefreshCcw } from 'lucide-react'
 import { chatWithLlm, ChatMessage, createTask, TaskCreate, getChatHistory } from '@/lib/api'
 import { useAppStore } from '@/lib/store'
 
@@ -59,6 +59,12 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
     }
   }, [messages])
 
+  const handleReset = () => {
+      localStorage.removeItem('liminal_chat_session_id')
+      setSessionId(null)
+      setMessages([{ role: 'assistant', content: 'Hello! I am Liminal. I can help you add tasks, answer questions, or track your progress.' }])
+  }
+
   const handleToolAction = async (jsonString: string) => {
     try {
       const command = JSON.parse(jsonString)
@@ -101,13 +107,7 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
     setLoading(true)
 
     try {
-      // Build context: System Prompt + Last 5 messages (or full history if we trust backend context window handling, but safer to limit)
-      // Actually, since we persist, backend HAS history. We can just send the new message if the backend handled stateful logic perfectly.
-      // BUT current AgentService implementation re-reads context from the `messages` argument provided.
-      // To support "contextual memory" fully, we should ideally let backend load full history from DB.
-      // But we are sending `messages`. Let's stick to sending `recentHistory` for now to keep tokens low, 
-      // but since we persist, next time we load, we get full history.
-      
+      // Build context: System Prompt + Last 5 messages
       const recentHistory = messages.slice(-5).filter(m => !m.content.includes(':::')) 
       const context: ChatMessage[] = [
         { role: 'system', content: SYSTEM_PROMPT },
@@ -159,14 +159,23 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
 
   return (
     <div className="flex flex-col h-[400px] bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="bg-gray-50/50 p-3 border-b border-gray-100 flex items-center gap-2">
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-          <Bot size={18} />
+      <div className="bg-gray-50/50 p-3 border-b border-gray-100 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+            <Bot size={18} />
+            </div>
+            <div>
+            <h3 className="text-sm font-semibold text-gray-700">Liminal Assistant</h3>
+            <p className="text-xs text-muted">Powered by Local AI</p>
+            </div>
         </div>
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700">Liminal Assistant</h3>
-          <p className="text-xs text-muted">Powered by Local AI</p>
-        </div>
+        <button 
+            onClick={handleReset}
+            className="p-1.5 text-gray-400 hover:text-primary hover:bg-gray-100 rounded-lg transition-colors"
+            title="Start New Chat"
+        >
+            <RefreshCcw size={16} />
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={scrollRef}>

@@ -265,3 +265,9 @@ export async function chatWithLlm(messages: ChatMessage[], sessionId?: string): 
 export async function getChatHistory(sessionId: string): Promise<ChatMessage[]> {
   return request<ChatMessage[]>(`${API_BASE_URL}/llm/history/${sessionId}`);
 }
+
+export async function clearChatHistory(sessionId: string): Promise<void> {
+  return request<void>(`${API_BASE_URL}/llm/history/${sessionId}`, {
+    method: 'DELETE',
+  });
+}
