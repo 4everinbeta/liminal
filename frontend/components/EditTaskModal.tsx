@@ -11,34 +11,43 @@ interface EditTaskModalProps {
 
 export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalProps) {
   const [editedTask, setEditedTask] = useState<Task>(task)
-  const [startDateNatural, setStartDateNatural] = useState('')
-  const [dueDateNatural, setDueDateNatural] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Include natural language dates if provided
-    const taskWithDates = {
-      ...editedTask,
-      ...(startDateNatural && { start_date_natural: startDateNatural }),
-      ...(dueDateNatural && { due_date_natural: dueDateNatural }),
-    }
-    onSave(taskWithDates)
-  }
-
-  // Format existing dates for display
-  const formatDate = (dateString?: string) => {
+  // Convert ISO datetime to YYYY-MM-DD format for date input
+  const toDateInputValue = (dateString?: string) => {
     if (!dateString) return ''
     try {
       const date = new Date(dateString)
-      return date.toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-      })
+      return date.toISOString().split('T')[0]
     } catch {
       return ''
     }
+  }
+
+  // Convert date input value to ISO datetime string
+  const fromDateInputValue = (dateValue: string) => {
+    if (!dateValue) return undefined
+    try {
+      // Create date at noon to avoid timezone issues
+      const date = new Date(dateValue + 'T12:00:00Z')
+      return date.toISOString()
+    } catch {
+      return undefined
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSave(editedTask)
+  }
+
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isoDate = fromDateInputValue(e.target.value)
+    setEditedTask({...editedTask, start_date: isoDate})
+  }
+
+  const handleDueDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isoDate = fromDateInputValue(e.target.value)
+    setEditedTask({...editedTask, due_date: isoDate})
   }
 
   return (
@@ -60,28 +69,20 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                     <div>
                         <label className="block text-xs font-bold uppercase text-muted mb-1">Start Date</label>
                         <input
-                            type="text"
+                            type="date"
                             className="w-full p-2 border rounded-lg text-sm"
-                            placeholder="tomorrow, next Mon, Jan 15"
-                            value={startDateNatural}
-                            onChange={e => setStartDateNatural(e.target.value)}
+                            value={toDateInputValue(editedTask.start_date)}
+                            onChange={handleStartDateChange}
                         />
-                        {editedTask.start_date && !startDateNatural && (
-                            <div className="text-xs text-muted mt-1">Current: {formatDate(editedTask.start_date)}</div>
-                        )}
                     </div>
                     <div>
                         <label className="block text-xs font-bold uppercase text-muted mb-1">Due Date</label>
                         <input
-                            type="text"
+                            type="date"
                             className="w-full p-2 border rounded-lg text-sm"
-                            placeholder="Friday, in 2 weeks, Feb 1"
-                            value={dueDateNatural}
-                            onChange={e => setDueDateNatural(e.target.value)}
+                            value={toDateInputValue(editedTask.due_date)}
+                            onChange={handleDueDateChange}
                         />
-                        {editedTask.due_date && !dueDateNatural && (
-                            <div className="text-xs text-muted mt-1">Current: {formatDate(editedTask.due_date)}</div>
-                        )}
                     </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
