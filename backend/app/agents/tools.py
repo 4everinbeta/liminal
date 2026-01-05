@@ -18,6 +18,17 @@ class DeleteTaskArgs(BaseModel):
 class SearchTasksArgs(BaseModel):
     query: str
 
+class UpdateTaskArgs(BaseModel):
+    id: str
+    status: Optional[str] = None
+    priority_score: Optional[int] = Field(default=None, ge=1, le=100)
+    effort_score: Optional[int] = Field(default=None, ge=1, le=100)
+    title: Optional[str] = None
+    notes: Optional[str] = None
+
+class CompleteTaskArgs(BaseModel):
+    id: str
+
 class ToolCall(BaseModel):
-    tool: Literal["create_task", "delete_task", "search_tasks"]
+    tool: Literal["create_task", "delete_task", "search_tasks", "update_task", "complete_task"]
     args: dict

@@ -13,7 +13,7 @@ from .prompts import (
     QA_AGENT_SYSTEM_PROMPT,
     TRACKING_AGENT_SYSTEM_PROMPT
 )
-from .tools import ToolCall, CreateTaskArgs, DeleteTaskArgs, SearchTasksArgs
+from .tools import ToolCall, CreateTaskArgs, DeleteTaskArgs, SearchTasksArgs, UpdateTaskArgs, CompleteTaskArgs
 from ..websockets import manager
 
 DEBUG_AGENT = os.getenv("DEBUG_AGENT", "").lower() in ("1", "true", "yes")
@@ -188,8 +188,19 @@ class AgentService:
         return "chat"
 
     async def _handle_task_management(self, messages: List[Dict[str, str]]) -> str:
-        system_msg = {"role": "system", "content": TASK_AGENT_SYSTEM_PROMPT}
-        
+        # Fetch recent tasks to provide context
+        recent_tasks = await crud.get_tasks(self.session, self.user_id)
+        # Limit to most recent 10 non-completed tasks for context
+        active_tasks = [t for t in recent_tasks if t.status != TaskStatus.done][:10]
+
+        task_context = ""
+        if active_tasks:
+            task_context = "\n\n**Current Active Tasks (for reference):**\n"
+            for task in active_tasks:
+                task_context += f"- {task.title} (ID: {task.id}, Status: {task.status})\n"
+
+        system_msg = {"role": "system", "content": TASK_AGENT_SYSTEM_PROMPT + task_context}
+
         response = await self._call_llm([system_msg] + messages)
         tool_data = self._extract_json(response)
 
@@ -258,11 +269,20 @@ class AgentService:
                     
                 elif tool_call.tool == "search_tasks":
                     args = SearchTasksArgs(**tool_call.args)
-                    tasks = await crud.search_tasks(self.session, self.user_id, args.query)
-                    if not tasks:
+                    search_results = await crud.search_tasks(self.session, self.user_id, args.query)
+
+                    if not search_results:
                         result_text = "No tasks found."
                     else:
-                        result_text = "Found:\n" + "\n".join([f"- {t.title} (ID: {t.id})" for t in tasks])
+                        # Format results with similarity scores
+                        result_text = "Found:\n"
+                        for task, score in search_results:
+                            match_type = "exact match" if score == 100.0 else f"{score:.0f}% match"
+                            result_text += f"- {task.title} (ID: {task.id}, {match_type})\n"
+
+                        # Add guidance for ambiguous matches
+                        if len(search_results) > 1 or (search_results and search_results[0][1] < 100.0):
+                            result_text += "\nMultiple or fuzzy matches found. Please confirm which task you meant."
                         
                 elif tool_call.tool == "delete_task":
                     args = DeleteTaskArgs(**tool_call.args)
@@ -275,8 +295,45 @@ class AgentService:
                     else:
                         result_text = "Task not found."
 
+                elif tool_call.tool == "complete_task":
+                    args = CompleteTaskArgs(**tool_call.args)
+                    task = await crud.get_task_by_id(self.session, args.id, self.user_id)
+                    if task:
+                        await crud.update_task(self.session, task, {"status": "done"})
+                        await manager.broadcast("refresh", self.user_id)
+                        result_text = f"Marked task '{task.title}' as complete."
+                        refresh_needed = True
+                    else:
+                        result_text = "Task not found."
+
+                elif tool_call.tool == "update_task":
+                    args = UpdateTaskArgs(**tool_call.args)
+                    task = await crud.get_task_by_id(self.session, args.id, self.user_id)
+                    if task:
+                        update_dict = {}
+                        if args.status:
+                            update_dict["status"] = args.status
+                        if args.priority_score:
+                            update_dict["priority_score"] = args.priority_score
+                        if args.effort_score:
+                            update_dict["effort_score"] = args.effort_score
+                        if args.title:
+                            update_dict["title"] = args.title
+                        if args.notes:
+                            update_dict["notes"] = args.notes
+
+                        if update_dict:
+                            await crud.update_task(self.session, task, update_dict)
+                            await manager.broadcast("refresh", self.user_id)
+                            result_text = f"Updated task '{task.title}'."
+                            refresh_needed = True
+                        else:
+                            result_text = "No updates provided."
+                    else:
+                        result_text = "Task not found."
+
                 tool_result_msg = {
-                    "role": "system", 
+                    "role": "system",
                     "content": f"Tool execution result: {result_text}"
                 }
                 

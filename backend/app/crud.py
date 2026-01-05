@@ -1,8 +1,9 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, col, or_
 import uuid
+from rapidfuzz import fuzz, process
 from .models import Task, TaskCreate, TaskStatus, Priority, ChatSession, ChatMessage
 
 # ... existing imports ...
@@ -191,10 +192,25 @@ async def delete_task(session: AsyncSession, task: Task) -> None:
     await session.delete(task)
     await session.commit()
 
-async def search_tasks(session: AsyncSession, user_id: str, query: str) -> List[Task]:
+async def search_tasks(session: AsyncSession, user_id: str, query: str, similarity_threshold: int = 60) -> List[Tuple[Task, float]]:
+    """
+    Search for tasks using both SQL substring matching and fuzzy matching.
+    Returns a list of (Task, similarity_score) tuples sorted by relevance.
+
+    Args:
+        session: Database session
+        user_id: User ID to filter tasks
+        query: Search query string
+        similarity_threshold: Minimum fuzzy match score (0-100, default 60)
+
+    Returns:
+        List of (Task, similarity_score) tuples sorted by score descending
+    """
+    # First try exact substring matching (fast path for exact matches)
     statement = (
         select(Task)
         .where(Task.user_id == user_id)
+        .where(Task.status != TaskStatus.done)  # Only search active tasks
         .where(
             or_(
                 col(Task.title).ilike(f"%{query}%"),
@@ -202,7 +218,45 @@ async def search_tasks(session: AsyncSession, user_id: str, query: str) -> List[
             )
         )
         .order_by(Task.created_at.desc())
-        .limit(5)
     )
     result = await session.execute(statement)
-    return result.scalars().all()
+    exact_matches = result.scalars().all()
+
+    # If we have exact matches, return them with high scores
+    if exact_matches:
+        return [(task, 100.0) for task in exact_matches[:5]]
+
+    # No exact matches - do fuzzy matching across all active tasks
+    all_tasks_stmt = (
+        select(Task)
+        .where(Task.user_id == user_id)
+        .where(Task.status != TaskStatus.done)
+        .order_by(Task.created_at.desc())
+    )
+    all_result = await session.execute(all_tasks_stmt)
+    all_tasks = all_result.scalars().all()
+
+    if not all_tasks:
+        return []
+
+    # Use rapidfuzz to find similar task titles
+    task_titles = {task.id: task.title for task in all_tasks}
+    task_map = {task.id: task for task in all_tasks}
+
+    # Extract top matches using fuzzy matching
+    # token_set_ratio is best for partial matches (e.g., "Review code" matches "Review cloud code for Yury")
+    matches = process.extract(
+        query,
+        task_titles,
+        scorer=fuzz.token_set_ratio,
+        score_cutoff=similarity_threshold,
+        limit=5
+    )
+
+    # Convert to (Task, score) tuples
+    fuzzy_results = []
+    for title, score, task_id in matches:
+        task = task_map[task_id]
+        fuzzy_results.append((task, float(score)))
+
+    return fuzzy_results
