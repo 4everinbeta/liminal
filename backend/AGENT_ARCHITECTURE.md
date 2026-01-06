@@ -1,8 +1,16 @@
-# Agent Architecture: Handoff Orchestration
+# Agent Architecture: Handoff Orchestration with Semantic Kernel
 
 ## Overview
 
-Implements Microsoft's Handoff Orchestration pattern for AI agents where a central orchestrator routes requests to specialized agents, and agents can hand off to each other based on context.
+Implements Microsoft's Handoff Orchestration pattern using **Semantic Kernel** framework where a central orchestrator routes requests to specialized agents, and agents can hand off to each other based on context.
+
+## Framework: Semantic Kernel
+
+We use Microsoft's Semantic Kernel for:
+- `ChatCompletionAgent`: Specialized agents with specific instructions
+- `AgentGroupChat`: Orchestrates multi-agent conversations
+- `Kernel`: Manages AI services and plugins
+- Native handoff orchestration support
 
 ## Pattern Benefits
 

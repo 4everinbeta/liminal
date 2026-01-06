@@ -17,6 +17,7 @@ from .tools import ToolCall, CreateTaskArgs, DeleteTaskArgs, SearchTasksArgs, Up
 from ..websockets import manager
 
 DEBUG_AGENT = os.getenv("DEBUG_AGENT", "").lower() in ("1", "true", "yes")
+USE_SK_ORCHESTRATOR = os.getenv("USE_SK_ORCHESTRATOR", "true").lower() in ("1", "true", "yes")
 
 class AgentService:
     def __init__(self, session: AsyncSession, user_id: str):
@@ -24,6 +25,7 @@ class AgentService:
         self.user_id = user_id
         self.settings = get_settings()
         self.user_context = None
+        self._sk_orchestrator = None
 
     async def _fetch_user_context(self):
         from sqlmodel import select
@@ -38,16 +40,21 @@ class AgentService:
 
     async def process_request(self, messages: List[Dict[str, str]], session_id: Optional[str] = None) -> Dict[str, Any]:
         await self._fetch_user_context()
-        
+
         user_msg_content = messages[-1]["content"] if messages else ""
-        
+
+        # Use Semantic Kernel orchestrator if enabled
+        if USE_SK_ORCHESTRATOR:
+            return await self._process_with_sk_orchestrator(user_msg_content, session_id)
+
+        # Legacy implementation
         chat_session = None
         if session_id:
             chat_session = await crud.get_chat_session(self.session, session_id, self.user_id)
-        
+
         if not chat_session:
             chat_session = await crud.create_chat_session(self.session, self.user_id, title=user_msg_content[:30])
-        
+
         if user_msg_content:
             await crud.add_chat_message(self.session, chat_session.id, "user", user_msg_content)
 
@@ -67,8 +74,74 @@ class AgentService:
             
         if response:
             await crud.add_chat_message(self.session, chat_session.id, "assistant", response)
-            
+
         return {"content": response, "session_id": chat_session.id}
+
+    async def _process_with_sk_orchestrator(self, message: str, session_id: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Process request using Semantic Kernel orchestrator.
+
+        Args:
+            message: User's message
+            session_id: Optional chat session ID
+
+        Returns:
+            Dict with content and session_id
+        """
+        from .sk_orchestrator import SKOrchestrator
+        from .sk_agents import create_task_agent, create_qa_agent, create_tracking_agent, create_general_agent
+
+        # Get or create chat session
+        chat_session = None
+        if session_id:
+            chat_session = await crud.get_chat_session(self.session, session_id, self.user_id)
+
+        if not chat_session:
+            chat_session = await crud.create_chat_session(self.session, self.user_id, title=message[:30])
+
+        # Save user message
+        if message:
+            await crud.add_chat_message(self.session, chat_session.id, "user", message)
+
+        # Initialize SK orchestrator (lazy initialization)
+        if not self._sk_orchestrator:
+            if DEBUG_AGENT:
+                print("SK: Initializing orchestrator and agents")
+
+            self._sk_orchestrator = SKOrchestrator(self.session, self.user_id)
+
+            # Get context for agents
+            user_context = await self._sk_orchestrator.get_active_tasks_context()
+
+            # Create and register agents
+            task_agent = create_task_agent(self._sk_orchestrator.kernel, user_context)
+            qa_agent = create_qa_agent(self._sk_orchestrator.kernel)
+            tracking_agent = create_tracking_agent(self._sk_orchestrator.kernel)
+            general_agent = create_general_agent(self._sk_orchestrator.kernel)
+
+            # Register in order of priority (General is fallback)
+            self._sk_orchestrator.register_agent(task_agent)
+            self._sk_orchestrator.register_agent(qa_agent)
+            self._sk_orchestrator.register_agent(tracking_agent)
+            self._sk_orchestrator.register_agent(general_agent)
+
+            # Create group chat
+            self._sk_orchestrator.create_group_chat()
+
+        # Process message
+        response = await self._sk_orchestrator.process_request(message)
+
+        # Save assistant response
+        if response:
+            # Clean up pending_confirmation markers from response
+            clean_response = response
+            if "pending_confirmation:" in response:
+                # Remove the JSON part
+                clean_response = response.split("pending_confirmation:")[0].strip()
+
+            await crud.add_chat_message(self.session, chat_session.id, "assistant", clean_response)
+
+        return {"content": clean_response if "pending_confirmation:" in response else response, "session_id": chat_session.id}
 
     async def _call_llm(self, messages: List[Dict[str, str]], model: Optional[str] = None) -> str:
         base_url = self.settings.llm_base_url
