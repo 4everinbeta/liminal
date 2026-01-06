@@ -102,7 +102,6 @@ pending_confirmation: {{"action": "complete_task", "details": {{"id": "abc-123"}
 """
 
     return ChatCompletionAgent(
-        service_id="chat",
         kernel=kernel,
         name="TaskAgent",
         instructions=instructions
@@ -158,7 +157,6 @@ Try it with your highest priority task!"
 """
 
     return ChatCompletionAgent(
-        service_id="chat",
         kernel=kernel,
         name="QAAgent",
         instructions=instructions
@@ -213,7 +211,6 @@ Want me to create a task for any of these?"
 """
 
     return ChatCompletionAgent(
-        service_id="chat",
         kernel=kernel,
         name="TrackingAgent",
         instructions=instructions
@@ -275,7 +272,6 @@ What sounds helpful?"
 """
 
     return ChatCompletionAgent(
-        service_id="chat",
         kernel=kernel,
         name="GeneralAgent",
         instructions=instructions

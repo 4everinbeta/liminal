@@ -19,6 +19,7 @@ from semantic_kernel.agents.strategies.termination.kernel_function_termination_s
 )
 from semantic_kernel.contents import ChatMessageContent, AuthorRole
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion, OpenAIChatCompletion
+from openai import AsyncOpenAI
 
 from ..config import get_settings
 from .. import crud
@@ -69,13 +70,24 @@ class SKOrchestrator:
                 api_version=self.settings.azure_openai_api_version or "2024-02-01",
                 service_id="chat"
             )
-        elif provider in ["openai", "groq", "local"]:
-            # Groq and local providers are OpenAI-compatible
+        elif provider == "openai":
+            # Standard OpenAI
             service = OpenAIChatCompletion(
                 service_id="chat",
                 ai_model_id=self.settings.llm_model,
-                api_key=self.settings.llm_api_key,
-                base_url=self.settings.llm_base_url if provider == "local" else None
+                api_key=self.settings.llm_api_key
+            )
+        elif provider in ["groq", "local"]:
+            # Groq and local providers need custom base URL
+            # Use AsyncOpenAI client with custom base_url
+            custom_client = AsyncOpenAI(
+                base_url=self.settings.llm_base_url,
+                api_key=self.settings.llm_api_key or "not-needed"
+            )
+            service = OpenAIChatCompletion(
+                service_id="chat",
+                ai_model_id=self.settings.llm_model,
+                async_client=custom_client
             )
         else:
             raise ValueError(f"Unsupported LLM provider: {provider}")
@@ -180,6 +192,10 @@ class SKOrchestrator:
         Returns:
             Agent's response
         """
+        # If no pending confirmation, return error
+        if not self.pending_confirmation:
+            return "I'm not waiting for any confirmation right now. How can I help you?"
+
         message_lower = message.lower().strip()
 
         if message_lower in ["yes", "y", "confirm", "create it", "do it"]:
