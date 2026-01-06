@@ -52,7 +52,13 @@ async def chat_with_llm(
     try:
         result = await agent.process_request(messages, session_id=payload.session_id)
         return ChatResponse(content=result["content"], session_id=result["session_id"])
+    except ValueError as exc:
+        # Configuration errors (missing env vars, invalid settings)
+        print(f"Agent Configuration Error: {exc}")
+        raise HTTPException(status_code=500, detail=f"Agent configuration error: {str(exc)}") from exc
     except Exception as exc:
-        # Log server-side; avoid leaking internals to clients.
+        # Log server-side with full traceback
+        import traceback
         print(f"Agent Processing Error: {exc}")
-        raise HTTPException(status_code=500, detail="Agent processing failed") from exc
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail="Agent processing failed. Please check server logs.") from exc

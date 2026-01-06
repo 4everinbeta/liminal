@@ -122,6 +122,16 @@ Agents can hand off to each other by mentioning the target agent:
 
 ## Configuration
 
+### Required Environment Variables
+
+**CRITICAL**: The SK orchestrator requires proper LLM configuration. The default `LLM_PROVIDER=local` will NOT work in production without a running LLM server.
+
+**Minimum Required Variables:**
+```bash
+LLM_PROVIDER=openai  # or azure, groq, local
+LLM_MODEL=gpt-4      # or your model name
+```
+
 ### Supported LLM Providers
 
 The SK orchestrator supports multiple providers:
@@ -129,32 +139,33 @@ The SK orchestrator supports multiple providers:
 #### Azure OpenAI
 ```bash
 LLM_PROVIDER=azure
-AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com
-AZURE_OPENAI_API_KEY=your-api-key
-AZURE_OPENAI_API_VERSION=2024-02-01
-LLM_MODEL=gpt-4
+LLM_BASE_URL=https://your-resource.openai.azure.com  # Required
+LLM_API_KEY=your-api-key                              # Required
+AZURE_OPENAI_API_VERSION=2024-02-01                   # Optional (defaults to 2024-02-01)
+LLM_MODEL=gpt-4                                       # Required
 ```
 
 #### OpenAI
 ```bash
 LLM_PROVIDER=openai
-OPENAI_API_KEY=your-api-key
-LLM_MODEL=gpt-4
+LLM_API_KEY=your-api-key  # Required (set as OPENAI_API_KEY)
+LLM_MODEL=gpt-4           # Required
 ```
 
 #### Groq
 ```bash
 LLM_PROVIDER=groq
-LLM_BASE_URL=https://api.groq.com
-GROQ_API_KEY=your-api-key
-LLM_MODEL=llama-3-70b
+LLM_BASE_URL=https://api.groq.com/openai/v1  # Required
+LLM_API_KEY=your-api-key                     # Optional (set as GROQ_API_KEY)
+LLM_MODEL=llama-3-70b-8192                   # Required
 ```
 
 #### Local (LM Studio, Ollama, etc.)
 ```bash
 LLM_PROVIDER=local
-LLM_BASE_URL=http://localhost:1234/v1
-LLM_MODEL=llama-3-8b
+LLM_BASE_URL=http://localhost:1234/v1  # Required - must be accessible
+LLM_MODEL=llama-3-8b                    # Required
+LLM_API_KEY=not-needed                  # Optional
 ```
 
 ## Debug Logging

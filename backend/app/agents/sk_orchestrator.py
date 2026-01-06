@@ -62,7 +62,19 @@ class SKOrchestrator:
         """Configure the AI service based on settings."""
         provider = self.settings.llm_provider.lower()
 
+        if DEBUG_AGENT:
+            print(f"SK: Setting up AI service with provider={provider}")
+
+        # Validate required settings
+        if not self.settings.llm_model:
+            raise ValueError("LLM_MODEL environment variable is required")
+
         if provider == "azure":
+            if not self.settings.llm_api_key:
+                raise ValueError("AZURE_OPENAI_API_KEY environment variable is required for Azure provider")
+            if not self.settings.llm_base_url:
+                raise ValueError("AZURE_OPENAI_ENDPOINT environment variable is required for Azure provider")
+
             service = AzureChatCompletion(
                 deployment_name=self.settings.llm_model,
                 endpoint=self.settings.llm_base_url,
@@ -71,6 +83,9 @@ class SKOrchestrator:
                 service_id="chat"
             )
         elif provider == "openai":
+            if not self.settings.llm_api_key:
+                raise ValueError("OPENAI_API_KEY environment variable is required for OpenAI provider")
+
             # Standard OpenAI
             service = OpenAIChatCompletion(
                 service_id="chat",
@@ -78,6 +93,9 @@ class SKOrchestrator:
                 api_key=self.settings.llm_api_key
             )
         elif provider in ["groq", "local"]:
+            if not self.settings.llm_base_url:
+                raise ValueError(f"LLM_BASE_URL environment variable is required for {provider} provider")
+
             # Groq and local providers need custom base URL
             # Use AsyncOpenAI client with custom base_url
             custom_client = AsyncOpenAI(
@@ -90,7 +108,7 @@ class SKOrchestrator:
                 async_client=custom_client
             )
         else:
-            raise ValueError(f"Unsupported LLM provider: {provider}")
+            raise ValueError(f"Unsupported LLM provider: {provider}. Must be one of: azure, openai, groq, local")
 
         self.kernel.add_service(service)
 
