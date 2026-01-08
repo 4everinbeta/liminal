@@ -13,6 +13,9 @@ Dockerized services managed via `docker-compose`.
 - **Backend:** Python (FastAPI), SQLModel (SQLAlchemy + Pydantic).
 - **Database:** PostgreSQL 15.
 
+📐 **[View Detailed Architecture Documentation →](docs/ARCHITECTURE.md)**
+Comprehensive diagrams covering system architecture, data model, authentication flows, AI agent orchestration, API structure, and more.
+
 ## 🚀 Getting Started
 
 1. **Start Services:**
@@ -142,6 +145,14 @@ What it does:
 - Upserts all per-service env vars defined in the stack after resolving `${env.*}` and `${db.*}` placeholders.
 
 Use `--dry-run` to inspect the GraphQL mutations without executing them. Edit `infra/railway/stack.json` to tweak env vars, build commands, or add more services and re-run the script to apply.
+
+## 📚 Documentation
+
+- **[Architecture Documentation](docs/ARCHITECTURE.md)** - System architecture, data models, and technical diagrams
+- **[Documentation Index](docs/README.md)** - Complete documentation navigation
+- **[Development Guide](CLAUDE.md)** - Commands, testing, and development workflow
+- **[Frontend Testing](frontend/TESTING.md)** - E2E and component testing guide
+- **[Railway Deployment](infra/railway/README.md)** - Infrastructure-as-code deployment guide
 
 ## 📝 Next Steps
 1. Add a user-facing Settings page wired to `GET /me` and `PATCH /me/settings`.
