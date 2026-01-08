@@ -58,6 +58,40 @@ class SKOrchestrator:
         self.pending_confirmation: Optional[Dict[str, Any]] = None
         self.conversation_context: Dict[str, Any] = {}
 
+    def _create_selection_strategy(self) -> KernelFunctionSelectionStrategy:
+        """Create the selection strategy for agent orchestration."""
+        from semantic_kernel.functions import kernel_function
+
+        # Internal helper to handle the logic
+        def _get_next_speaker(history_messages: List[ChatMessageContent]) -> str:
+            if not history_messages:
+                return "GeneralAgent"
+            
+            last_message = history_messages[-1].content.lower()
+            
+            # Direct routing for task keywords
+            if any(k in last_message for k in ["task", "create", "todo", "complete", "finish", "done", "delete", "update", "priority", "due", "effort"]):
+                return "TaskAgent"
+            
+            # Default fallback
+            return "GeneralAgent"
+
+        # Create the kernel function for selection
+        @kernel_function(name="select_speaker", description="Select the next speaker")
+        def select_speaker(history: str) -> str:
+            # Simple heuristic since history is passed as a concatenated string
+            last_line = history.split("\n")[-1].lower() if history else ""
+            if any(k in last_line for k in ["task", "create", "todo", "complete", "finish", "done", "delete", "update", "priority", "due"]):
+                return "TaskAgent"
+            return "GeneralAgent"
+
+        return KernelFunctionSelectionStrategy(
+            function=select_speaker,
+            kernel=self.kernel,
+            result_parser=lambda result: str(result.value) if result.value else "GeneralAgent",
+            agent_variable_name="history"
+        )
+
     def _setup_ai_service(self):
         """Configure the AI service based on settings."""
         provider = self.settings.llm_provider.lower()
@@ -156,9 +190,12 @@ class SKOrchestrator:
         if not self.agents:
             raise ValueError("No agents registered. Call register_agent() first.")
 
+        # Use our custom selection strategy if none provided
+        effective_selection_strategy = selection_strategy or self._create_selection_strategy()
+
         self.group_chat = AgentGroupChat(
             agents=self.agents,
-            selection_strategy=selection_strategy,
+            selection_strategy=effective_selection_strategy,
             termination_strategy=termination_strategy
         )
 
