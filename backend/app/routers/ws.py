@@ -26,7 +26,10 @@ async def get_user_from_token(token: str, session: AsyncSession) -> str:
         try:
             payload = await auth._decode_oidc_token(token)
             return payload.get("sub")
-        except Exception:
+        except Exception as e:
+            print(f"WS_AUTH_FAILURE: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return None
 
 @router.websocket("/ws")

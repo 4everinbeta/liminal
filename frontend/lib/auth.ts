@@ -51,6 +51,7 @@ export async function getUserManager(): Promise<UserManager | null> {
   _userManager.events.addUserLoaded((user) => {
     if (user.access_token) {
         localStorage.setItem('liminal_token', user.access_token)
+        window.dispatchEvent(new Event('liminal:token_updated'))
     }
   })
 

@@ -38,9 +38,20 @@ export function useWebSocket() {
       }
     }
 
+    const handleTokenUpdate = () => {
+        console.log('WS: Token updated, reconnecting...')
+        if (wsRef.current) {
+            wsRef.current.close() // Close intentionally
+            wsRef.current = null
+        }
+        connect()
+    }
+
+    window.addEventListener('liminal:token_updated', handleTokenUpdate)
     connect()
 
     return () => {
+      window.removeEventListener('liminal:token_updated', handleTokenUpdate)
       if (wsRef.current) {
         wsRef.current.close()
         wsRef.current = null
