@@ -8,14 +8,14 @@ export function useWebSocket() {
   const wsRef = useRef<WebSocket | null>(null)
 
   useEffect(() => {
-    const token = localStorage.getItem('liminal_token')
-    if (!token) return
-
-    // Convert http/https to ws/wss
-    const wsUrl = API_BASE_URL.replace(/^http/, 'ws') + '/ws?token=' + token
-    
     const connect = () => {
+      const token = localStorage.getItem('liminal_token')
+      if (!token) return
+
       if (wsRef.current?.readyState === WebSocket.OPEN) return
+
+      // Convert http/https to ws/wss
+      const wsUrl = API_BASE_URL.replace(/^http/, 'ws') + '/ws?token=' + token
 
       const ws = new WebSocket(wsUrl)
       wsRef.current = ws
