@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+import httpx
 
 from ..database import get_session
 from typing import List
@@ -56,9 +57,38 @@ async def chat_with_llm(
         # Configuration errors (missing env vars, invalid settings)
         print(f"Agent Configuration Error: {exc}")
         raise HTTPException(status_code=500, detail=f"Agent configuration error: {str(exc)}") from exc
+    except (httpx.ConnectError, httpx.ReadTimeout, httpx.WriteTimeout) as exc:
+        print(f"LLM Connection Error: {exc}")
+        raise HTTPException(status_code=503, detail=f"Could not connect to LLM service: {str(exc)}") from exc
     except Exception as exc:
         # Log server-side with full traceback
         import traceback
+        import openai
+        
+        # Check for OpenAI connection errors (since we can't easily import them at top level without dependency check)
+        if isinstance(exc, openai.APIConnectionError):
+             print(f"OpenAI/LLM Connection Error: {exc}")
+             raise HTTPException(status_code=503, detail=f"Could not connect to LLM provider: {str(exc)}") from exc
+
+        # Check for Semantic Kernel wrapped errors
+        try:
+            # Try to import ServiceResponseException from likely locations (depends on SK version)
+            try:
+                from semantic_kernel.exceptions import ServiceResponseException
+            except ImportError:
+                from semantic_kernel.exceptions.service_exceptions import ServiceResponseException
+
+            if isinstance(exc, ServiceResponseException):
+                 print(f"Semantic Kernel Service Error: {exc}")
+                 # Check if inner exception is connection error
+                 if hasattr(exc, 'inner_exception') and isinstance(exc.inner_exception, openai.APIConnectionError):
+                      raise HTTPException(status_code=503, detail=f"Could not connect to LLM provider (SK): {str(exc.inner_exception)}") from exc
+        except ImportError:
+            pass
+        except Exception:
+            # Fallback if SK inspection fails
+            pass
+
         print(f"Agent Processing Error: {exc}")
         print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail="Agent processing failed. Please check server logs.") from exc
+        raise HTTPException(status_code=500, detail=f"Agent processing failed: {str(exc)}") from exc

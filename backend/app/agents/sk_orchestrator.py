@@ -97,9 +97,23 @@ class SKOrchestrator:
                 raise ValueError(f"LLM_BASE_URL environment variable is required for {provider} provider")
 
             # Groq and local providers need custom base URL
+            # Some users might provide the full completion URL (legacy style)
+            # but AsyncOpenAI expects a base URL.
+            base_url = self.settings.llm_base_url
+            if base_url.endswith("/chat/completions"):
+                base_url = base_url.replace("/chat/completions", "")
+            
+            # Special handling for Groq: if the URL is just the domain, append the path
+            # the legacy implementation used: {base_url}/openai/v1/chat/completions
+            if provider == "groq" and "openai/v1" not in base_url:
+                if base_url.endswith("/"):
+                    base_url += "openai/v1"
+                else:
+                    base_url += "/openai/v1"
+
             # Use AsyncOpenAI client with custom base_url
             custom_client = AsyncOpenAI(
-                base_url=self.settings.llm_base_url,
+                base_url=base_url,
                 api_key=self.settings.llm_api_key or "not-needed"
             )
             service = OpenAIChatCompletion(
