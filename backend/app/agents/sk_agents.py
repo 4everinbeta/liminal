@@ -59,7 +59,8 @@ pending_confirmation: {{"action": "create_task", "details": {{"title": "Review c
 **Task Completion Flow:**
 1. Check Active Tasks list.
 2. If found, ask: "Mark '[task title]' as complete?"
-3. Signal: pending_confirmation: {{"action": "complete_task", "details": {{"id": "task-id"}}}}
+3. Signal (on a new line):
+pending_confirmation: {{"action": "complete_task", "details": {{"id": "task-id"}}}}
 
 **Task Search:**
 - If fuzzy match found, ask: "I found '[task title]' (75% match). Is this correct?"
@@ -67,7 +68,7 @@ pending_confirmation: {{"action": "create_task", "details": {{"title": "Review c
 **IMPORTANT:**
 - Do not hallucinate success messages.
 - Wait for the user to say "yes".
-- The system will handle the actual creation after you output the JSON.
+- ALWAYS put the `pending_confirmation:` JSON on a new line at the very end.
 """
 
     return ChatCompletionAgent(

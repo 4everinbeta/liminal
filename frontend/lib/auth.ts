@@ -45,6 +45,13 @@ export async function getUserManager(): Promise<UserManager | null> {
     response_type: 'code',
     scope: cfg.oidcScope,
     userStore: new WebStorageStateStore({ store: window.localStorage }),
+    automaticSilentRenew: true,
+  })
+
+  _userManager.events.addUserLoaded((user) => {
+    if (user.access_token) {
+        localStorage.setItem('liminal_token', user.access_token)
+    }
   })
 
   return _userManager

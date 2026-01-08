@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { getAuthConfig } from '@/lib/auth'
+import { getAuthConfig, getUserManager } from '@/lib/auth'
 
 export default function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -10,9 +10,19 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   const [authRequired, setAuthRequired] = useState<boolean | null>(null)
 
   useEffect(() => {
+    // Initialize auth config
     getAuthConfig()
       .then((cfg) => setAuthRequired(cfg.authRequired))
       .catch(() => setAuthRequired(false))
+
+    // Initialize user manager to attach event listeners
+    getUserManager().then(um => {
+        um?.getUser().then(user => {
+            if (user?.access_token) {
+                localStorage.setItem('liminal_token', user.access_token)
+            }
+        })
+    })
   }, [])
 
   useEffect(() => {

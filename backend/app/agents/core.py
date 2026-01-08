@@ -133,11 +133,15 @@ class AgentService:
 
         # Save assistant response
         if response:
-            # Clean up pending_confirmation markers from response
+            # Clean up pending_confirmation markers from response for the user view
             clean_response = response
             if "pending_confirmation:" in response:
                 # Remove the JSON part
                 clean_response = response.split("pending_confirmation:")[0].strip()
+                
+                # If the model output NOTHING but the confirmation marker, add a default message
+                if not clean_response:
+                    clean_response = "I've prepared that task. Does it look correct? (Reply 'yes' to confirm)"
 
             await crud.add_chat_message(self.session, chat_session.id, "assistant", clean_response)
 
