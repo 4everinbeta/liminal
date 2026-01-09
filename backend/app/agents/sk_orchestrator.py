@@ -60,7 +60,7 @@ class SKOrchestrator:
 
     def _create_selection_strategy(self) -> KernelFunctionSelectionStrategy:
         """Create the selection strategy for agent orchestration."""
-        from semantic_kernel.functions import kernel_function
+        from semantic_kernel.functions import kernel_function, KernelFunctionFromMethod
 
         # Internal helper to handle the logic
         def _get_next_speaker(history_messages: List[ChatMessageContent]) -> str:
@@ -85,8 +85,11 @@ class SKOrchestrator:
                 return "TaskAgent"
             return "GeneralAgent"
 
+        # Wrap in KernelFunctionFromMethod to satisfy Pydantic validation
+        kf = KernelFunctionFromMethod(method=select_speaker, plugin_name="Orchestration")
+
         return KernelFunctionSelectionStrategy(
-            function=select_speaker,
+            function=kf,
             kernel=self.kernel,
             result_parser=lambda result: str(result.value) if result.value else "GeneralAgent",
             agent_variable_name="history"
