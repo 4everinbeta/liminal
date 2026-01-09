@@ -95,6 +95,25 @@ class SKOrchestrator:
             agent_variable_name="history"
         )
 
+    def _create_termination_strategy(self) -> KernelFunctionTerminationStrategy:
+        """Create the termination strategy for agent orchestration."""
+        from semantic_kernel.functions import kernel_function, KernelFunctionFromMethod
+
+        @kernel_function(name="should_terminate", description="Determine if conversation should end")
+        def should_terminate(history: str) -> bool:
+            # Terminate if the agent is asking for confirmation
+            return "pending_confirmation:" in history
+
+        kf = KernelFunctionFromMethod(method=should_terminate, plugin_name="Orchestration")
+
+        return KernelFunctionTerminationStrategy(
+            function=kf,
+            kernel=self.kernel,
+            result_parser=lambda result: str(result.value).lower() == "true",
+            agent_variable_name="history",
+            maximum_iterations=10
+        )
+
     def _setup_ai_service(self):
         """Configure the AI service based on settings."""
         provider = self.settings.llm_provider.lower()
@@ -193,13 +212,14 @@ class SKOrchestrator:
         if not self.agents:
             raise ValueError("No agents registered. Call register_agent() first.")
 
-        # Use our custom selection strategy if none provided
+        # Use our custom strategies if none provided
         effective_selection_strategy = selection_strategy or self._create_selection_strategy()
+        effective_termination_strategy = termination_strategy or self._create_termination_strategy()
 
         self.group_chat = AgentGroupChat(
             agents=self.agents,
             selection_strategy=effective_selection_strategy,
-            termination_strategy=termination_strategy
+            termination_strategy=effective_termination_strategy
         )
 
         if DEBUG_AGENT:

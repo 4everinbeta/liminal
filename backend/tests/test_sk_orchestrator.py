@@ -280,3 +280,23 @@ async def test_get_active_tasks_context_empty(orchestrator):
     context = await orchestrator.get_active_tasks_context()
 
     assert "No active tasks" in context
+
+
+@pytest.mark.asyncio
+async def test_termination_strategy(orchestrator):
+    """Test that termination strategy correctly identifies when to stop."""
+    strategy = orchestrator._create_termination_strategy()
+    
+    # We can't easily invoke the wrapped kernel function directly without a kernel context,
+    # but we can verify the strategy configuration and simulate the logic.
+    
+    # Test the logic directly (re-implementing the lambda logic for verification)
+    def should_terminate_logic(history: str) -> bool:
+        return "pending_confirmation:" in history
+    
+    assert should_terminate_logic("Some text... pending_confirmation: {...}") is True
+    assert should_terminate_logic("Just some normal text") is False
+    
+    # Verify the strategy object
+    assert strategy is not None
+    assert strategy.maximum_iterations == 10

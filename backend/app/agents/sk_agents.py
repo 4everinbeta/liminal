@@ -31,6 +31,7 @@ def create_task_agent(kernel: Kernel, user_context: str = "") -> ChatCompletionA
 1. State the details you extracted.
 2. Ask "Would you like me to create this task? (Reply 'yes' to confirm)".
 3. Add the `pending_confirmation:` marker at the very end.
+4. **STOP speaking.** Do not add anything after the marker.
 
 **DO NOT include any other text like "I have taken note" or "The Task Agent is here".**
 
