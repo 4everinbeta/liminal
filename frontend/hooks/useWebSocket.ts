@@ -3,6 +3,21 @@ import { useAppStore } from '@/lib/store'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
+function isTokenExpired(token: string): boolean {
+  try {
+    const [, payload] = token.split('.')
+    if (!payload) return true
+    // Base64Url to Base64
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const decoded = JSON.parse(atob(base64))
+    if (!decoded.exp) return true
+    // exp is in seconds, add 10s buffer
+    return decoded.exp * 1000 < Date.now() + 10000
+  } catch (e) {
+    return true
+  }
+}
+
 export function useWebSocket() {
   const { triggerUpdate } = useAppStore()
   const wsRef = useRef<WebSocket | null>(null)
@@ -11,6 +26,11 @@ export function useWebSocket() {
     const connect = () => {
       const token = localStorage.getItem('liminal_token')
       if (!token) return
+
+      if (isTokenExpired(token)) {
+        console.log('WS: Token expired, waiting for refresh...')
+        return
+      }
 
       if (wsRef.current?.readyState === WebSocket.OPEN) return
 

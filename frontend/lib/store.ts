@@ -44,6 +44,7 @@ export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
       isFocusMode: false,
+      toggleFocusMode: () => set((state) => ({ isFocusMode: !state.isFocusMode })),
       // ... existing ...
       activeTaskId: null,
       setActiveTaskId: (id) => set({ activeTaskId: id }),
