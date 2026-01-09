@@ -130,11 +130,15 @@ class AgentService:
 
         # Process message
         response = await self._sk_orchestrator.process_request(message)
+        
+        # Ensure response is valid
+        if not response or not response.strip():
+            response = "I'm not sure how to help with that."
+
+        clean_response = response
 
         # Save assistant response
         if response:
-            # Clean up pending_confirmation markers from response for the user view
-            clean_response = response
             if "pending_confirmation:" in response:
                 # Remove the JSON part
                 clean_response = response.split("pending_confirmation:")[0].strip()
@@ -145,7 +149,7 @@ class AgentService:
 
             await crud.add_chat_message(self.session, chat_session.id, "assistant", clean_response)
 
-        return {"content": clean_response if "pending_confirmation:" in response else response, "session_id": chat_session.id}
+        return {"content": clean_response, "session_id": chat_session.id}
 
     async def _call_llm(self, messages: List[Dict[str, str]], model: Optional[str] = None) -> str:
         base_url = self.settings.llm_base_url

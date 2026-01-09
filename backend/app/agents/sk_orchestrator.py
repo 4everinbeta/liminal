@@ -265,10 +265,11 @@ class SKOrchestrator:
             if DEBUG_AGENT:
                 print(f"SK: {response.name}: {response.content}")
 
-            responses.append(response.content)
+            if response.content and response.content.strip():
+                responses.append(response.content)
 
             # Check if agent set pending confirmation
-            if "pending_confirmation:" in response.content:
+            if response.content and "pending_confirmation:" in response.content:
                 self._extract_pending_confirmation(response.content)
 
         # Return the last response
