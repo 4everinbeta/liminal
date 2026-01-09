@@ -39,3 +39,12 @@ build-args_railway.com
 AGENTS.md
 CLAUDE.md
 GEMINI.md
+
+# User Suggested Exclusions
+node_modules/
+dist/
+build/
+.env
+venv/
+*.local
+*.tsbuildinfo
