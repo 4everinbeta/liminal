@@ -79,10 +79,14 @@ class SKOrchestrator:
         # Create the kernel function for selection
         @kernel_function(name="select_speaker", description="Select the next speaker")
         def select_speaker(history: str) -> str:
-            # Simple heuristic since history is passed as a concatenated string
-            last_line = history.split("\n")[-1].lower() if history else ""
-            if any(k in last_line for k in ["task", "create", "todo", "complete", "finish", "done", "delete", "update", "priority", "due"]):
+            # Look at the recent history (last 300 chars) to handle multi-line user messages
+            # without reacting to ancient history
+            recent_history = history[-300:].lower() if history else ""
+            
+            # Direct routing for task keywords
+            if any(k in recent_history for k in ["task", "create", "todo", "complete", "finish", "done", "delete", "update", "priority", "due", "effort"]):
                 return "TaskAgent"
+            
             return "GeneralAgent"
 
         # Wrap in KernelFunctionFromMethod to satisfy Pydantic validation
