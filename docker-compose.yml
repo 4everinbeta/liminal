@@ -26,23 +26,20 @@ services:
       dockerfile: Dockerfile
     container_name: liminal_backend
     environment:
-      # Use the 'db' service name from docker-compose network
-      DATABASE_URL: postgresql+asyncpg://user:password@db:5432/liminal
-      # Default is intentionally insecure; override via env in any real deployment.
-      SECRET_KEY: ${SECRET_KEY:-change-me-in-prod}
-      # OIDC (recommended). Example when using Keycloak locally:
-      # OIDC_ISSUER: http://keycloak:8080/realms/liminal
-      # OIDC_AUDIENCE: liminal-frontend
-      # LLM settings (local default can point to DMR/Ollama)
-      LLM_BASE_URL: http://llm:11434/v1/chat/completions
-      # Default to the quantized tag that ships with DMR/Ollama; override via env if needed.
-      LLM_MODEL: llama3.2:latest
-      LLM_PROVIDER: local
-      # For Azure AI Foundry:
-      # LLM_PROVIDER: azure
-      # LLM_BASE_URL: https://<resource>.openai.azure.com/openai/deployments/<deployment>/chat/completions
-      # LLM_API_KEY: <your-azure-key>
-      # AZURE_OPENAI_API_VERSION: 2023-09-01-preview
+      DATABASE_URL: "postgresql+asyncpg://user:password@db:5432/liminal"
+      SECRET_KEY: "${SECRET_KEY:-change-me-in-prod}"
+      DEBUG_AGENT: "1"
+      ENABLE_LOCAL_AUTH: "1"
+      USE_SK_ORCHESTRATOR: "1"
+      # OIDC (Keycloak Local)
+      # Issuer matches the browser-facing URL (what's inside the token)
+      OIDC_ISSUER: http://localhost:8080/realms/liminal
+      # JWKS URL matches the internal Docker network URL (for backend to fetch keys)
+      OIDC_JWKS_URL: http://keycloak:8080/realms/liminal/protocol/openid-connect/certs
+      OIDC_AUDIENCE: "liminal-frontend"
+      LLM_BASE_URL: "http://llm:11434/v1/chat/completions"
+      LLM_MODEL: "llama3.2:3b-instruct-q4_0"
+      LLM_PROVIDER: "local"
     ports:
       - "8000:8000"
     depends_on:
@@ -50,11 +47,12 @@ services:
         condition: service_healthy
       llm:
         condition: service_started
+      keycloak:
+        condition: service_healthy
     volumes:
       - ./backend:/app
     networks:
       - liminal_net
-    # Reload logic is handled by uvicorn command in Dockerfile or override here
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
@@ -63,12 +61,21 @@ services:
       dockerfile: Dockerfile
     container_name: liminal_frontend
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_API_URL: "http://localhost:8000"
+      NEXT_PUBLIC_AUTH_REQUIRED: "true"
+      NEXT_PUBLIC_OIDC_AUTHORITY: "http://localhost:8080/realms/liminal"
+      NEXT_PUBLIC_OIDC_CLIENT_ID: "liminal-frontend"
+      NEXT_PUBLIC_OIDC_REDIRECT_URI: "http://localhost:3000/auth/callback"
+      NEXT_PUBLIC_OIDC_POST_LOGOUT_REDIRECT_URI: "http://localhost:3000"
+      NEXT_PUBLIC_OIDC_SCOPE: "openid profile email"
     ports:
       - "3000:3000"
+    depends_on:
+      - backend
+      - keycloak
     volumes:
       - ./frontend:/app
-      - /app/node_modules
+      - frontend_node_modules:/app/node_modules
     networks:
       - liminal_net
     command: npm run dev
@@ -79,14 +86,20 @@ services:
       dockerfile: Dockerfile
     container_name: liminal_keycloak
     environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KEYCLOAK_ADMIN: "${KEYCLOAK_ADMIN:-admin}"
+      KEYCLOAK_ADMIN_PASSWORD: "${KEYCLOAK_ADMIN_PASSWORD:-admin}"
     volumes:
       - keycloak_data:/opt/keycloak/data
     ports:
       - "8080:8080"
     networks:
       - liminal_net
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
   llm:
     image: ollama/ollama:latest
@@ -107,6 +120,7 @@ volumes:
   postgres_data:
   ollama_data:
   keycloak_data:
+  frontend_node_modules:
 
 networks:
   liminal_net:

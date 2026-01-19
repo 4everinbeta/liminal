@@ -76,7 +76,13 @@ export async function handleLoginCallback(): Promise<void> {
   const um = await getUserManager()
   if (!um) throw new Error('OIDC is not configured')
   const user = await um.signinRedirectCallback()
-  if (user?.access_token) localStorage.setItem('liminal_token', user.access_token)
+  console.log("OIDC User:", user)
+  if (user?.access_token) {
+      console.log("Storing token:", user.access_token.substring(0, 10) + "...")
+      localStorage.setItem('liminal_token', user.access_token)
+  } else {
+      console.warn("No access token in user object")
+  }
 }
 
 export async function logout(): Promise<void> {

@@ -1,0 +1,13 @@
+**/node_modules
+**/.next
+**/build
+**/dist
+**/__pycache__
+**/*.pyc
+**/.venv
+.git
+.github
+.vscode
+.claude
+.gemini
+*.log

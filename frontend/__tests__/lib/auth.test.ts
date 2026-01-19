@@ -8,6 +8,9 @@ vi.mock('oidc-client-ts', () => {
     signinRedirect,
     signinRedirectCallback,
     signoutRedirect,
+    events: {
+      addUserLoaded: vi.fn(),
+    },
   }));
   const WebStorageStateStore = vi.fn();
   return {
