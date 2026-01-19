@@ -92,10 +92,10 @@ async def test_pending_confirmation_storage(orchestrator):
 
 Would you like me to create this task?
 
-pending_confirmation: {"action": "create_task", "details": {"title": "Test Task", "priority_score": 50}}
+    pending_confirmation: {"action": "create_task", "details": {"title": "Test Task", "priority_score": 50}}
 """
 
-    orchestrator._extract_pending_confirmation(response_with_marker)
+    await orchestrator._extract_pending_confirmation(response_with_marker)
 
     assert orchestrator.pending_confirmation is not None
     assert orchestrator.pending_confirmation["action"] == "create_task"
@@ -107,7 +107,7 @@ async def test_pending_confirmation_invalid_json(orchestrator):
     """Test handling of invalid pending confirmation JSON."""
     response_with_bad_json = """pending_confirmation: {invalid json}"""
 
-    orchestrator._extract_pending_confirmation(response_with_bad_json)
+    await orchestrator._extract_pending_confirmation(response_with_bad_json)
 
     # Should not crash, pending_confirmation should remain None
     assert orchestrator.pending_confirmation is None

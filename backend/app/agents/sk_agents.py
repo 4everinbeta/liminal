@@ -28,7 +28,7 @@ def create_task_agent(kernel: Kernel, user_context: str = "") -> ChatCompletionA
 3. **NEVER say "Created task"** unless you are confirming a PAST action.
 4. **ALWAYS use the `pending_confirmation` marker** for ANY action.
 5. **KEEP IT SIMPLE.** Do not introduce yourself or explain your internal logic.
-6. **IGNORE items in [[CURRENT STATE]]** unless the user explicitly refers to them (e.g., "update that task"). If the user asks to "create a task", treat it as a NEW request.
+6. **CREATION OVERRIDE:** If the user says "create", "add", "new", or "remind me", TREAT IT AS A NEW TASK. Do NOT search for similar tasks in [[CURRENT STATE]]. Do NOT say "Review the status of...". Just draft the new task.
 
 **How to respond to a Task Creation request:**
 1. State the details you extracted.

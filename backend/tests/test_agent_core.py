@@ -14,7 +14,8 @@ async def test_agent_task_creation_flow():
     mock_result.scalar_one_or_none.return_value = User(id=mock_user_id, email="test@test.com", name="Test User")
     mock_session.execute.return_value = mock_result
 
-    with patch("app.agents.core.get_settings") as mock_settings:
+    with patch("app.agents.core.get_settings") as mock_settings, \
+         patch("app.agents.core.USE_SK_ORCHESTRATOR", True):
         mock_settings.return_value.llm_provider = "mock"
         
         service = AgentService(mock_session, mock_user_id)
@@ -53,17 +54,17 @@ async def test_agent_task_creation_flow():
         assert "Would you like" in resp1["content"]
         assert "session_id" in resp1
         
-        # 2. User responds "No"
+        # 2. User responds "Yes" to confirm
         # We need to simulate history being passed back (which the frontend does, and backend loads from DB if session_id provided)
         # But here we mock the LLM to just react to the last message for simplicity, assuming context is handled.
         # Actually, process_request loads history from DB. We mocked crud.get_chat_history?
         # We didn't mock get_chat_history in the previous test setup properly for multi-turn.
         # Let's just test the single turn where the user finally says "No".
         
-        resp2 = await service.process_request([{"role": "user", "content": "No"}], session_id="test-session")
+        resp2 = await service.process_request([{"role": "user", "content": "Yes"}], session_id="test-session")
         
         # Assertions
-        assert "Task created" in resp2["content"]
+        assert "Created task" in resp2["content"]
         # ... verify tool execution ...
 
 @pytest.mark.asyncio

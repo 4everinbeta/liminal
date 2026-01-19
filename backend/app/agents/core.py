@@ -108,7 +108,7 @@ class AgentService:
             if DEBUG_AGENT:
                 print("SK: Initializing orchestrator and agents")
 
-            self._sk_orchestrator = SKOrchestrator(self.session, self.user_id)
+            self._sk_orchestrator = SKOrchestrator(self.session, self.user_id, chat_session.id if chat_session else None)
 
             # Get context for agents
             user_context = await self._sk_orchestrator.get_active_tasks_context()

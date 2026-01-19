@@ -22,7 +22,9 @@ async def get_chat_history(
     if not chat_session:
         raise HTTPException(status_code=404, detail="Session not found")
     
-    return await crud.get_chat_history(session, session_id)
+    history = await crud.get_chat_history(session, session_id)
+    # Filter out internal state messages
+    return [msg for msg in history if not (msg.role == "system" and msg.content.startswith("SK_STATE:"))]
 
 @router.delete("/history/{session_id}", status_code=204)
 async def delete_chat_history(

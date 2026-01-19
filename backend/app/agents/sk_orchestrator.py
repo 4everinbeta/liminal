@@ -34,16 +34,18 @@ class SKOrchestrator:
     Uses AgentGroupChat to manage handoffs between specialized agents.
     """
 
-    def __init__(self, session: AsyncSession, user_id: str):
+    def __init__(self, session: AsyncSession, user_id: str, chat_session_id: Optional[str] = None):
         """
         Initialize SK orchestrator with database session and user context.
 
         Args:
             session: AsyncSession for database operations
             user_id: Current user's ID
+            chat_session_id: Optional ID of the persistent chat session
         """
         self.session = session
         self.user_id = user_id
+        self.chat_session_id = chat_session_id
         self.settings = get_settings()
 
         # Initialize Semantic Kernel
@@ -57,6 +59,51 @@ class SKOrchestrator:
         # Conversation state
         self.pending_confirmation: Optional[Dict[str, Any]] = None
         self.conversation_context: Dict[str, Any] = {}
+
+    async def save_state(self):
+        """Persist current state (pending_confirmation) to the chat history."""
+        if not self.chat_session_id:
+            return
+
+        import json
+        from .. import crud
+        
+        state = {
+            "pending_confirmation": self.pending_confirmation
+        }
+        content = f"SK_STATE: {json.dumps(state)}"
+        
+        # Save as a system message
+        await crud.add_chat_message(self.session, self.chat_session_id, "system", content)
+        if DEBUG_AGENT:
+            print(f"SK: Saved state to DB: {content}")
+
+    async def load_state(self):
+        """Load state from the chat history."""
+        if not self.chat_session_id:
+            return
+
+        import json
+        from .. import crud
+        
+        # Get history (simple fetch, filter in memory for now)
+        history = await crud.get_chat_history(self.session, self.chat_session_id)
+        
+        # Find last SK_STATE message
+        for msg in reversed(history):
+            if msg.role == "system" and msg.content.startswith("SK_STATE:"):
+                try:
+                    json_str = msg.content.replace("SK_STATE:", "").strip()
+                    state = json.loads(json_str)
+                    self.pending_confirmation = state.get("pending_confirmation")
+                    if DEBUG_AGENT:
+                        print(f"SK: Loaded state from DB: {state}")
+                    return
+                except Exception as e:
+                    print(f"SK: Failed to load state: {e}")
+        
+        if DEBUG_AGENT:
+            print("SK: No state found in DB")
 
     def _create_selection_strategy(self) -> KernelFunctionSelectionStrategy:
         """Create the selection strategy for agent orchestration."""
@@ -244,6 +291,9 @@ class SKOrchestrator:
         Returns:
             Agent's response as a string
         """
+        # Load state first
+        await self.load_state()
+
         if not self.group_chat:
             self.create_group_chat()
 
@@ -274,7 +324,10 @@ class SKOrchestrator:
 
             # Check if agent set pending confirmation
             if response.content and "pending_confirmation:" in response.content:
-                self._extract_pending_confirmation(response.content)
+                await self._extract_pending_confirmation(response.content)
+                # Stop immediately if we have a confirmation request
+                # This prevents the agent from "chatting" afterwards or the loop continuing
+                return response.content
 
         # Return the last response
         return responses[-1] if responses else "I'm not sure how to help with that."
@@ -309,12 +362,14 @@ class SKOrchestrator:
 
             # Clear pending confirmation
             self.pending_confirmation = None
+            await self.save_state()
 
             return result
 
         elif message_lower in ["no", "n", "cancel", "nevermind"]:
             # User cancelled
             self.pending_confirmation = None
+            await self.save_state()
             return "Okay, cancelled. What else can I help with?"
 
         else:
@@ -373,7 +428,7 @@ class SKOrchestrator:
         else:
             return f"Error: Unknown action '{action}'"
 
-    def _extract_pending_confirmation(self, content: str):
+    async def _extract_pending_confirmation(self, content: str):
         """
         Extract pending confirmation from agent response.
 
@@ -406,9 +461,12 @@ class SKOrchestrator:
 
                 if end_idx > 0:
                     self.pending_confirmation = json.loads(json_str[:end_idx])
-
+                    
                     if DEBUG_AGENT:
                         print(f"SK: Extracted pending confirmation: {self.pending_confirmation}")
+                    
+                    # Persist state
+                    await self.save_state()
 
             except (json.JSONDecodeError, ValueError) as e:
                 if DEBUG_AGENT:
@@ -431,6 +489,7 @@ class SKOrchestrator:
 
         context = "**Current Active Tasks:**\n"
         for task in active_tasks:
-            context += f"- {task.title} (ID: {task.id}, Status: {task.status})\n"
+            status_str = task.status.value if hasattr(task.status, "value") else str(task.status)
+            context += f"- {task.title} (ID: {task.id}, Status: {status_str})\n"
 
         return context

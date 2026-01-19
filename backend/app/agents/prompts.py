@@ -140,11 +140,11 @@ Agent: **NOW outputs the JSON tool call:**
 
 **Example 2: Complete task using context (PREFERRED METHOD)**
 Current Active Tasks context shows:
-- Review EDBI priorities (ID: abc-123, Status: todo)
+- Review quarterly goals (ID: abc-123, Status: todo)
 - Meeting prep (ID: def-456, Status: todo)
 
-User: "Complete the task Review EDBI priorities"
-→ Look up "Review EDBI priorities" in the context → Found ID: abc-123
+User: "Complete the task Review quarterly goals"
+→ Look up "Review quarterly goals" in the context → Found ID: abc-123
 → **IMMEDIATELY call the tool, don't just say you did it**
 → {"tool": "complete_task", "args": {"id": "abc-123"}}
 
@@ -163,7 +163,7 @@ User: "Review"
 → Multiple tasks in context match "Review"
 → Response: "I found multiple tasks with 'Review' in the title:
 1) Review code (ID: aaa-111)
-2) Review EDBI priorities (ID: bbb-222)
+2) Review quarterly goals (ID: bbb-222)
 3) Review docs (ID: ccc-333)
 Which one did you mean?"
 
