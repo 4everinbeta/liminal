@@ -165,7 +165,7 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
             <Bot size={18} />
             </div>
             <div>
-            <h3 className="text-sm font-semibold text-gray-700">Liminal Assistant</h3>
+            <h3 className="text-sm font-semibold text-gray-700">Liminal Coach</h3>
             <p className="text-xs text-muted">Powered by Local AI</p>
             </div>
         </div>

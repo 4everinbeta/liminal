@@ -21,6 +21,7 @@ export default function GlobalChatWidget() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            data-testid="chat-widget-container"
             className="w-[350px] md:w-[400px] bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden"
           >
             <div className="flex items-center justify-between p-3 border-b border-gray-100 bg-gray-50/80">
@@ -43,6 +44,7 @@ export default function GlobalChatWidget() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
+        aria-label="Open Chat"
         className={`p-4 rounded-full shadow-lg transition-colors ${
             isOpen ? 'bg-gray-800 text-white' : 'bg-primary text-white hover:bg-primary/90'
         }`}
