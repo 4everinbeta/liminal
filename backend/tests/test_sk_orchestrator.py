@@ -87,8 +87,11 @@ async def test_register_agent(orchestrator):
 async def test_pending_confirmation_storage(orchestrator):
     """Test extracting and storing pending confirmations."""
     response_with_marker = """I'll create a task with these details:
-- Title: Test Task
-- Priority: 50 (Medium)
+**Test Task**
+❗ Priority: 50 (Medium)
+⭐ Value: 50
+⏳ Effort: 50
+📅 Due: Not set
 
 Would you like me to create this task?
 

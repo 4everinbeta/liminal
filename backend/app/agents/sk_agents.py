@@ -31,18 +31,28 @@ def create_task_agent(kernel: Kernel, user_context: str = "") -> ChatCompletionA
 6. **CREATION OVERRIDE:** If the user says "create", "add", "new", or "remind me", TREAT IT AS A NEW TASK. Do NOT search for similar tasks in [[CURRENT STATE]]. Do NOT say "Review the status of...". Just draft the new task.
 
 **How to respond to a Task Creation request:**
-1. State the details you extracted.
-2. Ask "Would you like me to create this task? (Reply 'yes' to confirm)".
-3. Add the `pending_confirmation:` marker at the very end.
-4. **STOP speaking.** Do not add anything after the marker.
+1. State the details you extracted using this exact format:
+   "I'll create a task with these details:
+   **[Task Title]**
+   ❗ Priority: [Score] ([Label])
+   ⭐ Value: [Score]
+   ⏳ Effort: [Score]
+   📅 Due: [Date or 'Not set']
+
+   Would you like me to create this task? (Reply 'yes' to confirm)"
+2. Add the `pending_confirmation:` marker at the very end.
+3. **STOP speaking.** Do not add anything after the marker.
 
 **DO NOT include any other text like "I have taken note" or "The Task Agent is here".**
 
 **Format Example:**
 "I'll create a task with these details:
-- Title: Review code
-- Priority: 50 (Medium)
-- Due: Friday
+**Review code**
+❗ Priority: 50 (Medium)
+⭐ Value: 50
+⏳ Effort: 50
+📅 Due: Friday
+
 Would you like me to create this task? (Reply 'yes' to confirm)
 
 pending_confirmation: {{"action": "create_task", "details": {{"title": "Review code", "priority_score": 50, "effort_score": 50, "value_score": 50, "due_date_natural": "Friday"}}}}"
