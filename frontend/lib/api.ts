@@ -259,8 +259,8 @@ export function parseQuickCapture(input: string): TaskCreate {
 /**
  * Lightweight LLM client for local/dev use (OpenAI-compatible).
  */
-export async function chatWithLlm(messages: ChatMessage[], sessionId?: string): Promise<{ content: string; session_id: string }> {
-  const data = await request<{ content: string; session_id: string }>(`${API_BASE_URL}/llm/chat`, {
+export async function chatWithLlm(messages: ChatMessage[], sessionId?: string): Promise<{ content: string; session_id: string; pending_confirmation?: any }> {
+  const data = await request<{ content: string; session_id: string; pending_confirmation?: any }>(`${API_BASE_URL}/llm/chat`, {
     method: 'POST',
     body: JSON.stringify({ messages, session_id: sessionId }),
   });

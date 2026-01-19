@@ -23,6 +23,7 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [pendingConfirmation, setPendingConfirmation] = useState<any>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // Load session on mount
@@ -57,11 +58,12 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [messages])
+  }, [messages, pendingConfirmation])
 
   const handleReset = () => {
       localStorage.removeItem('liminal_chat_session_id')
       setSessionId(null)
+      setPendingConfirmation(null)
       setMessages([{ role: 'assistant', content: 'Hello! I am Liminal. I can help you add tasks, answer questions, or track your progress.' }])
   }
 
@@ -97,14 +99,17 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
     return false
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || loading) return
+  const handleSubmit = async (e?: React.FormEvent, messageOverride?: string) => {
+    if (e) e.preventDefault()
+    
+    const textToSend = messageOverride || input
+    if (!textToSend.trim() || loading) return
 
-    const userMsg: ChatMessage = { role: 'user', content: input.trim() }
+    const userMsg: ChatMessage = { role: 'user', content: textToSend.trim() }
     setMessages(prev => [...prev, userMsg])
     setInput('')
     setLoading(true)
+    setPendingConfirmation(null) // Clear confirmation on new message
 
     try {
       // Build context: System Prompt + Last 5 messages
@@ -120,6 +125,11 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
       if (response.session_id && response.session_id !== sessionId) {
           setSessionId(response.session_id)
           localStorage.setItem('liminal_chat_session_id', response.session_id)
+      }
+
+      // Check for pending confirmation in response
+      if (response.pending_confirmation) {
+          setPendingConfirmation(response.pending_confirmation)
       }
 
       const responseContent = response.content
@@ -157,6 +167,18 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
     }
   }
 
+  const handleEditConfirmation = () => {
+      if (!pendingConfirmation || !pendingConfirmation.details) return
+      
+      const d = pendingConfirmation.details
+      let editMsg = `Modify pending task: Change title to "${d.title}"`
+      if (d.priority_score) editMsg += `, priority to ${d.priority_score}`
+      // Pre-fill input for user to tweak
+      setInput(editMsg)
+      setPendingConfirmation(null) // Dismiss buttons so user can edit
+      // Focus input would be ideal here but sticking to React state flow
+  }
+
   return (
     <div className="flex flex-col h-[400px] bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
       <div className="bg-gray-50/50 p-3 border-b border-gray-100 flex items-center justify-between">
@@ -192,7 +214,7 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
               {msg.role === 'user' ? <UserIcon size={16} /> : <Bot size={16} />}
             </div>
             
-            <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
+            <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm whitespace-pre-wrap ${
               msg.role === 'user' 
                 ? 'bg-secondary text-white rounded-tr-none' 
                 : 'bg-gray-100 text-gray-700 rounded-tl-none'
@@ -201,6 +223,29 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
             </div>
           </motion.div>
         ))}
+        
+        {pendingConfirmation && (
+            <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="flex justify-start pl-11 gap-2">
+                <button 
+                    onClick={() => handleSubmit(undefined, "Yes")}
+                    className="px-4 py-1.5 bg-green-600 text-white text-xs rounded-full hover:bg-green-700 transition-colors shadow-sm"
+                >
+                    Yes
+                </button>
+                <button 
+                    onClick={() => handleSubmit(undefined, "No")}
+                    className="px-4 py-1.5 bg-red-500 text-white text-xs rounded-full hover:bg-red-600 transition-colors shadow-sm"
+                >
+                    No
+                </button>
+                <button 
+                    onClick={handleEditConfirmation}
+                    className="px-4 py-1.5 bg-gray-200 text-gray-700 text-xs rounded-full hover:bg-gray-300 transition-colors shadow-sm"
+                >
+                    Edit
+                </button>
+            </motion.div>
+        )}
         
         {loading && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3">
@@ -214,7 +259,7 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="p-3 border-t border-gray-100 bg-white flex gap-2">
+      <form onSubmit={(e) => handleSubmit(e)} className="p-3 border-t border-gray-100 bg-white flex gap-2">
         <input
           type="text"
           value={input}
