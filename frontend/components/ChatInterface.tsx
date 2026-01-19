@@ -266,18 +266,29 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
         )}
       </div>
 
-      <form onSubmit={(e) => handleSubmit(e)} className="p-3 border-t border-gray-100 bg-white flex gap-2">
-        <input
-          type="text"
+      <form onSubmit={(e) => handleSubmit(e)} className="p-3 border-t border-gray-100 bg-white flex gap-2 items-end">
+        <textarea
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            e.target.style.height = 'auto';
+            e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSubmit();
+            }
+          }}
           placeholder="Type 'Add task buy milk'..."
-          className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
+          rows={1}
+          className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm resize-none overflow-y-auto"
+          style={{ maxHeight: '120px' }}
         />
         <button
           type="submit"
           disabled={loading || !input.trim()}
-          className="p-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 h-[38px] bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
         >
           <Send size={18} />
         </button>
