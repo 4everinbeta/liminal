@@ -58,7 +58,7 @@ export async function GET(req: Request) {
     process.env.OIDC_POST_LOGOUT_REDIRECT_URI ||
     `${origin}/login`
 
-  const oidcScope = process.env.NEXT_PUBLIC_OIDC_SCOPE || process.env.OIDC_SCOPE || 'openid profile email'
+  const oidcScope = process.env.NEXT_PUBLIC_OIDC_SCOPE || process.env.OIDC_SCOPE || 'openid profile email offline_access'
 
   const oidcEnabled = Boolean(oidcAuthority && oidcClientId)
   const authRequired = toBool(process.env.NEXT_PUBLIC_AUTH_REQUIRED, oidcEnabled)
