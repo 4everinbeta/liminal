@@ -54,7 +54,12 @@ async def chat_with_llm(
     
     try:
         result = await agent.process_request(messages, session_id=payload.session_id)
-        return ChatResponse(content=result["content"], session_id=result["session_id"])
+        return ChatResponse(
+            content=result["content"], 
+            session_id=result["session_id"],
+            pending_confirmation=result.get("pending_confirmation"),
+            confirmation_options=result.get("confirmation_options")
+        )
     except ValueError as exc:
         # Configuration errors (missing env vars, invalid settings)
         print(f"Agent Configuration Error: {exc}")

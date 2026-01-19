@@ -24,6 +24,7 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [pendingConfirmation, setPendingConfirmation] = useState<any>(null)
+  const [confirmationOptions, setConfirmationOptions] = useState<string[]>([])
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // Load session on mount
@@ -64,6 +65,7 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
       localStorage.removeItem('liminal_chat_session_id')
       setSessionId(null)
       setPendingConfirmation(null)
+      setConfirmationOptions([])
       setMessages([{ role: 'assistant', content: 'Hello! I am Liminal. I can help you add tasks, answer questions, or track your progress.' }])
   }
 
@@ -110,6 +112,7 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
     setInput('')
     setLoading(true)
     setPendingConfirmation(null) // Clear confirmation on new message
+    setConfirmationOptions([])
 
     try {
       // Build context: System Prompt + Last 5 messages
@@ -130,6 +133,7 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
       // Check for pending confirmation in response
       if (response.pending_confirmation) {
           setPendingConfirmation(response.pending_confirmation)
+          setConfirmationOptions(response.confirmation_options || ["Yes", "No", "Edit"])
       }
 
       const responseContent = response.content
@@ -176,7 +180,15 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
       // Pre-fill input for user to tweak
       setInput(editMsg)
       setPendingConfirmation(null) // Dismiss buttons so user can edit
-      // Focus input would be ideal here but sticking to React state flow
+      setConfirmationOptions([])
+  }
+
+  const handleOptionClick = (option: string) => {
+      if (option === "Edit") {
+          handleEditConfirmation()
+      } else {
+          handleSubmit(undefined, option)
+      }
   }
 
   return (
@@ -224,26 +236,21 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
           </motion.div>
         ))}
         
-        {pendingConfirmation && (
+        {pendingConfirmation && confirmationOptions.length > 0 && (
             <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="flex justify-start pl-11 gap-2">
-                <button 
-                    onClick={() => handleSubmit(undefined, "Yes")}
-                    className="px-4 py-1.5 bg-green-600 text-white text-xs rounded-full hover:bg-green-700 transition-colors shadow-sm"
-                >
-                    Yes
-                </button>
-                <button 
-                    onClick={() => handleSubmit(undefined, "No")}
-                    className="px-4 py-1.5 bg-red-500 text-white text-xs rounded-full hover:bg-red-600 transition-colors shadow-sm"
-                >
-                    No
-                </button>
-                <button 
-                    onClick={handleEditConfirmation}
-                    className="px-4 py-1.5 bg-gray-200 text-gray-700 text-xs rounded-full hover:bg-gray-300 transition-colors shadow-sm"
-                >
-                    Edit
-                </button>
+                {confirmationOptions.map(option => (
+                    <button 
+                        key={option}
+                        onClick={() => handleOptionClick(option)}
+                        className={`px-4 py-1.5 text-xs rounded-full shadow-sm transition-colors ${
+                            option === 'Yes' ? 'bg-green-600 text-white hover:bg-green-700' :
+                            option === 'No' ? 'bg-red-500 text-white hover:bg-red-600' :
+                            'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                    >
+                        {option}
+                    </button>
+                ))}
             </motion.div>
         )}
         

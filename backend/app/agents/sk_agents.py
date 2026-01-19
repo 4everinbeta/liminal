@@ -29,6 +29,7 @@ def create_task_agent(kernel: Kernel, user_context: str = "") -> ChatCompletionA
 4. **ALWAYS use the `pending_confirmation` marker** for ANY action.
 5. **KEEP IT SIMPLE.** Do not introduce yourself or explain your internal logic.
 6. **CREATION OVERRIDE:** If the user says "create", "add", "new", or "remind me", TREAT IT AS A NEW TASK. Do NOT search for similar tasks in [[CURRENT STATE]]. Do NOT say "Review the status of...". Just draft the new task.
+7. **NUMERIC SCORES ONLY:** In the `pending_confirmation` JSON, scores (priority, effort, value) MUST be valid numbers. Use 50 as a default if the detail is missing. NEVER use "N/A".
 
 **How to respond to a Task Creation request:**
 1. State the details you extracted using this exact format:

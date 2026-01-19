@@ -217,4 +217,6 @@ class ChatRequest(SQLModel):
 class ChatResponse(SQLModel):
     content: str
     session_id: Optional[str] = None
+    pending_confirmation: Optional[dict] = None
+    confirmation_options: Optional[List[str]] = None
 

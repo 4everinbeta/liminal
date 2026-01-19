@@ -315,19 +315,24 @@ class SKOrchestrator:
 
         # Get agent responses
         responses = []
-        async for response in self.group_chat.invoke():
-            if DEBUG_AGENT:
-                print(f"SK: {response.name}: {response.content}")
+        try:
+            async for response in self.group_chat.invoke():
+                if DEBUG_AGENT:
+                    print(f"SK: {response.name}: {response.content}")
 
-            if response.content and response.content.strip():
-                responses.append(response.content)
+                if response.content and response.content.strip():
+                    responses.append(response.content)
 
-            # Check if agent set pending confirmation
-            if response.content and "pending_confirmation:" in response.content:
-                await self._extract_pending_confirmation(response.content)
-                # Stop immediately if we have a confirmation request
-                # This prevents the agent from "chatting" afterwards or the loop continuing
-                return response.content
+                # Check if agent set pending confirmation
+                if response.content and "pending_confirmation:" in response.content:
+                    await self._extract_pending_confirmation(response.content)
+                    # Stop immediately if we have a confirmation request
+                    # This prevents the agent from "chatting" afterwards or the loop continuing
+                    return response.content
+        finally:
+            # Crucial: reset active state so we can add more messages in the next turn
+            if self.group_chat:
+                self.group_chat.clear_activity_signal()
 
         # Return the last response
         return responses[-1] if responses else "I'm not sure how to help with that."

@@ -75,7 +75,11 @@ class AgentService:
         if response:
             await crud.add_chat_message(self.session, chat_session.id, "assistant", response)
 
-        return {"content": response, "session_id": chat_session.id}
+        return {
+            "content": response, 
+            "session_id": chat_session.id,
+            "confirmation_options": ["Yes", "No", "Edit"] if "Would you like me to create this task?" in response else None
+        }
 
     async def _process_with_sk_orchestrator(self, message: str, session_id: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -149,7 +153,12 @@ class AgentService:
 
             await crud.add_chat_message(self.session, chat_session.id, "assistant", clean_response)
 
-        return {"content": clean_response, "session_id": chat_session.id}
+        return {
+            "content": clean_response, 
+            "session_id": chat_session.id,
+            "pending_confirmation": self._sk_orchestrator.pending_confirmation if self._sk_orchestrator else None,
+            "confirmation_options": ["Yes", "No", "Edit"] if self._sk_orchestrator and self._sk_orchestrator.pending_confirmation else None
+        }
 
     async def _call_llm(self, messages: List[Dict[str, str]], model: Optional[str] = None) -> str:
         base_url = self.settings.llm_base_url
