@@ -58,7 +58,7 @@ export default function AppSidebar() {
           {navItems.map((item) => {
             const isActive = pathname === item.href
             return (
-              <Link key={item.href} href={item.href}>
+              <Link key={item.href} href={item.href} aria-label={item.label}>
                 <div className={`relative flex items-center h-12 px-4 cursor-pointer transition-colors ${
                     isActive ? 'bg-primary/10 text-primary' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                 }`}>

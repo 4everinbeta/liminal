@@ -46,6 +46,8 @@ test.describe('Chat Interface', () => {
 
     await page.route('**/themes', async route => route.fulfill({ json: [] }));
     await page.route('**/users', async route => route.fulfill({ json: { id: 'demo-user' } }));
+    await page.route('**/api/config', async route => route.fulfill({ json: { authRequired: false } }));
+    await page.route('**/llm/history/**', async route => route.fulfill({ json: [] }));
     
     // Default LLM Mock
     await page.route('**/llm/chat', async route => {
@@ -63,7 +65,7 @@ test.describe('Chat Interface', () => {
     const fab = page.locator('.fixed.bottom-6.right-6 button');
     await fab.click();
 
-    await expect(page.getByText('Liminal Assistant')).toBeVisible();
+    await expect(page.getByText('Liminal Coach')).toBeVisible();
   });
 
   test('should display chat interface elements', async ({ page }) => {

@@ -6,7 +6,9 @@ test.describe('Focus Mode Page', () => {
       localStorage.setItem('liminal_token', 'e2e-token');
     });
 
-    await page.route('**/tasks**', async route => {
+    await page.route('**/api/config', async route => route.fulfill({ json: { authRequired: false } }));
+
+    await page.route(/.*\/tasks.*/, async route => {
       const { method, url } = route.request();
       if (method === 'GET' && url.includes('/tasks')) {
         await route.fulfill({ json: [
@@ -31,6 +33,9 @@ test.describe('Focus Mode Page', () => {
       }
       await route.continue();
     });
+
+    await page.route('**/themes', async route => route.fulfill({ json: [] }));
+    await page.route('**/users', async route => route.fulfill({ json: { id: 'demo-user' } }));
 
     await page.goto('/focus');
   });

@@ -27,6 +27,7 @@ test.describe('Horizon View - Kanban Board', () => {
     
     await page.route('**/users', async route => route.fulfill({ json: { id: 'demo-user' } }));
     await page.route('**/auth/login', async route => route.fulfill({ json: { access_token: 'fake-jwt' } }));
+    await page.route('**/api/config', async route => route.fulfill({ json: { authRequired: false } }));
 
     await page.goto('/board');
   });
@@ -57,6 +58,6 @@ test.describe('Horizon View - Kanban Board', () => {
   test('should have link back to Focus Mode', async ({ page }) => {
     const link = page.getByRole('link', { name: 'Focus Mode' });
     await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute('href', '/');
+    await expect(link).toHaveAttribute('href', '/focus');
   });
 });

@@ -35,6 +35,7 @@ test.describe('Quick Capture', () => {
 
     await page.route('**/users', async route => route.fulfill({ json: { id: 'demo-user' } }));
     await page.route('**/auth/login', async route => route.fulfill({ json: { access_token: 'fake-jwt' } }));
+    await page.route('**/api/config', async route => route.fulfill({ json: { authRequired: false } }));
 
     await page.goto('/');
     await page.waitForTimeout(500);

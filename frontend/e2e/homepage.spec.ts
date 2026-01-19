@@ -14,6 +14,10 @@ test.describe('Homepage - Task List View', () => {
       await route.continue();
     });
 
+    await page.route('**/themes', async route => route.fulfill({ json: [] }));
+    await page.route('**/users', async route => route.fulfill({ json: { id: 'demo-user' } }));
+    await page.route('**/api/config', async route => route.fulfill({ json: { authRequired: false } }));
+
     await page.goto('/');
     await page.waitForTimeout(500);
   });
