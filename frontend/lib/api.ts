@@ -207,19 +207,21 @@ export async function deleteTheme(themeId: string): Promise<void> {
 /**
  * Quick Capture Parser
  */
+import { calculateSmartDefaults } from './smartDefaults'
+
 export function parseQuickCapture(input: string): TaskCreate {
   let title = input.trim();
-  let priority_score = 50;
-  let priority: 'high' | 'medium' | 'low' = 'medium';
+  let priority_score: number | undefined;
+  let priority: 'high' | 'medium' | 'low' | undefined;
   let estimated_duration: number | undefined;
-  let value_score = 50;
+  let value_score: number | undefined;
 
   // Priority (allow !high/!medium/!low as shorthand)
   const priorityMatch = title.match(/!(high|medium|low)/i);
   if (priorityMatch) {
     const label = priorityMatch[1].toLowerCase();
     priority_score = label === 'high' ? 90 : label === 'medium' ? 60 : 30;
-    priority = label as typeof priority;
+    priority = label as 'high' | 'medium' | 'low';
     title = title.replace(/!(high|medium|low)/i, '').trim();
   }
   const priorityNumMatch = title.match(/p:(\d+)/i);
@@ -245,14 +247,20 @@ export function parseQuickCapture(input: string): TaskCreate {
     title = title.replace(/v:(\d+)/i, '').trim();
   }
 
-  return {
+  // Apply smart defaults first
+  const baseDefaults = calculateSmartDefaults({
     title,
-    priority,
-    priority_score,
     estimated_duration,
-    effort_score: estimated_duration,
-    value_score,
-    status: 'backlog',
+  })
+
+  // User-specified values override smart defaults
+  return {
+    ...baseDefaults,
+    title, // Always use cleaned title
+    ...(priority !== undefined ? { priority } : {}),
+    ...(priority_score !== undefined ? { priority_score } : {}),
+    ...(value_score !== undefined ? { value_score } : {}),
+    ...(estimated_duration !== undefined ? { estimated_duration, effort_score: estimated_duration } : {}),
   };
 }
 
