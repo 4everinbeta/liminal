@@ -1,7 +1,7 @@
 'use client'
 
-import { Task } from '@/lib/api'
-import { useState } from 'react'
+import { Task, Theme, getThemes } from '@/lib/api'
+import { useState, useEffect } from 'react'
 
 interface EditTaskModalProps {
   task: Task
@@ -11,6 +11,19 @@ interface EditTaskModalProps {
 
 export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalProps) {
   const [editedTask, setEditedTask] = useState<Task>(task)
+  const [themes, setThemes] = useState<Theme[]>([])
+
+  useEffect(() => {
+    const loadThemes = async () => {
+      try {
+        const t = await getThemes()
+        setThemes(t)
+      } catch (err) {
+        console.error('Failed to load themes', err)
+      }
+    }
+    loadThemes()
+  }, [])
 
   // Convert ISO datetime to YYYY-MM-DD format for date input
   const toDateInputValue = (dateString?: string) => {
@@ -53,7 +66,8 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
   return (
     <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
         <div className="bg-white p-6 rounded-2xl shadow-xl max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4">Edit Task</h3>
+            <h3 className="text-lg font-bold mb-1">Edit Task</h3>
+            <p className="text-sm text-gray-500 mb-4">All fields are optional. Add details when you're ready.</p>
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label className="block text-xs font-bold uppercase text-muted mb-1">Title</label>
@@ -88,22 +102,22 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="block text-xs font-bold uppercase text-muted mb-1">Value (1-100)</label>
-                        <input 
-                            type="number" min="1" max="100" 
+                        <input
+                            type="number" min="0" max="100"
                             className="w-full p-2 border rounded-lg"
                             value={editedTask.value_score || ''}
-                            onChange={e => setEditedTask({...editedTask, value_score: parseInt(e.target.value)})}
-                            required
+                            onChange={e => setEditedTask({...editedTask, value_score: parseInt(e.target.value) || 0})}
+                            placeholder="Optional"
                         />
                     </div>
                     <div>
                         <label className="block text-xs font-bold uppercase text-muted mb-1">Effort (1-100)</label>
-                        <input 
-                            type="number" min="1" max="100"
+                        <input
+                            type="number" min="0" max="100"
                             className="w-full p-2 border rounded-lg"
                             value={editedTask.effort_score || ''}
-                            onChange={e => setEditedTask({...editedTask, effort_score: parseInt(e.target.value), estimated_duration: parseInt(e.target.value)})}
-                            required
+                            onChange={e => setEditedTask({...editedTask, effort_score: parseInt(e.target.value) || 0, estimated_duration: parseInt(e.target.value) || 0})}
+                            placeholder="Optional"
                         />
                     </div>
                 </div>
@@ -128,6 +142,31 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                                 {p}
                             </button>
                         ))}
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-xs font-bold uppercase text-muted mb-1">Theme</label>
+                        <select
+                            className="w-full p-2 border rounded-lg text-sm"
+                            value={editedTask.theme_id || ''}
+                            onChange={e => setEditedTask({...editedTask, theme_id: e.target.value || undefined})}
+                        >
+                            <option value="">No theme</option>
+                            {themes.map(theme => (
+                                <option key={theme.id} value={theme.id}>{theme.title}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold uppercase text-muted mb-1">Initiative</label>
+                        <select
+                            className="w-full p-2 border rounded-lg text-sm"
+                            value={editedTask.initiative_id || ''}
+                            onChange={e => setEditedTask({...editedTask, initiative_id: e.target.value || undefined})}
+                        >
+                            <option value="">No initiative</option>
+                        </select>
                     </div>
                 </div>
                 <div>
