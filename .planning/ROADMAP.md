@@ -31,10 +31,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can drag tasks between states without blocking modals
   4. Task scoring happens automatically (no manual 1-100 sliders required)
   5. Themes and initiatives are optional (not required for basic task creation)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD during planning
+- [ ] 01-01-PLAN.md — Smart defaults and form simplification (title-only with auto-calculated scores)
+- [ ] 01-02-PLAN.md — Remove board friction (frictionless drag-drop, optional themes)
+- [ ] 01-03-PLAN.md — Dashboard consolidation (focus-first, unified interface, remove pause)
 
 ### Phase 2: Capture & Feedback
 **Goal**: Users can capture thoughts instantly (<5 seconds) and receive immediate dopamine hits on completion
@@ -126,7 +128,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/0 | Not started | - |
+| 1. Foundation | 0/3 | Planned | - |
 | 2. Capture & Feedback | 0/0 | Not started | - |
 | 3. Urgency System | 0/0 | Not started | - |
 | 4. Gamification | 0/0 | Not started | - |
