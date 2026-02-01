@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Plus, Clock, BarChart2, AlertCircle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Plus, ChevronDown, ChevronUp, Calendar, FileText } from 'lucide-react'
 import { createTask, TaskCreate } from '@/lib/api'
+import { calculateSmartDefaults } from '@/lib/smartDefaults'
 
 interface TaskFormProps {
   onTaskCreated?: () => void
@@ -11,34 +12,61 @@ interface TaskFormProps {
 
 export default function TaskForm({ onTaskCreated }: TaskFormProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState<TaskCreate>({
-    title: '',
-    priority: 'medium',
-    estimated_duration: 30,
-    value_score: 50,
-    status: 'backlog'
-  })
+
+  // Only track user-provided fields
+  const [title, setTitle] = useState('')
+  const [dueDate, setDueDate] = useState('')
+  const [duration, setDuration] = useState<number>(30)
+  const [description, setDescription] = useState('')
+  const [priorityPreset, setPriorityPreset] = useState<'today' | 'week' | 'later'>('week')
+  const [valuePreset, setValuePreset] = useState<'quick' | 'standard' | 'big'>('standard')
+  const [durationPreset, setDurationPreset] = useState<'quick' | 'medium' | 'long' | 'custom'>('medium')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
-      await createTask(formData)
-      setFormData({
-        title: '',
-        priority: 'medium',
-        estimated_duration: 30,
-        value_score: 50,
-        status: 'backlog'
-      })
+      // Build partial task from user input
+      const partialTask: Partial<TaskCreate> = {
+        title,
+        description: description || undefined,
+        due_date: dueDate || undefined,
+        estimated_duration: duration,
+      }
+
+      // Apply smart defaults
+      const taskWithDefaults = calculateSmartDefaults(partialTask)
+
+      // Create the task
+      await createTask(taskWithDefaults)
+
+      // Reset form
+      setTitle('')
+      setDueDate('')
+      setDuration(30)
+      setDescription('')
+      setPriorityPreset('week')
+      setValuePreset('standard')
+      setDurationPreset('medium')
+      setShowAdvanced(false)
       setIsOpen(false)
+
       if (onTaskCreated) onTaskCreated()
     } catch (error) {
       console.error('Failed to create task:', error)
     } finally {
       setLoading(false)
     }
+  }
+
+  // Update duration when preset changes
+  const handleDurationPresetChange = (preset: typeof durationPreset) => {
+    setDurationPreset(preset)
+    if (preset === 'quick') setDuration(15)
+    else if (preset === 'medium') setDuration(30)
+    else if (preset === 'long') setDuration(60)
   }
 
   if (!isOpen) {
@@ -60,6 +88,7 @@ export default function TaskForm({ onTaskCreated }: TaskFormProps) {
       className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Title - always visible (only required field) */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Task Title
@@ -67,77 +96,130 @@ export default function TaskForm({ onTaskCreated }: TaskFormProps) {
           <input
             type="text"
             required
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             placeholder="What needs to be done?"
             autoFocus
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-              <Clock size={14} />
-              Duration (min)
-            </label>
-            <input
-              type="number"
-              min="5"
-              step="5"
-              value={formData.estimated_duration}
-              onChange={(e) =>
-                setFormData({ ...formData, estimated_duration: parseInt(e.target.value) || 0 })
-              }
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
-          </div>
+        {/* Progressive disclosure toggle */}
+        <button
+          type="button"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="text-sm text-primary hover:text-primary/80 transition-colors font-medium flex items-center gap-1"
+        >
+          {showAdvanced ? (
+            <>
+              <ChevronUp size={16} />
+              Hide details
+            </>
+          ) : (
+            <>
+              <ChevronDown size={16} />
+              Add details
+            </>
+          )}
+        </button>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-              <BarChart2 size={14} />
-              Value Score
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="100"
-              value={formData.value_score}
-              onChange={(e) =>
-                setFormData({ ...formData, value_score: parseInt(e.target.value) || 50 })
-              }
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
-          </div>
-        </div>
+        {/* Advanced fields - progressive disclosure */}
+        <AnimatePresence>
+          {showAdvanced && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-4 overflow-hidden"
+            >
+              {/* Due Date */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                  <Calendar size={14} />
+                  Due Date (optional)
+                </label>
+                <input
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-            <AlertCircle size={14} />
-            Priority
-          </label>
-          <div className="flex gap-2">
-            {(['low', 'medium', 'high'] as const).map((p) => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => setFormData({ ...formData, priority: p })}
-                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium capitalize border transition-colors ${
-                  formData.priority === p
-                    ? 'bg-primary text-white border-primary'
-                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-                }`}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-        </div>
+              {/* Duration Presets */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Duration
+                </label>
+                <div className="flex gap-2 mb-2">
+                  {(['quick', 'medium', 'long'] as const).map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => handleDurationPresetChange(preset)}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium capitalize border transition-colors ${
+                        durationPreset === preset
+                          ? 'bg-primary text-white border-primary'
+                          : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      {preset === 'quick' && 'Quick (15m)'}
+                      {preset === 'medium' && 'Medium (30m)'}
+                      {preset === 'long' && 'Long (60m)'}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setDurationPreset('custom')}
+                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${
+                      durationPreset === 'custom'
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    Custom
+                  </button>
+                </div>
+                {durationPreset === 'custom' && (
+                  <input
+                    type="number"
+                    min="5"
+                    step="5"
+                    value={duration}
+                    onChange={(e) => setDuration(parseInt(e.target.value) || 30)}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    placeholder="Minutes"
+                  />
+                )}
+              </div>
 
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                  <FileText size={14} />
+                  Description (optional)
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                  placeholder="Additional details..."
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Submit buttons */}
         <div className="flex gap-3 pt-2">
           <button
             type="button"
-            onClick={() => setIsOpen(false)}
+            onClick={() => {
+              setIsOpen(false)
+              setShowAdvanced(false)
+            }}
             className="flex-1 py-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors font-medium"
           >
             Cancel
