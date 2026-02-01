@@ -50,10 +50,13 @@ Plans:
   5. Task completion triggers confetti animation
   6. Form data auto-saves every 2 seconds (no data loss on distraction)
   7. All user actions show immediate visual response (<200ms perceived lag)
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 02-01: TBD during planning
+- [ ] 02-01-PLAN.md — Foundation hooks (draft preservation, voice input, auto-save utilities)
+- [ ] 02-02-PLAN.md — Confetti and keyboard shortcuts (celebration animations, Cmd/Ctrl+N)
+- [ ] 02-03-PLAN.md — Global quick capture (FAB, modal, voice integration, optimistic creation)
+- [ ] 02-04-PLAN.md — Task completion celebration (confetti on complete, satisfying animations)
 
 ### Phase 3: Urgency System
 **Goal**: Users experience visual time pressure that creates NOW-ness and activates ADHD focus
@@ -129,7 +132,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 0/3 | Planned | - |
-| 2. Capture & Feedback | 0/0 | Not started | - |
+| 2. Capture & Feedback | 0/4 | Planned | - |
 | 3. Urgency System | 0/0 | Not started | - |
 | 4. Gamification | 0/0 | Not started | - |
 | 5. Forgiveness | 0/0 | Not started | - |
