@@ -1,0 +1,484 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage:
+  scripts/gsd-ollama discuss-phase <N> --model <ollama-model>
+  scripts/gsd-ollama plan-phase <N> --model <ollama-model>
+  scripts/gsd-ollama execute-phase <N> --model <ollama-model>
+  scripts/gsd-ollama verify-phase <N> --model <ollama-model>
+
+Examples:
+  scripts/gsd-ollama discuss-phase 2 --model qwen3-coder:latest
+  scripts/gsd-ollama plan-phase 2 --model qwen3-coder:latest
+  scripts/gsd-ollama execute-phase 2 --model qwen3-coder:latest
+  scripts/gsd-ollama verify-phase 2 --model glm-4.7-flash:latest
+
+Notes:
+  - Reads planning docs from .planning/
+  - Writes artifacts into .planning/phases/<NN>-<slug>/
+  - execute-phase generates and applies a unified diff (auto-edits files)
+EOF
+}
+
+die() {
+  echo "error: $*" >&2
+  exit 1
+}
+
+require_cmd() {
+  command -v "$1" >/dev/null 2>&1 || die "missing command: $1"
+}
+
+require_repo_clean_or_confirm() {
+  if ! command -v git >/dev/null 2>&1; then
+    die "missing command: git (required for execute-phase)"
+  fi
+  if [[ ! -d .git ]]; then
+    die "execute-phase requires running inside a git repo"
+  fi
+
+  local status
+  status="$(git status --porcelain)"
+  if [[ -n "${status:-}" ]]; then
+    echo "Working tree is not clean:" >&2
+    echo "$status" >&2
+    echo "" >&2
+    read -r -p "Continue anyway and apply a patch on top of these changes? [y/N] " yn
+    case "${yn:-}" in
+      y|Y) ;;
+      *) die "aborted" ;;
+    esac
+  fi
+}
+
+slugify() {
+  # shellcheck disable=SC2001
+  echo "$1" \
+    | tr '[:upper:]' '[:lower:]' \
+    | sed -E 's/&/ and /g; s/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'
+}
+
+read_file_or_die() {
+  local path="$1"
+  [[ -f "$path" ]] || die "missing file: $path"
+  cat "$path"
+}
+
+ollama_run() {
+  local model="$1"
+  shift
+  local prompt="$1"
+  printf "%s" "$prompt" | ollama run "$model"
+}
+
+phase_title_from_roadmap() {
+  local phase="$1"
+  # Match: "### Phase 2: Capture & Feedback"
+  # Print: "Capture & Feedback"
+  awk -v phase="$phase" '
+    $0 ~ "^### Phase " phase ":" {
+      sub("^### Phase " phase ": *", "", $0);
+      print $0;
+      exit 0;
+    }
+  ' .planning/ROADMAP.md
+}
+
+phase_section_from_roadmap() {
+  local phase="$1"
+  awk -v phase="$phase" '
+    $0 ~ "^### Phase " phase ":" {in_section=1}
+    in_section==1 {print}
+    in_section==1 && $0 ~ "^### Phase " && $0 !~ "^### Phase " phase ":" {exit 0}
+  ' .planning/ROADMAP.md \
+    | awk '
+      NR==1 {print; next}
+      # stop when next phase header would have triggered but awk above can print one extra line; keep simple:
+      {print}
+    '
+}
+
+ensure_phase_dir() {
+  local phase="$1"
+  local title
+  title="$(phase_title_from_roadmap "$phase" || true)"
+  [[ -n "${title:-}" ]] || die "phase $phase not found in .planning/ROADMAP.md"
+
+  local nn
+  nn="$(printf "%02d" "$phase")"
+  local slug
+  slug="$(slugify "$title")"
+
+  local dir=".planning/phases/${nn}-${slug}"
+  mkdir -p "$dir"
+  echo "$dir"
+}
+
+parse_args() {
+  local action="$1"
+  shift
+
+  [[ $# -ge 1 ]] || die "missing phase number"
+  PHASE="$1"
+  shift
+
+  MODEL=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --model|-m)
+        shift
+        [[ $# -gt 0 ]] || die "missing value for --model"
+        MODEL="$1"
+        shift
+        ;;
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      *)
+        die "unknown argument: $1"
+        ;;
+    esac
+  done
+
+  [[ "$PHASE" =~ ^[0-9]+$ ]] || die "phase must be an integer (got: $PHASE)"
+  [[ -n "$MODEL" ]] || die "missing --model"
+}
+
+discuss_phase() {
+  local phase="$1"
+  local model="$2"
+
+  local dir
+  dir="$(ensure_phase_dir "$phase")"
+
+  local state roadmap requirements
+  state="$(read_file_or_die .planning/STATE.md)"
+  roadmap="$(read_file_or_die .planning/ROADMAP.md)"
+  requirements="$(read_file_or_die .planning/REQUIREMENTS.md)"
+
+  local phase_section
+  phase_section="$(phase_section_from_roadmap "$phase")"
+  [[ -n "${phase_section:-}" ]] || die "could not extract phase $phase section from .planning/ROADMAP.md"
+
+  local meta_prompt
+  meta_prompt=$(
+    cat <<EOF
+You are helping create a Phase ${phase} implementation context file.
+
+Return ONLY lines in this exact machine-readable format (no markdown):
+AREA|<short area title>
+Q|<question 1>
+Q|<question 2>
+Q|<question 3>
+Q|<question 4>
+END
+(repeat AREA/Q/Q/Q/Q/END for exactly 4 areas)
+
+Constraints:
+- Areas must be specific to the phase goal and success criteria.
+- Questions must force concrete choices (not vague vision).
+- Do not propose new scope outside the phase boundary; if something feels out-of-scope, ask a question that lets us defer it.
+
+Inputs:
+
+=== PHASE SECTION (from ROADMAP.md) ===
+${phase_section}
+
+=== CURRENT STATE (STATE.md) ===
+${state}
+
+=== REQUIREMENTS (REQUIREMENTS.md) ===
+${requirements}
+
+EOF
+  )
+
+  echo "Generating discussion areas/questions with Ollama model: $model" >&2
+  local outline
+  outline="$(ollama_run "$model" "$meta_prompt")"
+
+  local qa_file
+  qa_file="$(mktemp)"
+  printf "%s\n" "# Phase ${phase} Q&A" >"$qa_file"
+  printf "%s\n\n" "_Generated by scripts/gsd-ollama; answer in terminal prompts._" >>"$qa_file"
+
+  local current_area=""
+  local question=""
+  while IFS= read -r line; do
+    case "$line" in
+      AREA\|*)
+        current_area="${line#AREA|}"
+        echo "" >>"$qa_file"
+        echo "## ${current_area}" >>"$qa_file"
+        ;;
+      Q\|*)
+        question="${line#Q|}"
+        echo "" >&2
+        echo "[$current_area] $question" >&2
+        read -r -p "> " answer
+        echo "- Q: ${question}" >>"$qa_file"
+        echo "  A: ${answer}" >>"$qa_file"
+        ;;
+      END)
+        ;;
+      *)
+        # Ignore stray lines so the flow continues even if the model is imperfect.
+        ;;
+    esac
+  done <<<"$outline"
+
+  local context_prompt
+  context_prompt=$(
+    cat <<EOF
+Write a Phase ${phase} context file as markdown.
+
+Goal: capture implementation decisions that downstream work needs, based on the user's answers.
+
+Must include:
+- Phase summary (1 paragraph) aligned to the roadmap phase goal and success criteria.
+- Decisions (bullet lists) grouped by the 4 areas.
+- Open questions / unknowns (if any remain).
+- Deferred ideas (explicitly out-of-scope for this phase).
+- Acceptance notes: restate the success criteria and how we’ll know we met them.
+
+Do NOT include code. Do NOT suggest new scope.
+
+Inputs:
+
+=== PHASE SECTION (from ROADMAP.md) ===
+${phase_section}
+
+=== USER Q&A ===
+$(cat "$qa_file")
+
+EOF
+  )
+
+  echo "" >&2
+  echo "Generating CONTEXT.md with Ollama model: $model" >&2
+  local context
+  context="$(ollama_run "$model" "$context_prompt")"
+
+  local out_path="${dir}/$(printf "%02d" "$phase")-CONTEXT.md"
+  printf "%s\n" "$context" >"$out_path"
+  echo "Wrote: $out_path" >&2
+}
+
+plan_phase() {
+  local phase="$1"
+  local model="$2"
+
+  local dir
+  dir="$(ensure_phase_dir "$phase")"
+
+  local nn
+  nn="$(printf "%02d" "$phase")"
+  local context_path="${dir}/${nn}-CONTEXT.md"
+  [[ -f "$context_path" ]] || die "missing context file: $context_path (run: scripts/gsd-ollama discuss-phase $phase --model ...)"
+
+  local phase_section
+  phase_section="$(phase_section_from_roadmap "$phase")"
+
+  local plan_prompt
+  plan_prompt=$(
+    cat <<EOF
+Create a concrete implementation plan for Phase ${phase} as markdown.
+
+Hard requirements:
+- Include a deliverables checklist with acceptance criteria per item.
+- Include a file-by-file touch list (frontend/backend/scripts/etc). Use best guesses but be specific.
+- Include verification steps (tests or manual checks) that map to the roadmap success criteria.
+- Keep scope strictly within Phase ${phase}.
+
+Inputs:
+
+=== PHASE SECTION (from ROADMAP.md) ===
+${phase_section}
+
+=== CONTEXT (${nn}-CONTEXT.md) ===
+$(cat "$context_path")
+
+=== REPO TOP-LEVEL ===
+$(ls -1)
+
+EOF
+  )
+
+  echo "Generating plan with Ollama model: $model" >&2
+  local plan
+  plan="$(ollama_run "$model" "$plan_prompt")"
+
+  local out_path="${dir}/${nn}-PLAN.md"
+  printf "%s\n" "$plan" >"$out_path"
+  echo "Wrote: $out_path" >&2
+}
+
+execute_phase() {
+  local phase="$1"
+  local model="$2"
+
+  require_repo_clean_or_confirm
+
+  local dir
+  dir="$(ensure_phase_dir "$phase")"
+
+  local nn
+  nn="$(printf "%02d" "$phase")"
+  local context_path="${dir}/${nn}-CONTEXT.md"
+  local plan_path="${dir}/${nn}-PLAN.md"
+
+  [[ -f "$context_path" ]] || die "missing context file: $context_path (run: scripts/gsd-ollama discuss-phase $phase --model ...)"
+  [[ -f "$plan_path" ]] || die "missing plan file: $plan_path (run: scripts/gsd-ollama plan-phase $phase --model ...)"
+
+  local phase_section
+  phase_section="$(phase_section_from_roadmap "$phase")"
+
+  local prompt
+  prompt=$(
+    cat <<EOF
+You are an expert coding agent working inside a git repository.
+
+Task: implement the NEXT smallest chunk of Phase ${phase}.
+
+Return ONLY a unified diff that can be applied with 'git apply'. No markdown. No explanations.
+
+Rules:
+- Keep the patch small and reviewable (ideally 1–4 files).
+- Do not modify planning docs under .planning/ (except if absolutely necessary for tracking; prefer no).
+- If you need to add new files, include them in the diff.
+- If you need follow-up work, encode it as TODOs in the plan output? NO. Only code changes in the diff.
+- Ensure code compiles/lints by best effort, but do not run commands.
+
+Inputs:
+
+=== PHASE SECTION (from ROADMAP.md) ===
+${phase_section}
+
+=== CONTEXT (${nn}-CONTEXT.md) ===
+$(cat "$context_path")
+
+=== PLAN (${nn}-PLAN.md) ===
+$(cat "$plan_path")
+
+=== REPO SNAPSHOT ===
+Top-level:
+$(ls -1)
+
+Recent commits:
+$(git --no-pager log -n 8 --oneline 2>/dev/null || true)
+
+EOF
+  )
+
+  echo "Generating patch with Ollama model: $model" >&2
+  local patch
+  patch="$(ollama_run "$model" "$prompt")"
+
+  # Basic sanity check that we got something patch-like.
+  if ! printf "%s\n" "$patch" | awk 'NR==1{ok=0} /^diff --git /{ok=1} END{exit ok?0:1}'; then
+    die "model did not return a unified diff (expected lines starting with: diff --git)"
+  fi
+
+  local patch_file
+  patch_file="$(mktemp)"
+  printf "%s\n" "$patch" >"$patch_file"
+
+  echo "Applying patch..." >&2
+  if ! git apply "$patch_file"; then
+    echo "" >&2
+    echo "Patch failed to apply. Saved at: $patch_file" >&2
+    echo "Tip: open it and apply manually, or rerun execute-phase to regenerate." >&2
+    exit 1
+  fi
+
+  rm -f "$patch_file"
+  echo "Patch applied. Current status:" >&2
+  git status --short >&2
+}
+
+verify_phase() {
+  local phase="$1"
+  local model="$2"
+
+  local dir
+  dir="$(ensure_phase_dir "$phase")"
+
+  local nn
+  nn="$(printf "%02d" "$phase")"
+  local plan_path="${dir}/${nn}-PLAN.md"
+  [[ -f "$plan_path" ]] || die "missing plan file: $plan_path (run: scripts/gsd-ollama plan-phase $phase --model ...)"
+
+  local phase_section
+  phase_section="$(phase_section_from_roadmap "$phase")"
+
+  local verify_prompt
+  verify_prompt=$(
+    cat <<EOF
+You are a verifier. Produce a Phase ${phase} verification checklist as markdown.
+
+Include:
+- A checklist mapped to each roadmap success criterion for Phase ${phase}.
+- A checklist mapped to the plan deliverables.
+- What evidence to capture (screenshots, logs, test output) for each.
+- A short "If failing, likely causes" section.
+
+Do not claim work is complete. This is a verification plan, not a verdict.
+
+Inputs:
+
+=== PHASE SECTION (from ROADMAP.md) ===
+${phase_section}
+
+=== PLAN (${nn}-PLAN.md) ===
+$(cat "$plan_path")
+
+EOF
+  )
+
+  echo "Generating verification checklist with Ollama model: $model" >&2
+  local verify
+  verify="$(ollama_run "$model" "$verify_prompt")"
+
+  local out_path="${dir}/${nn}-VERIFY.md"
+  printf "%s\n" "$verify" >"$out_path"
+  echo "Wrote: $out_path" >&2
+}
+
+main() {
+  require_cmd ollama
+  require_cmd awk
+  require_cmd sed
+  require_cmd tr
+  require_cmd mktemp
+
+  [[ $# -ge 1 ]] || { usage; exit 1; }
+  local action="$1"
+  shift
+
+  case "$action" in
+    discuss-phase|plan-phase|execute-phase|verify-phase)
+      parse_args "$action" "$@"
+      ;;
+    -h|--help|help)
+      usage
+      exit 0
+      ;;
+    *)
+      die "unknown action: $action"
+      ;;
+  esac
+
+  case "$action" in
+    discuss-phase) discuss_phase "$PHASE" "$MODEL" ;;
+    plan-phase) plan_phase "$PHASE" "$MODEL" ;;
+    execute-phase) execute_phase "$PHASE" "$MODEL" ;;
+    verify-phase) verify_phase "$PHASE" "$MODEL" ;;
+  esac
+}
+
+PHASE=""
+MODEL=""
+main "$@"
