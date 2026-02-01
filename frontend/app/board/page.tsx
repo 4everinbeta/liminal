@@ -129,16 +129,6 @@ export default function BoardPage() {
 
     const targetThemeId = destination.droppableId === 'backlog' ? undefined : destination.droppableId
     const targetStatus: Task['status'] = targetThemeId ? 'in_progress' : 'backlog'
-    
-    // GATING CHECK: If leaving backlog, must have Value & Estimate
-    if (source.droppableId === 'backlog' && destination.droppableId !== 'backlog') {
-        const effort = task.effort_score ?? task.estimated_duration
-        const isValid = task.value_score > 0 && effort && effort > 0
-        if (!isValid) {
-            setEditingTask(task) // Open Modal
-            return 
-        }
-    }
 
     // Optimistic Update
     const updatedTasks = tasks.map(t => {
