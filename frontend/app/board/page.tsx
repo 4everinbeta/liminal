@@ -398,6 +398,8 @@ export default function BoardPage() {
 }
 
 function TaskItem({ task, index, handleComplete, handleDelete, setEditingTask, isBacklog = false }: any) {
+    const isIncomplete = task.status !== 'done' && (!task.value_score || !(task.effort_score ?? task.estimated_duration))
+
     return (
         <Draggable draggableId={task.id} index={index}>
             {(provided) => (
@@ -406,7 +408,10 @@ function TaskItem({ task, index, handleComplete, handleDelete, setEditingTask, i
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                     onClick={() => setEditingTask(task)}
-                    className={`mb-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-primary transition-all group cursor-pointer flex gap-3 items-start ${task.status === 'done' ? 'opacity-60 bg-gray-50' : ''}`}
+                    className={`mb-3 bg-white p-4 rounded-lg border shadow-sm hover:shadow-md hover:border-primary transition-all group cursor-pointer flex gap-3 items-start ${
+                        task.status === 'done' ? 'opacity-60 bg-gray-50' :
+                        isIncomplete && !isBacklog ? 'border-orange-200' : 'border-gray-200'
+                    }`}
                     style={provided.draggableProps.style}
                 >
                     <button 
@@ -430,10 +435,12 @@ function TaskItem({ task, index, handleComplete, handleDelete, setEditingTask, i
                                 task.priority_score >= 60 ? 'bg-yellow-400' : 'bg-blue-400'
                              }`} />
                         </div>
-                        
-                        {isBacklog && task.status !== 'done' && (!task.value_score || !(task.effort_score ?? task.estimated_duration)) && (
-                            <div className="mt-2 text-[10px] text-orange-500 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <AlertTriangle size={10} /> Needs details to start
+
+                        {/* Missing Data Indicator - always visible, non-blocking */}
+                        {task.status !== 'done' && (!task.value_score || !(task.effort_score ?? task.estimated_duration)) && (
+                            <div className="mt-2 text-[10px] text-orange-500 flex items-center gap-1">
+                                <AlertTriangle size={10} />
+                                <span>Missing details</span>
                             </div>
                         )}
                     </div>
