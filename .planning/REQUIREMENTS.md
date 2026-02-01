@@ -135,13 +135,73 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (To be filled by roadmapper) | | |
+| CAPTURE-01 | Phase 2 | Pending |
+| CAPTURE-02 | Phase 2 | Pending |
+| CAPTURE-03 | Phase 2 | Pending |
+| CAPTURE-04 | Phase 2 | Pending |
+| CAPTURE-05 | Phase 2 | Pending |
+| CAPTURE-06 | Phase 2 | Pending |
+| FEEDBACK-01 | Phase 2 | Pending |
+| FEEDBACK-02 | Phase 2 | Pending |
+| FEEDBACK-03 | Phase 2 | Pending |
+| FEEDBACK-04 | Phase 2 | Pending |
+| RECOVERY-01 | Phase 5 | Pending |
+| RECOVERY-02 | Phase 5 | Pending |
+| RECOVERY-03 | Phase 5 | Pending |
+| RECOVERY-04 | Phase 5 | Pending |
+| INTERFACE-01 | Phase 1 | Pending |
+| INTERFACE-02 | Phase 1 | Pending |
+| INTERFACE-03 | Phase 1 | Pending |
+| INTERFACE-04 | Phase 1 | Pending |
+| URGENCY-01 | Phase 3 | Pending |
+| URGENCY-02 | Phase 3 | Pending |
+| URGENCY-03 | Phase 3 | Pending |
+| URGENCY-04 | Phase 3 | Pending |
+| URGENCY-05 | Phase 3 | Pending |
+| URGENCY-06 | Phase 3 | Pending |
+| GAMIFY-01 | Phase 4 | Pending |
+| GAMIFY-02 | Phase 4 | Pending |
+| GAMIFY-03 | Phase 4 | Pending |
+| GAMIFY-04 | Phase 4 | Pending |
+| GAMIFY-05 | Phase 4 | Pending |
+| GAMIFY-06 | Phase 4 | Pending |
+| VOICE-01 | Phase 2 | Pending |
+| VOICE-02 | Phase 2 | Pending |
+| VOICE-03 | Phase 2 | Pending |
+| VOICE-04 | Phase 2 | Pending |
+| VOICE-05 | Phase 2 | Pending |
+| AI-01 | Phase 6 | Pending |
+| AI-02 | Phase 6 | Pending |
+| AI-03 | Phase 6 | Pending |
+| AI-04 | Phase 6 | Pending |
+| AI-05 | Phase 6 | Pending |
+| AI-06 | Phase 6 | Pending |
+| SIMPLIFY-01 | Phase 1 | Pending |
+| SIMPLIFY-02 | Phase 1 | Pending |
+| SIMPLIFY-03 | Phase 1 | Pending |
+| SIMPLIFY-04 | Phase 1 | Pending |
+| MEMORY-01 | Phase 5 | Pending |
+| MEMORY-02 | Phase 5 | Pending |
+| MEMORY-03 | Phase 5 | Pending |
+| MEMORY-04 | Phase 5 | Pending |
+| REMOVE-01 | Phase 1 | Pending |
+| REMOVE-02 | Phase 1 | Pending |
+| REMOVE-03 | Phase 1 | Pending |
+| REMOVE-04 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 41 total
-- Mapped to phases: (pending)
-- Unmapped: (pending)
+- v1 requirements: 53 total
+- Mapped to phases: 53/53 ✓
+- Unmapped: 0
+
+**Phase Distribution:**
+- Phase 1 (Foundation): 12 requirements
+- Phase 2 (Capture & Feedback): 15 requirements
+- Phase 3 (Urgency System): 6 requirements
+- Phase 4 (Gamification): 6 requirements
+- Phase 5 (Forgiveness): 8 requirements
+- Phase 6 (AI Prioritization): 6 requirements
 
 ---
 *Requirements defined: 2026-01-31*
-*Last updated: 2026-01-31 after initial definition*
+*Last updated: 2026-01-31 after roadmap creation*
