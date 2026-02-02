@@ -30,6 +30,7 @@ export default function FocusPage() {
 
   useEffect(() => {
     fetchTasks()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const activeTask = useMemo(() => {

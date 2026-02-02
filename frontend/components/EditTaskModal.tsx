@@ -67,7 +67,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
     <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
         <div className="bg-white p-6 rounded-2xl shadow-xl max-w-md w-full">
             <h3 className="text-lg font-bold mb-1">Edit Task</h3>
-            <p className="text-sm text-gray-500 mb-4">All fields are optional. Add details when you're ready.</p>
+            <p className="text-sm text-gray-500 mb-4">All fields are optional. Add details when you&apos;re ready.</p>
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label className="block text-xs font-bold uppercase text-muted mb-1">Title</label>

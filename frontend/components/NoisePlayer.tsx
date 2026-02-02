@@ -34,6 +34,7 @@ export default function NoisePlayer() {
       stopNoise()
       playNoise()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type])
 
   const initAudio = () => {

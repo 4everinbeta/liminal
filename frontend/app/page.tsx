@@ -55,6 +55,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchTasks()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastUpdate])
 
   const stats = useMemo(() => {
