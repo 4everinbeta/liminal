@@ -27,6 +27,29 @@ die() {
   exit 1
 }
 
+pick_plan_file() {
+  local dir="$1"
+  local nn="$2"
+
+  if [[ -f "${dir}/${nn}-PLAN.md" ]]; then
+    echo "${dir}/${nn}-PLAN.md"
+    return 0
+  fi
+
+  # Support multi-plan outputs like 02-01-PLAN.md ... 02-04-PLAN.md
+  local candidates=()
+  while IFS= read -r f; do
+    candidates+=("$f")
+  done < <(ls -1 "${dir}/${nn}-"??-PLAN.md 2>/dev/null | sort || true)
+
+  if [[ ${#candidates[@]} -eq 0 ]]; then
+    return 1
+  fi
+
+  # Pick the highest numbered plan (last after sort).
+  echo "${candidates[-1]}"
+}
+
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || die "missing command: $1"
 }
@@ -73,6 +96,27 @@ ollama_run() {
   printf "%s" "$prompt" | ollama run "$model"
 }
 
+extract_unified_diff() {
+  # Best-effort extraction of a unified diff from model output.
+  # - If fenced code block exists, prefer its contents
+  # - Trim everything before the first "diff --git"
+  local raw="$1"
+
+  # Prefer first fenced block if present.
+  if printf "%s\n" "$raw" | awk 'BEGIN{in=0} /^```/{if(in==0){in=1;next}else{exit}} in==1{print}' | grep -q '^diff --git '; then
+    printf "%s\n" "$raw" | awk 'BEGIN{in=0} /^```/{if(in==0){in=1;next}else{exit}} in==1{print}'
+    return 0
+  fi
+
+  # Otherwise, strip everything before first diff header.
+  printf "%s\n" "$raw" | awk 'BEGIN{found=0} /^diff --git /{found=1} found==1{print}'
+}
+
+validate_unified_diff() {
+  # Quick structural sanity check before git apply.
+  awk 'BEGIN{has=0} /^diff --git /{has=1} END{exit has?0:1}'
+}
+
 phase_title_from_roadmap() {
   local phase="$1"
   # Match: "### Phase 2: Capture & Feedback"
@@ -102,6 +146,9 @@ phase_section_from_roadmap() {
 
 ensure_phase_dir() {
   local phase="$1"
+  local require_a="${2:-}"
+  local require_b="${3:-}"
+
   local title
   title="$(phase_title_from_roadmap "$phase" || true)"
   [[ -n "${title:-}" ]] || die "phase $phase not found in .planning/ROADMAP.md"
@@ -111,9 +158,56 @@ ensure_phase_dir() {
   local slug
   slug="$(slugify "$title")"
 
-  local dir=".planning/phases/${nn}-${slug}"
-  mkdir -p "$dir"
-  echo "$dir"
+  local canonical=".planning/phases/${nn}-${slug}"
+
+  # Gather candidates (canonical first, then any other 02-* dirs).
+  local candidates=()
+  if [[ -d "$canonical" ]]; then
+    candidates+=("$canonical")
+  fi
+  while IFS= read -r d; do
+    [[ "$d" == "$canonical" ]] && continue
+    candidates+=("$d")
+  done < <(find .planning/phases -maxdepth 1 -type d -name "${nn}-*" -print 2>/dev/null | sort)
+
+  # If required files are specified, pick the first candidate that contains them.
+  if [[ -n "${require_a:-}" ]]; then
+    for d in "${candidates[@]}"; do
+      if [[ -f "${d}/${require_a}" ]] && { [[ -z "${require_b:-}" ]] || [[ -f "${d}/${require_b}" ]]; }; then
+        echo "$d"
+        return 0
+      fi
+    done
+  fi
+
+  # If we have exactly one candidate, use it.
+  if [[ ${#candidates[@]} -eq 1 ]]; then
+    echo "${candidates[0]}"
+    return 0
+  fi
+
+  # If no candidates exist yet, create canonical.
+  if [[ ${#candidates[@]} -eq 0 ]]; then
+    mkdir -p "$canonical"
+    echo "$canonical"
+    return 0
+  fi
+
+  # Prefer canonical if it exists (even if empty) for discuss-phase.
+  if [[ -z "${require_a:-}" ]] && [[ -d "$canonical" ]]; then
+    echo "$canonical"
+    return 0
+  fi
+
+  echo "error: cannot select a phase directory for phase ${phase}." >&2
+  echo "Candidates:" >&2
+  for d in "${candidates[@]}"; do
+    echo "  - $d" >&2
+  done
+  if [[ -n "${require_a:-}" ]]; then
+    echo "Required file(s): ${require_a}${require_b:+, ${require_b}}" >&2
+  fi
+  die "rename/delete the wrong directory, or re-run discuss/plan to generate missing artifacts"
 }
 
 parse_args() {
@@ -272,10 +366,10 @@ plan_phase() {
   local model="$2"
 
   local dir
-  dir="$(ensure_phase_dir "$phase")"
-
   local nn
   nn="$(printf "%02d" "$phase")"
+  dir="$(ensure_phase_dir "$phase" "${nn}-CONTEXT.md")"
+
   local context_path="${dir}/${nn}-CONTEXT.md"
   [[ -f "$context_path" ]] || die "missing context file: $context_path (run: scripts/gsd-ollama discuss-phase $phase --model ...)"
 
@@ -323,15 +417,18 @@ execute_phase() {
   require_repo_clean_or_confirm
 
   local dir
-  dir="$(ensure_phase_dir "$phase")"
-
   local nn
   nn="$(printf "%02d" "$phase")"
+  # We require context, but plan might be either 02-PLAN.md or 02-0X-PLAN.md.
+  dir="$(ensure_phase_dir "$phase" "${nn}-CONTEXT.md")"
+
   local context_path="${dir}/${nn}-CONTEXT.md"
-  local plan_path="${dir}/${nn}-PLAN.md"
+  local plan_path
+  plan_path="$(pick_plan_file "$dir" "$nn" || true)"
 
   [[ -f "$context_path" ]] || die "missing context file: $context_path (run: scripts/gsd-ollama discuss-phase $phase --model ...)"
-  [[ -f "$plan_path" ]] || die "missing plan file: $plan_path (run: scripts/gsd-ollama plan-phase $phase --model ...)"
+  [[ -n "${plan_path:-}" ]] || die "missing plan file in ${dir} (expected ${nn}-PLAN.md or ${nn}-0X-PLAN.md; run: scripts/gsd-ollama plan-phase $phase --model ...)"
+  [[ -f "$plan_path" ]] || die "missing plan file: $plan_path"
 
   local phase_section
   phase_section="$(phase_section_from_roadmap "$phase")"
@@ -373,30 +470,62 @@ $(git --no-pager log -n 8 --oneline 2>/dev/null || true)
 EOF
   )
 
-  echo "Generating patch with Ollama model: $model" >&2
-  local patch
-  patch="$(ollama_run "$model" "$prompt")"
+  local attempt=1
+  local max_attempts=3
+  local last_patch_file=""
 
-  # Basic sanity check that we got something patch-like.
-  if ! printf "%s\n" "$patch" | awk 'NR==1{ok=0} /^diff --git /{ok=1} END{exit ok?0:1}'; then
-    die "model did not return a unified diff (expected lines starting with: diff --git)"
-  fi
+  while [[ $attempt -le $max_attempts ]]; do
+    echo "Generating patch with Ollama model: $model (attempt $attempt/$max_attempts)" >&2
+    local raw
+    raw="$(ollama_run "$model" "$prompt")"
 
-  local patch_file
-  patch_file="$(mktemp)"
-  printf "%s\n" "$patch" >"$patch_file"
+    local patch
+    patch="$(extract_unified_diff "$raw")"
 
-  echo "Applying patch..." >&2
-  if ! git apply "$patch_file"; then
-    echo "" >&2
-    echo "Patch failed to apply. Saved at: $patch_file" >&2
-    echo "Tip: open it and apply manually, or rerun execute-phase to regenerate." >&2
-    exit 1
-  fi
+    if ! printf "%s\n" "$patch" | validate_unified_diff; then
+      echo "" >&2
+      echo "Model did not return a usable unified diff." >&2
+      if [[ $attempt -lt $max_attempts ]]; then
+        prompt="${prompt}"$'\n'"IMPORTANT: Your previous output was not a valid unified diff. Return ONLY a unified diff starting with 'diff --git'. No prose. No code fences. No JSON."
+        attempt=$((attempt + 1))
+        continue
+      fi
+      die "model did not return a unified diff (expected lines starting with: diff --git)"
+    fi
 
-  rm -f "$patch_file"
-  echo "Patch applied. Current status:" >&2
-  git status --short >&2
+    local patch_file
+    patch_file="$(mktemp)"
+    last_patch_file="$patch_file"
+    printf "%s\n" "$patch" >"$patch_file"
+
+    # Validate before applying to avoid partial application.
+    if ! git apply --check "$patch_file" >/dev/null 2>&1; then
+      echo "" >&2
+      echo "Patch failed validation (git apply --check). Saved at: $patch_file" >&2
+      echo "First few lines:" >&2
+      sed -n '1,40p' "$patch_file" >&2 || true
+      if [[ $attempt -lt $max_attempts ]]; then
+        prompt="${prompt}"$'\n'"IMPORTANT: The previous diff did not apply cleanly. Generate a smaller patch that applies to the current repo state. Return ONLY a unified diff. Avoid large refactors."
+        attempt=$((attempt + 1))
+        continue
+      fi
+      exit 1
+    fi
+
+    echo "Applying patch..." >&2
+    if ! git apply "$patch_file"; then
+      echo "" >&2
+      echo "Patch failed to apply (unexpected after --check). Saved at: $patch_file" >&2
+      exit 1
+    fi
+
+    rm -f "$patch_file"
+    echo "Patch applied. Current status:" >&2
+    git status --short >&2
+    return 0
+  done
+
+  die "failed to generate an applicable patch after ${max_attempts} attempts (last patch: ${last_patch_file:-n/a})"
 }
 
 verify_phase() {
@@ -404,12 +533,15 @@ verify_phase() {
   local model="$2"
 
   local dir
-  dir="$(ensure_phase_dir "$phase")"
-
   local nn
   nn="$(printf "%02d" "$phase")"
-  local plan_path="${dir}/${nn}-PLAN.md"
-  [[ -f "$plan_path" ]] || die "missing plan file: $plan_path (run: scripts/gsd-ollama plan-phase $phase --model ...)"
+  # Plan might be either 02-PLAN.md or 02-0X-PLAN.md.
+  dir="$(ensure_phase_dir "$phase")"
+
+  local plan_path
+  plan_path="$(pick_plan_file "$dir" "$nn" || true)"
+  [[ -n "${plan_path:-}" ]] || die "missing plan file in ${dir} (expected ${nn}-PLAN.md or ${nn}-0X-PLAN.md; run: scripts/gsd-ollama plan-phase $phase --model ...)"
+  [[ -f "$plan_path" ]] || die "missing plan file: $plan_path"
 
   local phase_section
   phase_section="$(phase_section_from_roadmap "$phase")"
@@ -432,7 +564,7 @@ Inputs:
 === PHASE SECTION (from ROADMAP.md) ===
 ${phase_section}
 
-=== PLAN (${nn}-PLAN.md) ===
+=== PLAN ($(basename "$plan_path")) ===
 $(cat "$plan_path")
 
 EOF
