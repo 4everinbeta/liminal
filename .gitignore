@@ -48,4 +48,4 @@ build/
 venv/
 *.local
 *.tsbuildinfo
-.gemini/
+.gemini/.claude/

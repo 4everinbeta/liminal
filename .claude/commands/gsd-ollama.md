@@ -21,3 +21,7 @@ scripts/gsd-ollama discuss-phase 2 --model qwen3-coder:latest
 scripts/gsd-ollama execute-phase 2 --model qwen3-coder:latest
 scripts/gsd-ollama verify-phase 2 --model glm-4.7-flash:latest
 ```
+
+Troubleshooting:
+- If execute-phase says “corrupt patch”, rerun it; it will auto-retry up to 3 times.
+- A clean git working tree makes patch application much more reliable.
