@@ -7,6 +7,7 @@ import { getTasks, getThemes, updateTask, deleteTask, createTheme, updateTheme, 
 import TaskActionMenu from '@/components/TaskActionMenu'
 import EditTaskModal from '@/components/EditTaskModal'
 import { useAppStore } from '@/lib/store'
+import { triggerTaskComplete } from '@/lib/confetti'
 
 export default function BoardPage() {
   const { lastUpdate } = useAppStore()
@@ -165,7 +166,12 @@ export default function BoardPage() {
   const handleComplete = async (e: React.MouseEvent, task: Task) => {
     e?.stopPropagation()
     const newStatus = task.status === 'done' ? 'in_progress' : 'done'
-    
+
+    // Trigger confetti when completing a task
+    if (newStatus === 'done') {
+      triggerTaskComplete()
+    }
+
     // Optimistic
     setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newStatus } : t))
 
