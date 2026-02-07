@@ -5,6 +5,7 @@ import AppSidebar from '@/components/AppSidebar'
 import TrustedTypesPolyfill from '@/components/TrustedTypesPolyfill'
 import GlobalChatWidget from '@/components/GlobalChatWidget'
 import WebSocketManager from '@/components/WebSocketManager'
+import { GlobalQuickCapture } from '@/components/GlobalQuickCapture'
 
 export const metadata: Metadata = {
   title: 'Liminal',
@@ -24,6 +25,7 @@ export default function RootLayout({
         <AuthGate>
           <AppSidebar />
           <GlobalChatWidget />
+          <GlobalQuickCapture />
           <main className="min-h-screen md:pl-16 pb-20 md:pb-0">
             {children}
           </main>

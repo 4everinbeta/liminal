@@ -35,6 +35,11 @@ interface AppState {
   setChatMessages: (msgs: ChatMessage[]) => void
   resetChatMessages: () => void
 
+  // Quick Capture
+  isQuickCaptureOpen: boolean
+  openQuickCapture: () => void
+  closeQuickCapture: () => void
+
   // Global Refresh Signal
   lastUpdate: number
   triggerUpdate: () => void
@@ -70,6 +75,10 @@ export const useAppStore = create<AppState>()(
           chatMessages: msgs.length ? msgs : INITIAL_CHAT_MESSAGES,
         }),
       resetChatMessages: () => set({ chatMessages: INITIAL_CHAT_MESSAGES }),
+
+      isQuickCaptureOpen: false,
+      openQuickCapture: () => set({ isQuickCaptureOpen: true }),
+      closeQuickCapture: () => set({ isQuickCaptureOpen: false }),
 
       lastUpdate: 0,
       triggerUpdate: () => set({ lastUpdate: Date.now() }),
