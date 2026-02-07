@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { CheckCircle2, Circle } from 'lucide-react'
 import { forwardRef, useState } from 'react'
 import TaskActionMenu from './TaskActionMenu'
+import { triggerTaskComplete } from '@/lib/confetti'
 
 interface TaskProps {
   task: {
@@ -35,6 +36,9 @@ const TaskCard = forwardRef<HTMLDivElement, TaskProps>(({ task, onComplete, onDe
   const effortLabel = typeof task.estimatedTime === 'number' ? `e:${task.estimatedTime}` : null
 
   const handleComplete = () => {
+    // Immediate celebration (optimistic feedback)
+    triggerTaskComplete()
+
     setIsCompleting(true)
     setTimeout(() => {
       onComplete?.(task.id)
@@ -57,8 +61,9 @@ const TaskCard = forwardRef<HTMLDivElement, TaskProps>(({ task, onComplete, onDe
       }`}
       style={cardBorderStyle}
     >
-      <button 
+      <motion.button
         onClick={handleComplete}
+        whileTap={{ scale: 0.9 }}
         className="text-gray-300 hover:text-secondary transition-colors relative"
         disabled={isCompleting}
       >
@@ -73,7 +78,7 @@ const TaskCard = forwardRef<HTMLDivElement, TaskProps>(({ task, onComplete, onDe
         ) : (
           <Circle size={24} />
         )}
-      </button>
+      </motion.button>
       
       <div className={`flex-1 transition-opacity ${isCompleting ? 'opacity-50 line-through' : ''}`}>
         <h3 className="font-medium text-text">{task.title}</h3>
