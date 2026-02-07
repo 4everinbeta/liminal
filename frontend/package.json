@@ -17,6 +17,7 @@
   "dependencies": {
     "@hello-pangea/dnd": "^16.3.0",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "canvas-confetti": "^1.9.4",
     "clsx": "^2.0.0",
     "date-fns": "^2.30.0",
     "framer-motion": "^10.12.16",
@@ -33,6 +34,7 @@
     "@testing-library/jest-dom": "^6.1.5",
     "@testing-library/react": "^14.1.0",
     "@testing-library/user-event": "^14.5.1",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "20.4.5",
     "@types/react": "18.2.17",
