@@ -13,7 +13,7 @@ Transform Liminal from a traditional task manager into an ADHD-optimized product
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Foundation** - Remove existing friction and simplify interface
-- [ ] **Phase 2: Capture & Feedback** - Frictionless input and immediate visual rewards
+- [x] **Phase 2: Capture & Feedback** - Frictionless input and immediate visual rewards
 - [ ] **Phase 3: Urgency System** - Visual time pressure and scarcity framing
 - [ ] **Phase 4: Gamification** - Streaks, progress tracking, and momentum
 - [ ] **Phase 5: Forgiveness** - Working memory support and interruption recovery
@@ -53,10 +53,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Foundation hooks (draft preservation, voice input, auto-save utilities)
-- [ ] 02-02-PLAN.md — Confetti and keyboard shortcuts (celebration animations, Cmd/Ctrl+N)
-- [ ] 02-03-PLAN.md — Global quick capture (FAB, modal, voice integration, optimistic creation)
-- [ ] 02-04-PLAN.md — Task completion celebration (confetti on complete, satisfying animations)
+- [x] 02-01-PLAN.md — Foundation hooks (draft preservation, voice input, auto-save utilities)
+- [x] 02-02-PLAN.md — Confetti and keyboard shortcuts (celebration animations, Cmd/Ctrl+N)
+- [x] 02-03-PLAN.md — Global quick capture (FAB, modal, voice integration, optimistic creation)
+- [x] 02-04-PLAN.md — Task completion celebration (confetti on complete, satisfying animations)
 
 ### Phase 3: Urgency System
 **Goal**: Users experience visual time pressure that creates NOW-ness and activates ADHD focus
@@ -132,7 +132,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 0/3 | Planned | - |
-| 2. Capture & Feedback | 0/4 | Planned | - |
+| 2. Capture & Feedback | 4/4 | Complete | 2026-02-07 |
 | 3. Urgency System | 0/0 | Not started | - |
 | 4. Gamification | 0/0 | Not started | - |
 | 5. Forgiveness | 0/0 | Not started | - |
