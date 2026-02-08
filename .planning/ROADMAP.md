@@ -69,10 +69,12 @@ Plans:
   4. "Due today" section shows time-boxed capacity ("2 hours left, 3 tasks remaining")
   5. Tasks fade or change style after 3 days in backlog (visual aging)
   6. User receives browser notification 1 hour before deadline (opt-in)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD during planning
+- [ ] 03-01-PLAN.md — Urgency utilities and hooks (chroma-js color gradient, countdown hook, urgency color hook)
+- [ ] 03-02-PLAN.md — Capacity summary and notifications (due-today display, browser notification system)
+- [ ] 03-03-PLAN.md — Wire urgency into UI (TaskCard integration, UrgencyIndicator, dashboard capacity, notification opt-in)
 
 ### Phase 4: Gamification
 **Goal**: Users experience sustained engagement through progress tracking, streaks, and concrete impact feedback
@@ -127,13 +129,13 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 0/3 | Planned | - |
 | 2. Capture & Feedback | 4/4 | Complete | 2026-02-07 |
-| 3. Urgency System | 0/0 | Not started | - |
+| 3. Urgency System | 0/3 | Planned | - |
 | 4. Gamification | 0/0 | Not started | - |
 | 5. Forgiveness | 0/0 | Not started | - |
 | 6. AI Prioritization | 0/0 | Not started | - |
