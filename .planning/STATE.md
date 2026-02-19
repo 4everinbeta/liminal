@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-01-31)
 
 **Core value:** ADHD brains respond to NOW/NOT NOW, not IMPORTANT/NOT IMPORTANT
-**Current focus:** Phase 1: Foundation (COMPLETE)
+**Current focus:** Phase 3: Urgency System (in progress)
 
 ## Current Position
 
-Phase: 1 of 6 (Foundation)
-Plan: 3 of 3 in current phase
-Status: Phase complete ✅
-Last activity: 2026-02-19 — Completed 01-03-PLAN.md (Focus-First Dashboard)
+Phase: 3 of 6 (Urgency System)
+Plan: 2 of 3 in current phase (03-02 complete)
+Status: In progress
+Last activity: 2026-02-19 — Completed 03-02-PLAN.md (Capacity Summary and Notifications)
 
-Progress: [███████░░░] 7/7 plans (100%)
+Progress: [█████████░] 9/10 plans (90%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: 2.3 min
 - Total execution time: 0.28 hours
 
@@ -29,12 +29,14 @@ Progress: [███████░░░] 7/7 plans (100%)
 |-------|-------|-------|----------|
 | 01-foundation | 3 | 8.8 min | 2.9 min |
 | 02-capture--and--feedback | 4 | 8.7 min | 2.2 min |
+| 03-urgency-system | 1 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (2min), 02-03 (2.7min), 02-04 (1min), 01-03 (2.6min)
-- Trend: Consistent velocity maintained (2.6 min for 01-03)
+- Last 5 plans: 02-02 (2min), 02-03 (2.7min), 02-04 (1min), 01-03 (2.6min), 03-01 (2min)
+- Trend: Consistent velocity maintained (~2 min for 03-01)
 
 *Updated after each plan completion*
+| Phase 03-urgency-system P01 | 2 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -78,6 +80,13 @@ Recent decisions affecting current work:
 - Single-column planning layout (reduces competing interfaces)
 - Inline mode toggle in header (avoid unnecessary component abstraction)
 
+**From 03-01:**
+- Warm orange (#f97316) for overdue state — avoids shame-inducing red that triggers RSD in ADHD users
+- requestAnimationFrame over setInterval for countdown timers (RAF suspends cleanly, setInterval drifts in background tabs)
+- HSL interpolation mode in chroma-js — RGB produces muddy brown between green and red
+- Inline style={{ backgroundColor: color }} for dynamic colors — dynamic Tailwind class strings break at build time (Tailwind v3)
+- useCountdown returns { timeLeft, isOverdue } named object for semantic clarity (not raw string)
+
 ### Pending Todos
 
 None yet.
@@ -89,7 +98,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19 (plan execution)
-Stopped at: Completed 01-03-PLAN.md (Focus-First Dashboard) - Phase 1 complete
+Stopped at: Completed 03-01-PLAN.md (Urgency Calculation Foundation)
 Resume file: None
 
 **Phase 1 Status:** ✅ Complete - Foundation established
@@ -103,4 +112,7 @@ Resume file: None
   - 02-03: Global quick capture (FAB, modal, optimistic creation)
   - 02-04: Task completion celebrations (confetti integration)
 
-**Next Phase:** Phase 3 - Urgency System (visual time pressure, scarcity framing)
+**Phase 3 Status:** In Progress - Urgency System (visual time pressure, scarcity framing)
+  - 03-01: Urgency calculation foundation (chroma-js gradient, useCountdown RAF, useUrgencyColor) ✅
+  - 03-02: Urgency components (UrgencyIndicator, TaskCard integration) - PENDING
+  - 03-03: Notifications and capacity (browser notifications, CapacitySummary) - PENDING
