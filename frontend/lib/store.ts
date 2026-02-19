@@ -40,6 +40,10 @@ interface AppState {
   openQuickCapture: () => void
   closeQuickCapture: () => void
 
+  // Planning scroll position
+  planningScrollPosition: number
+  setPlanningScrollPosition: (pos: number) => void
+
   // Global Refresh Signal
   lastUpdate: number
   triggerUpdate: () => void
@@ -48,7 +52,7 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
-      isFocusMode: false,
+      isFocusMode: true, // Focus mode is now the default
       toggleFocusMode: () => set((state) => ({ isFocusMode: !state.isFocusMode })),
       // ... existing ...
       activeTaskId: null,
@@ -80,6 +84,9 @@ export const useAppStore = create<AppState>()(
       openQuickCapture: () => set({ isQuickCaptureOpen: true }),
       closeQuickCapture: () => set({ isQuickCaptureOpen: false }),
 
+      planningScrollPosition: 0,
+      setPlanningScrollPosition: (pos) => set({ planningScrollPosition: pos }),
+
       lastUpdate: 0,
       triggerUpdate: () => set({ lastUpdate: Date.now() }),
     }),
@@ -89,9 +96,12 @@ export const useAppStore = create<AppState>()(
         if (typeof window === 'undefined') return undefined as unknown as Storage
         return window.sessionStorage
       }),
-      // Only persist chat messages; other UI state stays ephemeral per page load.
+      // Persist focus mode preference, active task, scroll position, and chat messages
       partialize: (state) => ({
         chatMessages: state.chatMessages,
+        isFocusMode: state.isFocusMode,
+        activeTaskId: state.activeTaskId,
+        planningScrollPosition: state.planningScrollPosition,
       }),
     }
   )
