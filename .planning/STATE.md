@@ -11,8 +11,8 @@ See: .planning/PROJECT.md (updated 2026-01-31)
 
 Phase: 1 of 6 (Foundation)
 Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-02-19 — Completed 01-03-PLAN.md
+Status: Phase complete ✅
+Last activity: 2026-02-19 — Completed 01-03-PLAN.md (Focus-First Dashboard)
 
 Progress: [███████░░░] 7/7 plans (100%)
 
@@ -92,5 +92,15 @@ Last session: 2026-02-19 (plan execution)
 Stopped at: Completed 01-03-PLAN.md (Focus-First Dashboard) - Phase 1 complete
 Resume file: None
 
-**Phase 1 Status:** ✅ Complete - Foundation established (progressive forms, frictionless board, focus-first dashboard)
+**Phase 1 Status:** ✅ Complete - Foundation established
+  - 01-01: Progressive disclosure forms (title-only capture with smart defaults)
+  - 01-02: Frictionless board (no modal drag-drop, optional themes)
+  - 01-03: Focus-first dashboard (execution mode default, mode toggle, Complete/Skip actions)
+
 **Phase 2 Status:** ✅ Complete - Full capture and feedback loop implemented
+  - 02-01: Foundation hooks (draft preservation, voice input, auto-save)
+  - 02-02: Confetti and shortcuts (completion celebrations, Cmd/Ctrl+N)
+  - 02-03: Global quick capture (FAB, modal, optimistic creation)
+  - 02-04: Task completion celebrations (confetti integration)
+
+**Next Phase:** Phase 3 - Urgency System (visual time pressure, scarcity framing)
