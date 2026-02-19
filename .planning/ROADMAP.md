@@ -72,8 +72,8 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Urgency utilities and hooks (chroma-js color gradient, countdown hook, urgency color hook)
-- [ ] 03-02-PLAN.md — Capacity summary and notifications (due-today display, browser notification system)
+- [x] 03-01-PLAN.md — Urgency utilities and hooks (chroma-js color gradient, countdown hook, urgency color hook)
+- [x] 03-02-PLAN.md — Capacity summary and notifications (due-today display, browser notification system)
 - [ ] 03-03-PLAN.md — Wire urgency into UI (TaskCard integration, UrgencyIndicator, dashboard capacity, notification opt-in)
 
 ### Phase 4: Gamification
@@ -135,7 +135,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-02-19 |
 | 2. Capture & Feedback | 4/4 | Complete | 2026-02-07 |
-| 3. Urgency System | 0/3 | Planned | - |
+| 3. Urgency System | 2/3 | In progress | - |
 | 4. Gamification | 0/0 | Not started | - |
 | 5. Forgiveness | 0/0 | Not started | - |
 | 6. AI Prioritization | 0/0 | Not started | - |

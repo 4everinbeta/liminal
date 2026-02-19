@@ -19,9 +19,9 @@ Progress: [█████████░] 9/10 plans (90%)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 2.3 min
-- Total execution time: 0.28 hours
+- Total execution time: 0.35 hours
 
 **By Phase:**
 
@@ -29,14 +29,13 @@ Progress: [█████████░] 9/10 plans (90%)
 |-------|-------|-------|----------|
 | 01-foundation | 3 | 8.8 min | 2.9 min |
 | 02-capture--and--feedback | 4 | 8.7 min | 2.2 min |
-| 03-urgency-system | 1 | 2 min | 2 min |
+| 03-urgency-system | 2 | 6 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (2min), 02-03 (2.7min), 02-04 (1min), 01-03 (2.6min), 03-01 (2min)
-- Trend: Consistent velocity maintained (~2 min for 03-01)
+- Last 5 plans: 02-03 (2.7min), 02-04 (1min), 01-03 (2.6min), 03-01 (2min), 03-02 (4min)
+- Trend: Consistent velocity maintained
 
 *Updated after each plan completion*
-| Phase 03-urgency-system P01 | 2 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -87,6 +86,14 @@ Recent decisions affecting current work:
 - Inline style={{ backgroundColor: color }} for dynamic colors — dynamic Tailwind class strings break at build time (Tailwind v3)
 - useCountdown returns { timeLeft, isOverdue } named object for semantic clarity (not raw string)
 
+**From 03-02:**
+- Hardcode 9-5 workday for MVP — avoids configuration complexity, per RESEARCH.md open question 1
+- Greedy fit uses shortest-first ordering — maximizes tasks completed under time constraint
+- Over-capacity shown with text-orange-600 (warm orange), never text-red-600 — ADHD-safe design
+- 25-day ceiling for setTimeout scheduling — avoids 32-bit integer overflow in browser
+- Module-level Map<string, number> for active notifications — auto-cancels duplicates on re-render
+- triggerSoftAsk() separates soft prompt from browser dialog — avoids Chrome/Firefox permission penalties
+
 ### Pending Todos
 
 None yet.
@@ -98,7 +105,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19 (plan execution)
-Stopped at: Completed 03-01-PLAN.md (Urgency Calculation Foundation)
+Stopped at: Completed 03-02-PLAN.md (Capacity Summary and Notifications)
 Resume file: None
 
 **Phase 1 Status:** ✅ Complete - Foundation established
@@ -113,6 +120,8 @@ Resume file: None
   - 02-04: Task completion celebrations (confetti integration)
 
 **Phase 3 Status:** In Progress - Urgency System (visual time pressure, scarcity framing)
-  - 03-01: Urgency calculation foundation (chroma-js gradient, useCountdown RAF, useUrgencyColor) ✅
-  - 03-02: Urgency components (UrgencyIndicator, TaskCard integration) - PENDING
-  - 03-03: Notifications and capacity (browser notifications, CapacitySummary) - PENDING
+  - 03-01: Urgency utilities (chroma-js gradient, useCountdown RAF, useUrgencyColor) ✅
+  - 03-02: Capacity summary and notifications (CapacitySummary, notifications.ts, useNotifications) ✅
+  - 03-03: Wire urgency into UI (TaskCard integration, UrgencyIndicator, dashboard capacity, notification opt-in) - PENDING
+
+**Next:** 03-03 - Wire urgency into UI
