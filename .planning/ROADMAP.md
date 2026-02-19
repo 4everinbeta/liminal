@@ -12,7 +12,7 @@ Transform Liminal from a traditional task manager into an ADHD-optimized product
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Remove existing friction and simplify interface
+- [x] **Phase 1: Foundation** - Remove existing friction and simplify interface
 - [x] **Phase 2: Capture & Feedback** - Frictionless input and immediate visual rewards
 - [ ] **Phase 3: Urgency System** - Visual time pressure and scarcity framing
 - [ ] **Phase 4: Gamification** - Streaks, progress tracking, and momentum
@@ -34,9 +34,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Smart defaults and form simplification (title-only with auto-calculated scores)
-- [ ] 01-02-PLAN.md — Remove board friction (frictionless drag-drop, optional themes)
-- [ ] 01-03-PLAN.md — Dashboard consolidation (focus-first, unified interface, remove pause)
+- [x] 01-01-PLAN.md — Smart defaults and form simplification (title-only with auto-calculated scores)
+- [x] 01-02-PLAN.md — Remove board friction (frictionless drag-drop, optional themes)
+- [x] 01-03-PLAN.md — Dashboard consolidation (focus-first, unified interface, remove pause)
 
 ### Phase 2: Capture & Feedback
 **Goal**: Users can capture thoughts instantly (<5 seconds) and receive immediate dopamine hits on completion
