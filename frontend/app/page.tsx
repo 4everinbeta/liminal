@@ -6,7 +6,10 @@ import TaskForm from '@/components/TaskForm'
 import TaskActionMenu from '@/components/TaskActionMenu'
 import EditTaskModal from '@/components/EditTaskModal'
 import ChatInterface from '@/components/ChatInterface'
+import CapacitySummary from '@/components/CapacitySummary'
+import UrgencyIndicator from '@/components/UrgencyIndicator'
 import { getTasks, updateTask, deleteTask, Task } from '@/lib/api'
+import { useNotifications } from '@/lib/hooks/useNotifications'
 import { CheckCircle, ArrowRight, CircleDashed, Flame, ListTodo } from 'lucide-react'
 
 export default function Home() {
@@ -27,6 +30,23 @@ export default function Home() {
 
   // Edit Modal State
   const [editingTask, setEditingTask] = useState<Task | null>(null)
+
+  // Notification soft-ask (dismissed state persisted to sessionStorage)
+  const { permission, showSoftAsk, requestPermission, dismissSoftAsk, triggerSoftAsk, scheduleNotification } = useNotifications()
+  const [softAskDismissed, setSoftAskDismissed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('notif-soft-ask-dismissed') === 'true'
+    }
+    return false
+  })
+
+  const handleDismissSoftAsk = () => {
+    dismissSoftAsk()
+    setSoftAskDismissed(true)
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('notif-soft-ask-dismissed', 'true')
+    }
+  }
 
   const fetchTasks = async () => {
     setIsLoading(true)
@@ -70,6 +90,23 @@ export default function Home() {
     fetchTasks()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastUpdate])
+
+  // Trigger notification soft-ask and schedule notifications after tasks load
+  useEffect(() => {
+    if (tasks.length === 0) return
+    const hasDueDates = tasks.some(t => t.due_date && t.status !== 'done')
+    if (hasDueDates && !softAskDismissed && permission === 'default') {
+      triggerSoftAsk()
+    }
+    if (permission === 'granted') {
+      tasks.forEach(t => {
+        if (t.due_date && t.status !== 'done') {
+          scheduleNotification(t.id, t.title, t.due_date)
+        }
+      })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tasks, permission])
 
   // Restore scroll position when switching to planning mode
   useEffect(() => {
@@ -211,6 +248,27 @@ export default function Home() {
         </div>
       </header>
 
+      {/* Notification soft-ask banner */}
+      {showSoftAsk && !softAskDismissed && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between mb-4">
+          <span className="text-sm text-blue-800">Get reminded 1 hour before deadlines?</span>
+          <div className="flex gap-2">
+            <button
+              onClick={requestPermission}
+              className="text-sm bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Enable
+            </button>
+            <button
+              onClick={handleDismissSoftAsk}
+              className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              Not now
+            </button>
+          </div>
+        </div>
+      )}
+
       {error && (
         <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm mb-4">
             Failed to load tasks. <button onClick={fetchTasks} className="underline ml-2">Retry</button>
@@ -322,6 +380,11 @@ export default function Home() {
             <TaskForm onTaskCreated={fetchTasks} />
           </div>
 
+          {/* Capacity Summary */}
+          <div className="mb-4">
+            <CapacitySummary tasks={tasks} />
+          </div>
+
           {/* Task List */}
           <div className="bg-white border border-gray-100 shadow-sm rounded-3xl p-6">
             <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
@@ -367,6 +430,7 @@ export default function Home() {
                             {task.priority} priority
                           </span>
                           {task.estimated_duration && <span>{task.estimated_duration}m</span>}
+                          <UrgencyIndicator dueDate={task.due_date} size="sm" />
                         </div>
                       </button>
                       <TaskActionMenu
