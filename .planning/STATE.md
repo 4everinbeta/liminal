@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-31)
 
 **Core value:** ADHD brains respond to NOW/NOT NOW, not IMPORTANT/NOT IMPORTANT
-**Current focus:** Phase 3: Urgency System (in progress)
+**Current focus:** Phase 3: Urgency System (COMPLETE) — Next: Phase 4 Gamification
 
 ## Current Position
 
-Phase: 3 of 6 (Urgency System)
-Plan: 2 of 3 in current phase (03-02 complete)
-Status: In progress
-Last activity: 2026-02-19 — Completed 03-02-PLAN.md (Capacity Summary and Notifications)
+Phase: 3 of 6 (Urgency System) — COMPLETE
+Plan: 3 of 3 in current phase
+Status: Phase complete ✅
+Last activity: 2026-02-19 — Completed 03-03-PLAN.md (Wire Urgency into UI)
 
-Progress: [█████████░] 9/10 plans (90%)
+Progress: [██████████] 10/10 plans (100%)
 
 ## Performance Metrics
 
@@ -29,7 +29,7 @@ Progress: [█████████░] 9/10 plans (90%)
 |-------|-------|-------|----------|
 | 01-foundation | 3 | 8.8 min | 2.9 min |
 | 02-capture--and--feedback | 4 | 8.7 min | 2.2 min |
-| 03-urgency-system | 2 | 6 min | 3 min |
+| 03-urgency-system | 3 | 31 min | 10.3 min |
 
 **Recent Trend:**
 - Last 5 plans: 02-03 (2.7min), 02-04 (1min), 01-03 (2.6min), 03-01 (2min), 03-02 (4min)
@@ -119,9 +119,15 @@ Resume file: None
   - 02-03: Global quick capture (FAB, modal, optimistic creation)
   - 02-04: Task completion celebrations (confetti integration)
 
-**Phase 3 Status:** In Progress - Urgency System (visual time pressure, scarcity framing)
-  - 03-01: Urgency utilities (chroma-js gradient, useCountdown RAF, useUrgencyColor) ✅
-  - 03-02: Capacity summary and notifications (CapacitySummary, notifications.ts, useNotifications) ✅
-  - 03-03: Wire urgency into UI (TaskCard integration, UrgencyIndicator, dashboard capacity, notification opt-in) - PENDING
+**Phase 3 Status:** ✅ Complete - Full urgency system implemented and human-verified
+  - 03-01: Urgency utilities (chroma-js gradient, useCountdown RAF, useUrgencyColor)
+  - 03-02: Capacity summary and notifications (CapacitySummary, notifications.ts, useNotifications)
+  - 03-03: Wire urgency into UI (PlanningTaskRow with hooks, UrgencyIndicator, CapacitySummary, notification soft-ask)
 
-**Next:** 03-03 - Wire urgency into UI
+**From 03-03:**
+- transpilePackages: ['chroma-js'] required in next.config.js — chroma-js v3 is pure ESM
+- Extract PlanningTaskRow component to use hooks per task (hooks can't be called in .map())
+- React.memo wraps TaskCard to prevent O(n) re-renders from rAF countdown updates
+- sessionStorage for soft-ask dismissal (session-scoped, not permanent)
+
+**Next Phase:** Phase 4 - Gamification (streaks, progress tracking, momentum)

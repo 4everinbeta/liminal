@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Remove existing friction and simplify interface
 - [x] **Phase 2: Capture & Feedback** - Frictionless input and immediate visual rewards
-- [ ] **Phase 3: Urgency System** - Visual time pressure and scarcity framing
+- [x] **Phase 3: Urgency System** - Visual time pressure and scarcity framing
 - [ ] **Phase 4: Gamification** - Streaks, progress tracking, and momentum
 - [ ] **Phase 5: Forgiveness** - Working memory support and interruption recovery
 - [ ] **Phase 6: AI Prioritization** - Intelligent "do this now" suggestions
@@ -135,7 +135,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-02-19 |
 | 2. Capture & Feedback | 4/4 | Complete | 2026-02-07 |
-| 3. Urgency System | 2/3 | In progress | - |
+| 3. Urgency System | 3/3 | Complete | 2026-02-19 |
 | 4. Gamification | 0/0 | Not started | - |
 | 5. Forgiveness | 0/0 | Not started | - |
 | 6. AI Prioritization | 0/0 | Not started | - |
