@@ -10,7 +10,61 @@ import CapacitySummary from '@/components/CapacitySummary'
 import UrgencyIndicator from '@/components/UrgencyIndicator'
 import { getTasks, updateTask, deleteTask, Task } from '@/lib/api'
 import { useNotifications } from '@/lib/hooks/useNotifications'
+import { useUrgencyColor } from '@/lib/hooks/useUrgencyColor'
+import { isStaleTask } from '@/lib/urgency'
 import { CheckCircle, ArrowRight, CircleDashed, Flame, ListTodo } from 'lucide-react'
+
+// Extracted component so hooks (useUrgencyColor) can be called per-task row
+function PlanningTaskRow({
+  task,
+  isActive,
+  onTaskClick,
+  onDelete,
+  onComplete,
+  onEdit,
+}: {
+  task: Task
+  isActive: boolean
+  onTaskClick: () => void
+  onDelete: () => void
+  onComplete: () => void
+  onEdit: () => void
+}) {
+  const urgencyColor = useUrgencyColor(task.due_date, task.created_at, task.status)
+  const stale = isStaleTask(task.created_at, task.status)
+
+  const borderStyle = task.due_date
+    ? { borderLeft: '4px solid', borderLeftColor: urgencyColor }
+    : {}
+
+  return (
+    <li
+      className={`border rounded-2xl px-4 py-3 transition-all group ${
+        isActive ? 'border-primary bg-primary/5' : 'border-gray-100 bg-gray-50/60 hover:bg-white'
+      }`}
+      style={{ opacity: stale ? 0.5 : 1, filter: stale ? 'grayscale(30%)' : undefined, ...borderStyle }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <button onClick={onTaskClick} className="flex-1 text-left">
+          <div className="text-base font-semibold text-gray-900 hover:text-primary">
+            {task.title}
+          </div>
+          <div className="text-xs text-gray-500 mt-1 flex items-center gap-3">
+            <span className="uppercase tracking-wide">{task.priority} priority</span>
+            {task.estimated_duration && <span>{task.estimated_duration}m</span>}
+            <UrgencyIndicator dueDate={task.due_date} size="sm" />
+          </div>
+        </button>
+        <TaskActionMenu
+          onDelete={onDelete}
+          onToggleComplete={onComplete}
+          onEdit={onEdit}
+          isCompleted={false}
+        />
+      </div>
+    </li>
+  )
+}
 
 export default function Home() {
   const {
@@ -409,38 +463,15 @@ export default function Home() {
             ) : (
               <ul className="space-y-3">
                 {activeTasks.map((task) => (
-                  <li
+                  <PlanningTaskRow
                     key={task.id}
-                    className={`border rounded-2xl px-4 py-3 transition-all group ${
-                      task.id === activeTaskId
-                        ? 'border-primary bg-primary/5'
-                        : 'border-gray-100 bg-gray-50/60 hover:bg-white'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <button
-                        onClick={() => handleTaskClick(task.id)}
-                        className="flex-1 text-left"
-                      >
-                        <div className="text-base font-semibold text-gray-900 hover:text-primary">
-                          {task.title}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1 flex items-center gap-3">
-                          <span className="uppercase tracking-wide">
-                            {task.priority} priority
-                          </span>
-                          {task.estimated_duration && <span>{task.estimated_duration}m</span>}
-                          <UrgencyIndicator dueDate={task.due_date} size="sm" />
-                        </div>
-                      </button>
-                      <TaskActionMenu
-                        onDelete={() => handleDeleteTask(task.id)}
-                        onToggleComplete={() => handleCompleteTask(task.id)}
-                        onEdit={() => setEditingTask(task)}
-                        isCompleted={false}
-                      />
-                    </div>
-                  </li>
+                    task={task}
+                    isActive={task.id === activeTaskId}
+                    onTaskClick={() => handleTaskClick(task.id)}
+                    onDelete={() => handleDeleteTask(task.id)}
+                    onComplete={() => handleCompleteTask(task.id)}
+                    onEdit={() => setEditingTask(task)}
+                  />
                 ))}
               </ul>
             )}
