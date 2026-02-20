@@ -8,6 +8,9 @@ Usage:
   scripts/gsd-ollama plan-phase <N> --model <ollama-model>
   scripts/gsd-ollama execute-phase <N> --model <ollama-model>
   scripts/gsd-ollama verify-phase <N> --model <ollama-model>
+  scripts/gsd-ollama execute-phase <N> --model <ollama-model> --debug
+  scripts/gsd-ollama execute-phase <N> --model <ollama-model> --mode json
+  scripts/gsd-ollama <action> <N> --model <ollama-model> --timeout 120m
 
 Examples:
   scripts/gsd-ollama discuss-phase 2 --model qwen3-coder:latest
@@ -19,6 +22,7 @@ Notes:
   - Reads planning docs from .planning/
   - Writes artifacts into .planning/phases/<NN>-<slug>/
   - execute-phase generates and applies a unified diff (auto-edits files)
+  - Timeout default is 60m (override with --timeout or GSD_OLLAMA_TIMEOUT)
 EOF
 }
 
@@ -48,6 +52,54 @@ pick_plan_file() {
 
   # Pick the highest numbered plan (last after sort).
   echo "${candidates[-1]}"
+}
+
+list_patch_paths() {
+  # Extract b/<path> targets from a unified diff.
+  awk '
+    /^diff --git a\// {
+      for (i=1;i<=NF;i++) {
+        if ($i ~ /^b\//) {
+          p=$i
+          sub(/^b\//,"",p)
+          print p
+        }
+      }
+    }
+    /^\+\+\+ b\// {
+      p=$2
+      sub(/^b\//,"",p)
+      print p
+    }
+  ' | awk '!seen[$0]++'
+}
+
+validate_patch_paths() {
+  # Ensure the diff only touches allowed paths.
+  # - Existing files must be tracked by git.
+  # - New files allowed only under certain roots (to avoid hallucinated top-level dirs).
+  local allow_roots_regex='^(frontend/|backend/|docs/|scripts/)'
+
+  local bad=0
+  while IFS= read -r p; do
+    [[ -z "${p:-}" ]] && continue
+    if git ls-files --error-unmatch "$p" >/dev/null 2>&1; then
+      continue
+    fi
+    if [[ "$p" =~ $allow_roots_regex ]]; then
+      continue
+    fi
+    echo "Disallowed/untracked path in patch: $p" >&2
+    bad=1
+  done
+
+  return $bad
+}
+
+validate_path_allowed() {
+  local p="$1"
+  local allow_roots_regex='^(frontend/|backend/|docs/|scripts/)'
+  [[ "$p" =~ $allow_roots_regex ]]
 }
 
 require_cmd() {
@@ -93,28 +145,89 @@ ollama_run() {
   local model="$1"
   shift
   local prompt="$1"
-  printf "%s" "$prompt" | ollama run "$model"
+  # Ollama frequently emits spinner/control codes on stderr; suppress to keep logs readable.
+  # Also apply a generous timeout so a hung model call doesn't block the workflow indefinitely.
+  local args=(run "$model" --nowordwrap --think=false --hidethinking)
+  if [[ "${DEBUG:-0}" -eq 1 ]]; then
+    local err_file
+    err_file="$(mktemp -t gsd-ollama-err.XXXXXX)"
+    OLLAMA_NO_SPINNER=1 timeout "$TIMEOUT" ollama "${args[@]}" <<<"$prompt" 2>"$err_file"
+    local rc=$?
+    if [[ $rc -ne 0 ]]; then
+      echo "Ollama stderr saved at: $err_file" >&2
+      if [[ $rc -eq 124 ]]; then
+        echo "Ollama timed out (${TIMEOUT})." >&2
+      else
+        echo "Ollama exit code: $rc" >&2
+      fi
+      return $rc
+    fi
+    rm -f "$err_file"
+    return 0
+  fi
+  OLLAMA_NO_SPINNER=1 timeout "$TIMEOUT" ollama "${args[@]}" <<<"$prompt" 2>/dev/null
 }
 
 extract_unified_diff() {
   # Best-effort extraction of a unified diff from model output.
   # - If fenced code block exists, prefer its contents
-  # - Trim everything before the first "diff --git"
+  # - Trim everything before the first patch header ("diff --git" or "--- a/")
   local raw="$1"
 
   # Prefer first fenced block if present.
-  if printf "%s\n" "$raw" | awk 'BEGIN{in=0} /^```/{if(in==0){in=1;next}else{exit}} in==1{print}' | grep -q '^diff --git '; then
-    printf "%s\n" "$raw" | awk 'BEGIN{in=0} /^```/{if(in==0){in=1;next}else{exit}} in==1{print}'
+  # Note: "in" is a keyword in awk ("for (x in y)"), so use a different variable name.
+  if printf "%s\n" "$raw" | awk 'BEGIN{inside=0} /^```/{if(inside==0){inside=1;next}else{exit}} inside==1{print}' | grep -q '^diff --git '; then
+    printf "%s\n" "$raw" | awk 'BEGIN{inside=0} /^```/{if(inside==0){inside=1;next}else{exit}} inside==1{print}'
     return 0
   fi
 
-  # Otherwise, strip everything before first diff header.
-  printf "%s\n" "$raw" | awk 'BEGIN{found=0} /^diff --git /{found=1} found==1{print}'
+  # If a fenced block exists but doesn't include diff --git, still try it.
+  local fenced
+  fenced="$(printf "%s\n" "$raw" | awk 'BEGIN{inside=0} /^```/{if(inside==0){inside=1;next}else{exit}} inside==1{print}')"
+  if [[ -n "${fenced:-}" ]]; then
+    raw="$fenced"
+  fi
+
+  # Otherwise, strip everything before first patch header.
+  # Avoid regex literals with slashes to keep awk portable.
+  printf "%s\n" "$raw" | awk 'BEGIN{found=0} /^diff --git /{found=1} substr($0,1,6)=="--- a/"{found=1} found{print}'
 }
 
-validate_unified_diff() {
-  # Quick structural sanity check before git apply.
-  awk 'BEGIN{has=0} /^diff --git /{has=1} END{exit has?0:1}'
+extract_repo_files_from_plan() {
+  # Best-effort extraction of file paths mentioned in a plan markdown.
+  # Returns newline-delimited unique paths (existing files only).
+  local plan_path="$1"
+  local max_files="${2:-8}"
+
+  awk '
+    {
+      # Pull out backticked paths first: `frontend/...`
+      while (match($0, /`(frontend|backend|infra|scripts|docs)\/[^`]+`/, m)) {
+        p=m[0]
+        gsub(/^`|`$/, "", p)
+        print p
+        $0 = substr($0, RSTART + RLENGTH)
+      }
+      # Then raw-looking paths
+      while (match($0, /(frontend|backend|infra|scripts|docs)\/[A-Za-z0-9._\/-]+/, m2)) {
+        print m2[0]
+        $0 = substr($0, RSTART + RLENGTH)
+      }
+    }
+  ' "$plan_path" \
+    | awk '!seen[$0]++' \
+    | while IFS= read -r p; do
+        [[ -f "$p" ]] && echo "$p"
+      done \
+    | head -n "$max_files"
+}
+
+slurp_file_snippet() {
+  local path="$1"
+  local max_lines="${2:-220}"
+  echo "=== FILE: ${path} ==="
+  sed -n "1,${max_lines}p" "$path"
+  echo ""
 }
 
 phase_title_from_roadmap() {
@@ -219,12 +332,31 @@ parse_args() {
   shift
 
   MODEL=""
+  DEBUG=0
+  MODE="diff"
+  TIMEOUT="${GSD_OLLAMA_TIMEOUT:-60m}"
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --model|-m)
         shift
         [[ $# -gt 0 ]] || die "missing value for --model"
         MODEL="$1"
+        shift
+        ;;
+      --debug)
+        DEBUG=1
+        shift
+        ;;
+      --mode)
+        shift
+        [[ $# -gt 0 ]] || die "missing value for --mode (diff|json)"
+        MODE="$1"
+        shift
+        ;;
+      --timeout)
+        shift
+        [[ $# -gt 0 ]] || die "missing value for --timeout (e.g. 60m, 2h)"
+        TIMEOUT="$1"
         shift
         ;;
       -h|--help)
@@ -239,6 +371,8 @@ parse_args() {
 
   [[ "$PHASE" =~ ^[0-9]+$ ]] || die "phase must be an integer (got: $PHASE)"
   [[ -n "$MODEL" ]] || die "missing --model"
+  [[ "$MODE" == "diff" || "$MODE" == "json" ]] || die "invalid --mode (expected diff|json): $MODE"
+  [[ -n "$TIMEOUT" ]] || die "missing timeout value"
 }
 
 discuss_phase() {
@@ -433,6 +567,17 @@ execute_phase() {
   local phase_section
   phase_section="$(phase_section_from_roadmap "$phase")"
 
+  local repo_files_context=""
+  local mentioned
+  mentioned="$(extract_repo_files_from_plan "$plan_path" 8 || true)"
+  local allowed_files=""
+  if [[ -n "${mentioned:-}" ]]; then
+    while IFS= read -r f; do
+      repo_files_context+=$(slurp_file_snippet "$f" 220)
+      allowed_files+="${f}"$'\n'
+    done <<<"$mentioned"
+  fi
+
   local prompt
   prompt=$(
     cat <<EOF
@@ -440,7 +585,7 @@ You are an expert coding agent working inside a git repository.
 
 Task: implement the NEXT smallest chunk of Phase ${phase}.
 
-Return ONLY a unified diff that can be applied with 'git apply'. No markdown. No explanations.
+Return ONLY a unified diff that can be applied with 'git apply'. No markdown. No explanations. No code fences.
 
 Rules:
 - Keep the patch small and reviewable (ideally 1–4 files).
@@ -448,6 +593,8 @@ Rules:
 - If you need to add new files, include them in the diff.
 - If you need follow-up work, encode it as TODOs in the plan output? NO. Only code changes in the diff.
 - Ensure code compiles/lints by best effort, but do not run commands.
+- Do NOT invent file contents. Use the provided file snapshots when editing existing files.
+- Do NOT create or edit files outside: frontend/, backend/, docs/, scripts/.
 
 Inputs:
 
@@ -467,6 +614,12 @@ $(ls -1)
 Recent commits:
 $(git --no-pager log -n 8 --oneline 2>/dev/null || true)
 
+=== ALLOWED FILES (prefer editing these) ===
+${allowed_files}
+
+=== FILE SNAPSHOTS (authoritative) ===
+${repo_files_context}
+
 EOF
   )
 
@@ -474,29 +627,58 @@ EOF
   local max_attempts=3
   local last_patch_file=""
 
+  if [[ "${MODE:-diff}" == "json" ]]; then
+    attempt=$((max_attempts + 1))
+  fi
+
   while [[ $attempt -le $max_attempts ]]; do
     echo "Generating patch with Ollama model: $model (attempt $attempt/$max_attempts)" >&2
     local raw
     raw="$(ollama_run "$model" "$prompt")"
 
+    if [[ "${DEBUG:-0}" -eq 1 ]]; then
+      local raw_file
+      raw_file="/tmp/gsd-ollama-exec-${nn}-attempt-${attempt}.raw.txt"
+      printf "%s\n" "$raw" >"$raw_file"
+      echo "Saved raw model output: $raw_file" >&2
+    fi
+
     local patch
     patch="$(extract_unified_diff "$raw")"
 
-    if ! printf "%s\n" "$patch" | validate_unified_diff; then
+    if [[ -z "${patch//$'\n'/}" ]]; then
       echo "" >&2
-      echo "Model did not return a usable unified diff." >&2
+      echo "Model did not return a usable patch body." >&2
+      if [[ "${DEBUG:-0}" -eq 1 ]]; then
+        echo "Raw output (first 40 lines):" >&2
+        printf "%s\n" "$raw" | sed -n '1,40p' >&2 || true
+      fi
       if [[ $attempt -lt $max_attempts ]]; then
-        prompt="${prompt}"$'\n'"IMPORTANT: Your previous output was not a valid unified diff. Return ONLY a unified diff starting with 'diff --git'. No prose. No code fences. No JSON."
+        prompt="${prompt}"$'\n'"IMPORTANT: Your previous output was not a patch. Return ONLY a unified diff (git apply compatible). Start with either 'diff --git' or '--- a/'. No prose. No code fences. No JSON."
         attempt=$((attempt + 1))
         continue
       fi
-      die "model did not return a unified diff (expected lines starting with: diff --git)"
+      die "model did not return a patch"
     fi
 
     local patch_file
     patch_file="$(mktemp)"
     last_patch_file="$patch_file"
     printf "%s\n" "$patch" >"$patch_file"
+
+    # Reject patches that touch hallucinated/untracked paths (e.g., app/page.tsx).
+    if ! list_patch_paths <"$patch_file" | validate_patch_paths; then
+      echo "" >&2
+      echo "Patch touches disallowed/untracked paths. Saved at: $patch_file" >&2
+      echo "First few lines:" >&2
+      sed -n '1,40p' "$patch_file" >&2 || true
+      if [[ $attempt -lt $max_attempts ]]; then
+        prompt="${prompt}"$'\n'"IMPORTANT: The previous diff touched invalid paths. Only edit existing tracked files, or create new files ONLY under frontend/, backend/, docs/, scripts/. Return ONLY a unified diff."
+        attempt=$((attempt + 1))
+        continue
+      fi
+      exit 1
+    fi
 
     # Validate before applying to avoid partial application.
     if ! git apply --check "$patch_file" >/dev/null 2>&1; then
@@ -525,7 +707,95 @@ EOF
     return 0
   done
 
-  die "failed to generate an applicable patch after ${max_attempts} attempts (last patch: ${last_patch_file:-n/a})"
+  # Fallback: request structured file edits and write them directly.
+  echo "" >&2
+  echo "Falling back to JSON file-edit mode (model isn't producing applyable diffs)..." >&2
+
+  local json_prompt
+  json_prompt=$(
+    cat <<EOF
+Return ONLY JSON (no markdown, no prose) with this schema:
+{
+  "files": [
+    {"path": "frontend/...", "content": "<full file contents>"},
+    ...
+  ]
+}
+
+Rules:
+- Only include paths under frontend/, backend/, docs/, scripts/.
+- Provide complete file contents for each entry.
+- Keep it small: 1–3 files max.
+- Do not invent new app structure; prefer editing the ALLOWED FILES list.
+
+Task: implement the NEXT smallest chunk of Phase ${phase} using the context and plan below.
+
+=== PHASE SECTION ===
+${phase_section}
+
+=== CONTEXT ===
+$(cat "$context_path")
+
+=== PLAN ===
+$(cat "$plan_path")
+
+=== ALLOWED FILES (prefer editing these) ===
+${allowed_files}
+
+=== FILE SNAPSHOTS (authoritative) ===
+${repo_files_context}
+EOF
+  )
+
+  local json_raw
+  json_raw="$(ollama_run "$model" "$json_prompt")" || die "model call failed during JSON fallback"
+
+  if [[ "${DEBUG:-0}" -eq 1 ]]; then
+    local json_file
+    json_file="/tmp/gsd-ollama-exec-${nn}-files.json"
+    printf "%s\n" "$json_raw" >"$json_file"
+    echo "Saved JSON edit payload: $json_file" >&2
+  fi
+
+  require_cmd python3
+  python3 - <<'PY' "$json_raw"
+import json, os, sys
+
+raw = sys.argv[1]
+try:
+    data = json.loads(raw)
+except Exception as e:
+    print("error: JSON parse failed:", e, file=sys.stderr)
+    sys.exit(2)
+
+files = data.get("files")
+if not isinstance(files, list) or not files:
+    print("error: JSON must include non-empty 'files' list", file=sys.stderr)
+    sys.exit(2)
+
+def allowed(path: str) -> bool:
+    return path.startswith(("frontend/","backend/","docs/","scripts/")) and ".." not in path and not path.startswith("/")
+
+for item in files:
+    if not isinstance(item, dict):
+        print("error: each files[] entry must be an object", file=sys.stderr)
+        sys.exit(2)
+    path = item.get("path")
+    content = item.get("content")
+    if not isinstance(path, str) or not isinstance(content, str):
+        print("error: each entry must have string 'path' and 'content'", file=sys.stderr)
+        sys.exit(2)
+    if not allowed(path):
+        print(f"error: disallowed path: {path}", file=sys.stderr)
+        sys.exit(2)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
+PY
+
+  echo "Wrote files from JSON payload. Current status:" >&2
+  git status --short >&2
+  return 0
 }
 
 verify_phase() {
@@ -585,6 +855,7 @@ main() {
   require_cmd sed
   require_cmd tr
   require_cmd mktemp
+  require_cmd timeout
 
   [[ $# -ge 1 ]] || { usage; exit 1; }
   local action="$1"
@@ -613,4 +884,7 @@ main() {
 
 PHASE=""
 MODEL=""
+DEBUG=0
+MODE="diff"
+TIMEOUT="${GSD_OLLAMA_TIMEOUT:-60m}"
 main "$@"

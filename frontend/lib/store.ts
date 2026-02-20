@@ -44,6 +44,10 @@ interface AppState {
   planningScrollPosition: number
   setPlanningScrollPosition: (pos: number) => void
 
+  // Gamification: EOD summary opt-in
+  eodSummaryEnabled: boolean
+  setEodSummaryEnabled: (enabled: boolean) => void
+
   // Global Refresh Signal
   lastUpdate: number
   triggerUpdate: () => void
@@ -87,6 +91,9 @@ export const useAppStore = create<AppState>()(
       planningScrollPosition: 0,
       setPlanningScrollPosition: (pos) => set({ planningScrollPosition: pos }),
 
+      eodSummaryEnabled: false, // Off by default per CONTEXT.md
+      setEodSummaryEnabled: (enabled) => set({ eodSummaryEnabled: enabled }),
+
       lastUpdate: 0,
       triggerUpdate: () => set({ lastUpdate: Date.now() }),
     }),
@@ -102,6 +109,7 @@ export const useAppStore = create<AppState>()(
         isFocusMode: state.isFocusMode,
         activeTaskId: state.activeTaskId,
         planningScrollPosition: state.planningScrollPosition,
+        eodSummaryEnabled: state.eodSummaryEnabled,
       }),
     }
   )

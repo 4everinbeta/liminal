@@ -15,7 +15,7 @@ async def test_agent_task_creation_flow():
     mock_session.execute.return_value = mock_result
 
     with patch("app.agents.core.get_settings") as mock_settings, \
-         patch("app.agents.core.USE_SK_ORCHESTRATOR", True):
+         patch("app.agents.core.USE_SK_ORCHESTRATOR", False):
         mock_settings.return_value.llm_provider = "mock"
         
         service = AgentService(mock_session, mock_user_id)

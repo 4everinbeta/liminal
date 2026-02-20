@@ -15,3 +15,7 @@ export default function Home() {
                 <div className="mt-4">
                     <TaskForm />
                 </div>
+            </div>
+        </main>
+    );
+}

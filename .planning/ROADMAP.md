@@ -87,10 +87,12 @@ Plans:
   4. Streak system is flexible (no harsh penalties for breaks)
   5. End-of-day summary highlights wins (no focus on incomplete tasks)
   6. Progress visualizations use smooth, satisfying animations
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD during planning
+- [x] 04-01-PLAN.md — Gamification foundation (utility functions, useGamificationStats hook, store extension)
+- [x] 04-02-PLAN.md — Gamification UI components (StatsBar, EodSummaryToast)
+- [x] 04-03-PLAN.md — Dashboard integration (StatsBar integration, EOD toggle, EOD toast scheduler)
 
 ### Phase 5: Forgiveness
 **Goal**: Users can recover from interruptions, undo mistakes, and restore context after distractions
@@ -136,6 +138,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Foundation | 3/3 | Complete | 2026-02-19 |
 | 2. Capture & Feedback | 4/4 | Complete | 2026-02-07 |
 | 3. Urgency System | 3/3 | Complete | 2026-02-19 |
-| 4. Gamification | 0/0 | Not started | - |
+| 4. Gamification | 3/3 | Complete | 2026-02-19 |
 | 5. Forgiveness | 0/0 | Not started | - |
 | 6. AI Prioritization | 0/0 | Not started | - |

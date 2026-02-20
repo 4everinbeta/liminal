@@ -12,7 +12,10 @@ import { getTasks, updateTask, deleteTask, Task } from '@/lib/api'
 import { useNotifications } from '@/lib/hooks/useNotifications'
 import { useUrgencyColor } from '@/lib/hooks/useUrgencyColor'
 import { isStaleTask } from '@/lib/urgency'
-import { CheckCircle, ArrowRight, CircleDashed, Flame, ListTodo } from 'lucide-react'
+import { CheckCircle, ArrowRight, CircleDashed, ListTodo } from 'lucide-react'
+import { StatsBar } from '@/components/StatsBar'
+import { EodSummaryToast, useEodSummaryScheduler } from '@/components/EodSummaryToast'
+import { useGamificationStats } from '@/lib/hooks/useGamificationStats'
 
 // Extracted component so hooks (useUrgencyColor) can be called per-task row
 function PlanningTaskRow({
@@ -74,6 +77,8 @@ export default function Home() {
     setActiveTaskId,
     planningScrollPosition,
     setPlanningScrollPosition,
+    eodSummaryEnabled,
+    setEodSummaryEnabled,
     triggerUpdate,
     lastUpdate
   } = useAppStore()
@@ -169,42 +174,8 @@ export default function Home() {
     }
   }, [isFocusMode, planningScrollPosition])
 
-  const stats = useMemo(() => {
-    const today = new Date()
-    const todayStr = today.toDateString()
-
-    // Done Today
-    const doneToday = tasks.filter(t => t.status === 'done' && t.updated_at && new Date(t.updated_at).toDateString() === todayStr).length
-
-    // Counts
-    const backlog = tasks.filter(t => t.status === 'backlog').length
-    const inProgress = tasks.filter(t => t.status === 'in_progress').length
-
-    // Streak Calculation
-    const completedDates = new Set(
-        tasks
-        .filter(t => t.status === 'done' && t.updated_at)
-        .map(t => new Date(t.updated_at!).toDateString())
-    )
-
-    let streak = 0
-    // Check up to 365 days back
-    for (let i = 0; i < 365; i++) {
-        const d = new Date()
-        d.setDate(d.getDate() - i)
-        const dStr = d.toDateString()
-
-        if (completedDates.has(dStr)) {
-            streak++
-        } else if (i === 0 && !completedDates.has(dStr)) {
-            continue
-        } else {
-            break
-        }
-    }
-
-    return { doneToday, backlog, inProgress, streak }
-  }, [tasks])
+  const gamificationStats = useGamificationStats(tasks)
+  const { showSummary, dismissSummary } = useEodSummaryScheduler(eodSummaryEnabled, gamificationStats)
 
   const activeTasks = useMemo(() => tasks.filter(t => t.status !== 'done'), [tasks])
   const activeTask = activeTasks.find(t => t.id === activeTaskId)
@@ -329,40 +300,12 @@ export default function Home() {
         </div>
       )}
 
+      {/* Gamification Stats Bar — shown in both focus and planning mode */}
+      <StatsBar stats={gamificationStats} />
+
       {/* FOCUS MODE VIEW */}
       {isFocusMode && (
         <div className="space-y-6 py-6">
-          {/* Stats Row */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">
-              <div className="p-2 bg-green-100 text-green-600 rounded-lg">
-                <CheckCircle size={20} />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.doneToday}</p>
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Done Today</p>
-              </div>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">
-              <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
-                <Flame size={20} />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.streak}</p>
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Day Streak</p>
-              </div>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">
-              <div className="p-2 bg-gray-100 text-gray-600 rounded-lg">
-                <CircleDashed size={20} />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{activeTasks.length}</p>
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Active</p>
-              </div>
-            </div>
-          </div>
-
           {/* Active Task Card */}
           {activeTask ? (
             <div className="bg-white border border-gray-100 rounded-3xl shadow-lg p-8">
@@ -428,6 +371,24 @@ export default function Home() {
       {/* PLANNING MODE VIEW */}
       {!isFocusMode && (
         <div className="space-y-6 py-6">
+          {/* EOD Summary opt-in toggle */}
+          <div className="flex items-center justify-end gap-2 text-xs text-gray-400">
+            <span>End-of-day summary</span>
+            <button
+              onClick={() => setEodSummaryEnabled(!eodSummaryEnabled)}
+              className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
+                eodSummaryEnabled ? 'bg-primary' : 'bg-gray-200'
+              }`}
+              aria-label="Toggle end-of-day summary"
+            >
+              <span
+                className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform ${
+                  eodSummaryEnabled ? 'translate-x-4' : 'translate-x-0.5'
+                }`}
+              />
+            </button>
+          </div>
+
           {/* Quick Capture */}
           <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-5">
             <h3 className="text-base font-semibold text-gray-900 mb-2">Quick capture</h3>
@@ -492,6 +453,13 @@ export default function Home() {
             onSave={handleSaveTask}
         />
       )}
+
+      {/* End-of-day summary toast */}
+      <EodSummaryToast
+        stats={gamificationStats}
+        isVisible={showSummary}
+        onDismiss={dismissSummary}
+      />
     </div>
   )
 }

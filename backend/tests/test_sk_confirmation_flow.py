@@ -80,7 +80,7 @@ pending_confirmation: {"action": "create_task", "details": {"title": "Review cod
 """
 
     # Extract pending confirmation
-    orchestrator._extract_pending_confirmation(agent_response)
+    await orchestrator._extract_pending_confirmation(agent_response)
 
     # Verify NO task was created yet
     tasks = await crud.get_tasks(async_session, test_user.id)
@@ -329,7 +329,7 @@ async def test_nested_pending_confirmation_not_allowed(orchestrator):
 pending_confirmation: {"action": "create_task", "details": {"title": "Second Task"}}
 """
 
-    orchestrator._extract_pending_confirmation(response_with_new_confirmation)
+    await orchestrator._extract_pending_confirmation(response_with_new_confirmation)
 
     # Should replace the first confirmation
     assert orchestrator.pending_confirmation is not None
