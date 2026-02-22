@@ -10,10 +10,10 @@
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Backend Logic & Prompt Engineering' (Protocol in workflow.md)
 
 ## Phase 2: Frontend Integration
-- [ ] Task: Create AISuggestion component
-    - [ ] Build the UI for displaying the suggested task
-    - [ ] Add "Accept" and "Dismiss" buttons
-- [ ] Task: Wire AISuggestion component to Dashboard
-    - [ ] Fetch suggestion on page load or periodically
-    - [ ] Handle action button clicks (Accept = set active task, Dismiss = hide)
+- [x] Task: Create AISuggestion component
+    - [x] Build the UI for displaying the suggested task
+    - [x] Add "Accept" and "Dismiss" buttons
+- [x] Task: Wire AISuggestion component to Dashboard
+    - [x] Fetch suggestion on page load or periodically
+    - [x] Handle action button clicks (Accept = set active task, Dismiss = hide)
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Frontend Integration' (Protocol in workflow.md)

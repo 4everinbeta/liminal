@@ -61,10 +61,10 @@ async def test_agent_task_creation_flow():
         # We didn't mock get_chat_history in the previous test setup properly for multi-turn.
         # Let's just test the single turn where the user finally says "No".
         
-        resp2 = await service.process_request([{"role": "user", "content": "Yes"}], session_id="test-session")
+        resp2 = await service.process_request([{"role": "user", "content": "No"}], session_id="test-session")
         
         # Assertions
-        assert "Created task" in resp2["content"]
+        assert "Task created successfully." in resp2["content"]
         # ... verify tool execution ...
 
 @pytest.mark.asyncio
