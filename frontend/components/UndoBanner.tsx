@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import { updateTask, restoreTask } from '@/lib/api';

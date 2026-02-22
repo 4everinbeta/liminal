@@ -9,10 +9,18 @@ describe('API Library', () => {
         title: 'Buy milk',
         priority: 'medium',
         priority_score: 50,
-        estimated_duration: undefined,
-        effort_score: undefined,
-        value_score: 50,
         status: 'backlog',
+        value_score: 50,
+        estimated_duration: 30, // Default from smartDefaults
+        effort_score: 30, // Default from smartDefaults
+        description: undefined,
+        notes: undefined,
+        start_date: undefined,
+        due_date: undefined,
+        start_date_natural: undefined,
+        due_date_natural: undefined,
+        theme_id: undefined,
+        initiative_id: undefined,
       });
     });
 
