@@ -187,6 +187,15 @@ export async function restoreTask(taskId: string): Promise<Task> {
   });
 }
 
+export interface AISuggestion {
+  suggested_task_id: string;
+  reasoning: string;
+}
+
+export async function getAiSuggestion(): Promise<AISuggestion> {
+  return request<AISuggestion>(`${API_BASE_URL}/tasks/ai-suggestion`);
+}
+
 /**
  * Themes
  */

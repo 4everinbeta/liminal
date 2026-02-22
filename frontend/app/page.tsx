@@ -8,7 +8,8 @@ import EditTaskModal from '@/components/EditTaskModal'
 import ChatInterface from '@/components/ChatInterface'
 import CapacitySummary from '@/components/CapacitySummary'
 import UrgencyIndicator from '@/components/UrgencyIndicator'
-import { getTasks, updateTask, deleteTask, getDeletedTasks, restoreTask, Task } from '@/lib/api'
+import { getTasks, updateTask, deleteTask, getDeletedTasks, restoreTask, getAiSuggestion, Task, type AISuggestion as AISuggestionType } from '@/lib/api'
+import { AISuggestion } from '@/components/AISuggestion'
 import { useNotifications } from '@/lib/hooks/useNotifications'
 import { useUrgencyColor } from '@/lib/hooks/useUrgencyColor'
 import { isStaleTask } from '@/lib/urgency'
@@ -101,6 +102,7 @@ export default function Home() {
 
   // Edit Modal State
   const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [aiSuggestion, setAiSuggestion] = useState<AISuggestionType | null>(null);
 
   // Notification soft-ask (dismissed state persisted to sessionStorage)
   const { permission, showSoftAsk, requestPermission, dismissSoftAsk, triggerSoftAsk, scheduleNotification } = useNotifications()
@@ -124,9 +126,13 @@ export default function Home() {
     setError(null)
     console.log("Fetching tasks...")
     try {
-      const [fetchedTasks, fetchedDeleted] = await Promise.all([
+      const [fetchedTasks, fetchedDeleted, suggestion] = await Promise.all([
         getTasks(),
-        getDeletedTasks()
+        getDeletedTasks(),
+        getAiSuggestion().catch(err => {
+          console.log("No AI suggestion available:", err.message);
+          return null;
+        })
       ])
       console.log("Fetched tasks:", fetchedTasks.length)
       const priorityMap = { high: 3, medium: 2, low: 1 }
@@ -145,6 +151,7 @@ export default function Home() {
 
       setTasks(sorted)
       setDeletedTasks(fetchedDeleted)
+      setAiSuggestion(suggestion)
 
       // Set active task to first non-done task if none is set
       if (!activeTaskId) {
@@ -195,6 +202,17 @@ export default function Home() {
 
   const activeTasks = useMemo(() => tasks.filter(t => t.status !== 'done'), [tasks])
   const activeTask = activeTasks.find(t => t.id === activeTaskId)
+
+  const handleAcceptSuggestion = () => {
+    if (aiSuggestion) {
+      setActiveTaskId(aiSuggestion.suggested_task_id);
+      setAiSuggestion(null);
+    }
+  }
+
+  const handleDismissSuggestion = () => {
+    setAiSuggestion(null);
+  }
 
   const previousTask = useMemo(() => {
     if (!previouslyActiveTaskId) return null;
@@ -570,6 +588,14 @@ export default function Home() {
         stats={gamificationStats}
         isVisible={showSummary}
         onDismiss={dismissSummary}
+      />
+
+      <AISuggestion
+        isVisible={!!aiSuggestion}
+        taskTitle={tasks.find(t => t.id === aiSuggestion?.suggested_task_id)?.title || ""}
+        reasoning={aiSuggestion?.reasoning || ""}
+        onAccept={handleAcceptSuggestion}
+        onDismiss={handleDismissSuggestion}
       />
     </div>
   )
