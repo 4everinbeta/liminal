@@ -1,11 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, ChevronDown, ChevronUp, Calendar, FileText } from 'lucide-react'
 import { createTask, TaskCreate } from '@/lib/api'
 import { calculateSmartDefaults } from '@/lib/smartDefaults'
-import { useEffect } from 'react'
 
 interface TaskFormProps {
   onTaskCreated?: () => void
@@ -14,6 +13,11 @@ interface TaskFormProps {
 const STORAGE_KEY = 'liminal_task_form_draft'
 
 export default function TaskForm({ onTaskCreated }: TaskFormProps) {
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const [isOpen, setIsOpen] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -29,6 +33,7 @@ export default function TaskForm({ onTaskCreated }: TaskFormProps) {
 
   // Load draft from localStorage on mount
   useEffect(() => {
+    if (!hasMounted) return;
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
       try {
@@ -44,10 +49,11 @@ export default function TaskForm({ onTaskCreated }: TaskFormProps) {
         console.error('Failed to parse task form draft', e)
       }
     }
-  }, [])
+  }, [hasMounted])
 
   // Save draft to localStorage whenever fields change
   useEffect(() => {
+    if (!hasMounted) return;
     const draft = {
       title,
       dueDate,
@@ -57,7 +63,7 @@ export default function TaskForm({ onTaskCreated }: TaskFormProps) {
       showAdvanced,
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
-  }, [title, dueDate, duration, description, durationPreset, showAdvanced])
+  }, [hasMounted, title, dueDate, duration, description, durationPreset, showAdvanced])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

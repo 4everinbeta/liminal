@@ -7,6 +7,11 @@ import { RotateCcw, X } from 'lucide-react';
 const UNDO_WINDOW_MS = 30000;
 
 export const UndoBanner: React.FC = () => {
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const { 
     lastCompletedTask, 
     setLastCompletedTask, 
@@ -18,6 +23,8 @@ export const UndoBanner: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    if (!hasMounted) return;
+
     const checkVisibility = () => {
       const now = Date.now();
       let visible = false;
@@ -40,7 +47,7 @@ export const UndoBanner: React.FC = () => {
     checkVisibility();
     const interval = setInterval(checkVisibility, 1000);
     return () => clearInterval(interval);
-  }, [lastCompletedTask, lastDeletedTask, setLastCompletedTask, setLastDeletedTask]);
+  }, [hasMounted, lastCompletedTask, lastDeletedTask, setLastCompletedTask, setLastDeletedTask]);
 
   const handleUndoComplete = async () => {
     if (!lastCompletedTask) return;
@@ -64,7 +71,7 @@ export const UndoBanner: React.FC = () => {
     }
   };
 
-  if (!isVisible) return null;
+  if (!hasMounted || !isVisible) return null;
 
   return (
     <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
