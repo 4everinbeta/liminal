@@ -8,11 +8,11 @@ import EditTaskModal from '@/components/EditTaskModal'
 import ChatInterface from '@/components/ChatInterface'
 import CapacitySummary from '@/components/CapacitySummary'
 import UrgencyIndicator from '@/components/UrgencyIndicator'
-import { getTasks, updateTask, deleteTask, Task } from '@/lib/api'
+import { getTasks, updateTask, deleteTask, getDeletedTasks, restoreTask, Task } from '@/lib/api'
 import { useNotifications } from '@/lib/hooks/useNotifications'
 import { useUrgencyColor } from '@/lib/hooks/useUrgencyColor'
 import { isStaleTask } from '@/lib/urgency'
-import { CheckCircle, ArrowRight, CircleDashed, ListTodo } from 'lucide-react'
+import { CheckCircle, ArrowRight, CircleDashed, ListTodo, ArrowDownCircle, RotateCcw } from 'lucide-react'
 import { StatsBar } from '@/components/StatsBar'
 import { EodSummaryToast, useEodSummaryScheduler } from '@/components/EodSummaryToast'
 import { useGamificationStats } from '@/lib/hooks/useGamificationStats'
@@ -25,6 +25,7 @@ function PlanningTaskRow({
   onDelete,
   onComplete,
   onEdit,
+  onPause,
 }: {
   task: Task
   isActive: boolean
@@ -32,9 +33,11 @@ function PlanningTaskRow({
   onDelete: () => void
   onComplete: () => void
   onEdit: () => void
+  onPause: () => void
 }) {
   const urgencyColor = useUrgencyColor(task.due_date, task.created_at, task.status)
   const stale = isStaleTask(task.created_at, task.status)
+  const isPaused = task.status === 'paused'
 
   const borderStyle = task.due_date
     ? { borderLeft: '4px solid', borderLeftColor: urgencyColor }
@@ -45,12 +48,13 @@ function PlanningTaskRow({
       className={`border rounded-2xl px-4 py-3 transition-all group ${
         isActive ? 'border-primary bg-primary/5' : 'border-gray-100 bg-gray-50/60 hover:bg-white'
       }`}
-      style={{ opacity: stale ? 0.5 : 1, filter: stale ? 'grayscale(30%)' : undefined, ...borderStyle }}
+      style={{ opacity: stale || isPaused ? 0.5 : 1, filter: stale ? 'grayscale(30%)' : undefined, ...borderStyle }}
     >
       <div className="flex items-start justify-between gap-3">
         <button onClick={onTaskClick} className="flex-1 text-left">
-          <div className="text-base font-semibold text-gray-900 hover:text-primary">
+          <div className="text-base font-semibold text-gray-900 hover:text-primary flex items-center gap-2">
             {task.title}
+            {isPaused && <span className="text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded uppercase tracking-wider">Paused</span>}
           </div>
           <div className="text-xs text-gray-500 mt-1 flex items-center gap-3">
             <span className="uppercase tracking-wide">{task.priority} priority</span>
@@ -62,7 +66,9 @@ function PlanningTaskRow({
           onDelete={onDelete}
           onToggleComplete={onComplete}
           onEdit={onEdit}
+          onPause={onPause}
           isCompleted={false}
+          isPaused={isPaused}
         />
       </div>
     </li>
@@ -75,15 +81,21 @@ export default function Home() {
     toggleFocusMode,
     activeTaskId,
     setActiveTaskId,
+    previouslyActiveTaskId,
     planningScrollPosition,
     setPlanningScrollPosition,
     eodSummaryEnabled,
     setEodSummaryEnabled,
     triggerUpdate,
-    lastUpdate
+    lastUpdate,
+    lastCompletedTask,
+    setLastCompletedTask,
+    lastDeletedTask,
+    setLastDeletedTask
   } = useAppStore()
 
   const [tasks, setTasks] = useState<Task[]>([])
+  const [deletedTasks, setDeletedTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -112,7 +124,10 @@ export default function Home() {
     setError(null)
     console.log("Fetching tasks...")
     try {
-      const fetchedTasks = await getTasks()
+      const [fetchedTasks, fetchedDeleted] = await Promise.all([
+        getTasks(),
+        getDeletedTasks()
+      ])
       console.log("Fetched tasks:", fetchedTasks.length)
       const priorityMap = { high: 3, medium: 2, low: 1 }
       const sorted = fetchedTasks
@@ -129,6 +144,7 @@ export default function Home() {
         })
 
       setTasks(sorted)
+      setDeletedTasks(fetchedDeleted)
 
       // Set active task to first non-done task if none is set
       if (!activeTaskId) {
@@ -180,9 +196,22 @@ export default function Home() {
   const activeTasks = useMemo(() => tasks.filter(t => t.status !== 'done'), [tasks])
   const activeTask = activeTasks.find(t => t.id === activeTaskId)
 
+  const previousTask = useMemo(() => {
+    if (!previouslyActiveTaskId) return null;
+    return tasks.find(t => t.id === previouslyActiveTaskId && t.status !== 'done');
+  }, [tasks, previouslyActiveTaskId]);
+
   const handleCompleteTask = async (taskId: string) => {
+    const taskToComplete = tasks.find(t => t.id === taskId)
     try {
       await updateTask(taskId, { status: 'done' })
+      if (taskToComplete) {
+        setLastCompletedTask({ ...taskToComplete })
+        // Clear after 30 seconds
+        setTimeout(() => {
+          setLastCompletedTask(null)
+        }, 30000)
+      }
       setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'done', updated_at: new Date().toISOString() } : t))
 
       // Move to next task
@@ -197,6 +226,27 @@ export default function Home() {
     }
   }
 
+  const handlePauseTask = async (taskId: string) => {
+    try {
+      await updateTask(taskId, { status: 'paused' })
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'paused', updated_at: new Date().toISOString() } : t))
+      
+      // Move to next task if this was the active one
+      if (taskId === activeTaskId) {
+        const currentIndex = activeTasks.findIndex(t => t.id === taskId)
+        const nextTask = activeTasks[currentIndex + 1] || activeTasks[0]
+        if (nextTask && nextTask.id !== taskId) {
+          setActiveTaskId(nextTask.id)
+        } else {
+          setActiveTaskId(null)
+        }
+      }
+    } catch (err) {
+      console.error('Pause failed', err)
+      fetchTasks()
+    }
+  }
+
   const handleSkipTask = () => {
     const currentIndex = activeTasks.findIndex(t => t.id === activeTaskId)
     const nextTask = activeTasks[currentIndex + 1] || activeTasks[0]
@@ -207,11 +257,29 @@ export default function Home() {
 
   const handleDeleteTask = async (taskId: string) => {
     if (!confirm('Remove this task?')) return
+    const taskToDelete = tasks.find(t => t.id === taskId)
     try {
       await deleteTask(taskId)
+      if (taskToDelete) {
+        setLastDeletedTask({ ...taskToDelete })
+        // Clear after 30 seconds
+        setTimeout(() => {
+          setLastDeletedTask(null)
+        }, 30000)
+      }
       setTasks((prev) => prev.filter((t) => t.id !== taskId))
+      fetchTasks()
     } catch (err) {
       console.error('Delete failed', err)
+    }
+  }
+
+  const handleRestoreTask = async (taskId: string) => {
+    try {
+      await restoreTask(taskId)
+      fetchTasks()
+    } catch (err) {
+      console.error('Restore failed', err)
     }
   }
 
@@ -328,6 +396,13 @@ export default function Home() {
                   Complete
                 </button>
                 <button
+                  onClick={() => handlePauseTask(activeTask.id)}
+                  className="flex-1 py-4 bg-orange-50 text-orange-700 hover:bg-orange-100 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors text-lg"
+                >
+                  <ArrowDownCircle size={24} />
+                  Pause
+                </button>
+                <button
                   onClick={handleSkipTask}
                   className="flex-1 py-4 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors text-lg"
                 >
@@ -337,18 +412,33 @@ export default function Home() {
               </div>
 
               {/* Task Queue Preview */}
-              <div className="mt-6 pt-6 border-t border-gray-100">
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Up Next</p>
-                <div className="space-y-2">
-                  {activeTasks.slice(1, 4).map(task => (
+              <div className="mt-6 pt-6 border-t border-gray-100 flex flex-col gap-4">
+                {previousTask && (
+                  <div className="bg-primary/5 border border-primary/10 rounded-xl p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-primary font-bold mb-1">Previous interruption</p>
                     <button
-                      key={task.id}
-                      onClick={() => setActiveTaskId(task.id)}
-                      className="w-full text-left px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm text-gray-700 transition-colors"
+                      onClick={() => setActiveTaskId(previousTask.id)}
+                      className="text-sm font-medium text-gray-900 hover:text-primary transition-colors text-left flex items-center gap-2"
                     >
-                      {task.title}
+                      <RotateCcw size={14} />
+                      Resume "{previousTask.title}"
                     </button>
-                  ))}
+                  </div>
+                )}
+                
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Up Next</p>
+                  <div className="space-y-2">
+                    {activeTasks.slice(1, 4).map(task => (
+                      <button
+                        key={task.id}
+                        onClick={() => setActiveTaskId(task.id)}
+                        className="w-full text-left px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm text-gray-700 transition-colors"
+                      >
+                        {task.title}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -432,11 +522,32 @@ export default function Home() {
                     onDelete={() => handleDeleteTask(task.id)}
                     onComplete={() => handleCompleteTask(task.id)}
                     onEdit={() => setEditingTask(task)}
+                    onPause={() => handlePauseTask(task.id)}
                   />
                 ))}
               </ul>
             )}
           </div>
+
+          {/* Recently Deleted Section */}
+          {deletedTasks.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3">Recently Deleted (24h)</h3>
+              <div className="space-y-2">
+                {deletedTasks.map(task => (
+                  <div key={task.id} className="bg-white border border-gray-100 rounded-xl px-4 py-2 flex items-center justify-between opacity-60 hover:opacity-100 transition-opacity">
+                    <span className="text-sm text-gray-600 line-through">{task.title}</span>
+                    <button
+                      onClick={() => handleRestoreTask(task.id)}
+                      className="text-xs font-bold text-primary hover:text-primary/80 uppercase tracking-tighter"
+                    >
+                      Restore
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Chat Assistant */}
           <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-5">

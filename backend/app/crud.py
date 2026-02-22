@@ -117,8 +117,18 @@ async def create_task(session: AsyncSession, task_data: TaskCreate, user_id: str
 async def get_tasks(session: AsyncSession, user_id: str) -> List[Task]:
     statement = (
         select(Task)
-        .where(Task.user_id == user_id)
+        .where(Task.user_id == user_id, Task.is_deleted == False)
         .order_by(Task.created_at.desc())
+    )
+    result = await session.execute(statement)
+    return result.scalars().all()
+
+async def get_deleted_tasks(session: AsyncSession, user_id: str) -> List[Task]:
+    threshold = datetime.utcnow() - timedelta(hours=24)
+    statement = (
+        select(Task)
+        .where(Task.user_id == user_id, Task.is_deleted == True, Task.updated_at >= threshold)
+        .order_by(Task.updated_at.desc())
     )
     result = await session.execute(statement)
     return result.scalars().all()
@@ -127,7 +137,7 @@ async def get_stale_tasks(session: AsyncSession, user_id: str, days: int = 7) ->
     threshold_date = datetime.utcnow() - timedelta(days=days)
     statement = (
         select(Task)
-        .where(Task.user_id == user_id)
+        .where(Task.user_id == user_id, Task.is_deleted == False)
         .where(Task.status != TaskStatus.done)
         .where(Task.created_at < threshold_date)
         .order_by(Task.created_at.asc())
@@ -138,6 +148,7 @@ async def get_task_by_id(session: AsyncSession, task_id: str, user_id: str) -> O
     statement = select(Task).where(
         Task.id == task_id,
         Task.user_id == user_id,
+        Task.is_deleted == False
     )
     result = await session.execute(statement)
     return result.scalar_one_or_none()
@@ -189,8 +200,16 @@ async def update_task(session: AsyncSession, task: Task, task_update: dict) -> T
     return task
 
 async def delete_task(session: AsyncSession, task: Task) -> None:
-    await session.delete(task)
+    task.is_deleted = True
+    session.add(task)
     await session.commit()
+
+async def restore_task(session: AsyncSession, task: Task) -> Task:
+    task.is_deleted = False
+    session.add(task)
+    await session.commit()
+    await session.refresh(task)
+    return task
 
 async def search_tasks(session: AsyncSession, user_id: str, query: str, similarity_threshold: int = 60) -> List[Tuple[Task, float]]:
     """
@@ -209,7 +228,7 @@ async def search_tasks(session: AsyncSession, user_id: str, query: str, similari
     # First try exact substring matching (fast path for exact matches)
     statement = (
         select(Task)
-        .where(Task.user_id == user_id)
+        .where(Task.user_id == user_id, Task.is_deleted == False)
         .where(Task.status != TaskStatus.done)  # Only search active tasks
         .where(
             or_(
@@ -229,7 +248,7 @@ async def search_tasks(session: AsyncSession, user_id: str, query: str, similari
     # No exact matches - do fuzzy matching across all active tasks
     all_tasks_stmt = (
         select(Task)
-        .where(Task.user_id == user_id)
+        .where(Task.user_id == user_id, Task.is_deleted == False)
         .where(Task.status != TaskStatus.done)
         .order_by(Task.created_at.desc())
     )

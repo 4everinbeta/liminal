@@ -5,10 +5,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, ChevronDown, ChevronUp, Calendar, FileText } from 'lucide-react'
 import { createTask, TaskCreate } from '@/lib/api'
 import { calculateSmartDefaults } from '@/lib/smartDefaults'
+import { useEffect } from 'react'
 
 interface TaskFormProps {
   onTaskCreated?: () => void
 }
+
+const STORAGE_KEY = 'liminal_task_form_draft'
 
 export default function TaskForm({ onTaskCreated }: TaskFormProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -23,6 +26,38 @@ export default function TaskForm({ onTaskCreated }: TaskFormProps) {
   const [priorityPreset, setPriorityPreset] = useState<'today' | 'week' | 'later'>('week')
   const [valuePreset, setValuePreset] = useState<'quick' | 'standard' | 'big'>('standard')
   const [durationPreset, setDurationPreset] = useState<'quick' | 'medium' | 'long' | 'custom'>('medium')
+
+  // Load draft from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      try {
+        const draft = JSON.parse(saved)
+        setTitle(draft.title || '')
+        setDueDate(draft.dueDate || '')
+        setDuration(draft.duration || 30)
+        setDescription(draft.description || '')
+        setDurationPreset(draft.durationPreset || 'medium')
+        setShowAdvanced(draft.showAdvanced || false)
+        if (draft.title) setIsOpen(true)
+      } catch (e) {
+        console.error('Failed to parse task form draft', e)
+      }
+    }
+  }, [])
+
+  // Save draft to localStorage whenever fields change
+  useEffect(() => {
+    const draft = {
+      title,
+      dueDate,
+      duration,
+      description,
+      durationPreset,
+      showAdvanced,
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
+  }, [title, dueDate, duration, description, durationPreset, showAdvanced])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,6 +76,9 @@ export default function TaskForm({ onTaskCreated }: TaskFormProps) {
 
       // Create the task
       await createTask(taskWithDefaults)
+
+      // Clear draft
+      localStorage.removeItem(STORAGE_KEY)
 
       // Reset form
       setTitle('')

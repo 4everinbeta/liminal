@@ -20,6 +20,7 @@ interface AppState {
   // Focus Mode Task
   activeTaskId: string | null
   setActiveTaskId: (id: string | null) => void
+  previouslyActiveTaskId: string | null
 
   // Timer
   timerStatus: 'idle' | 'running' | 'paused'
@@ -48,6 +49,12 @@ interface AppState {
   eodSummaryEnabled: boolean
   setEodSummaryEnabled: (enabled: boolean) => void
 
+  // Forgiveness & Recovery
+  lastCompletedTask: { task: any; timestamp: number } | null
+  setLastCompletedTask: (task: any | null) => void
+  lastDeletedTask: { task: any; timestamp: number } | null
+  setLastDeletedTask: (task: any | null) => void
+
   // Global Refresh Signal
   lastUpdate: number
   triggerUpdate: () => void
@@ -55,12 +62,19 @@ interface AppState {
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       isFocusMode: true, // Focus mode is now the default
       toggleFocusMode: () => set((state) => ({ isFocusMode: !state.isFocusMode })),
       // ... existing ...
       activeTaskId: null,
-      setActiveTaskId: (id) => set({ activeTaskId: id }),
+      previouslyActiveTaskId: null,
+      setActiveTaskId: (id) => set((state) => {
+        if (id === state.activeTaskId) return state;
+        return { 
+          previouslyActiveTaskId: state.activeTaskId,
+          activeTaskId: id 
+        };
+      }),
 
       timerStatus: 'idle',
       timeLeft: DEFAULT_DURATION,
@@ -94,6 +108,15 @@ export const useAppStore = create<AppState>()(
       eodSummaryEnabled: false, // Off by default per CONTEXT.md
       setEodSummaryEnabled: (enabled) => set({ eodSummaryEnabled: enabled }),
 
+      lastCompletedTask: null,
+      setLastCompletedTask: (task) => set({ 
+        lastCompletedTask: task ? { task, timestamp: Date.now() } : null 
+      }),
+      lastDeletedTask: null,
+      setLastDeletedTask: (task) => set({ 
+        lastDeletedTask: task ? { task, timestamp: Date.now() } : null 
+      }),
+
       lastUpdate: 0,
       triggerUpdate: () => set({ lastUpdate: Date.now() }),
     }),
@@ -101,15 +124,18 @@ export const useAppStore = create<AppState>()(
       name: 'liminal-app',
       storage: createJSONStorage(() => {
         if (typeof window === 'undefined') return undefined as unknown as Storage
-        return window.sessionStorage
+        return window.localStorage
       }),
-      // Persist focus mode preference, active task, scroll position, and chat messages
+      // Persist focus mode preference, active task, scroll position, and recovery state
       partialize: (state) => ({
         chatMessages: state.chatMessages,
         isFocusMode: state.isFocusMode,
         activeTaskId: state.activeTaskId,
+        previouslyActiveTaskId: state.previouslyActiveTaskId,
         planningScrollPosition: state.planningScrollPosition,
         eodSummaryEnabled: state.eodSummaryEnabled,
+        lastCompletedTask: state.lastCompletedTask,
+        lastDeletedTask: state.lastDeletedTask,
       }),
     }
   )

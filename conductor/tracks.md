@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Implement AI Prioritization suggestions**
+- [~] **Track: Implement AI Prioritization suggestions**
   *Link: [./tracks/ai_prioritization_20260219/index.md](./tracks/ai_prioritization_20260219/index.md)*

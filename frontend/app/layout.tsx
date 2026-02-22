@@ -6,6 +6,7 @@ import TrustedTypesPolyfill from '@/components/TrustedTypesPolyfill'
 import GlobalChatWidget from '@/components/GlobalChatWidget'
 import WebSocketManager from '@/components/WebSocketManager'
 import { GlobalQuickCapture } from '@/components/GlobalQuickCapture'
+import { UndoBanner } from '@/components/UndoBanner'
 
 export const metadata: Metadata = {
   title: 'Liminal',
@@ -26,6 +27,7 @@ export default function RootLayout({
           <AppSidebar />
           <GlobalChatWidget />
           <GlobalQuickCapture />
+          <UndoBanner />
           <main className="min-h-screen md:pl-16 pb-20 md:pb-0">
             {children}
           </main>

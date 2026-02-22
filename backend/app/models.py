@@ -15,6 +15,7 @@ class TaskStatus(str, Enum):
                          # Actually, we will map "active" tasks to their Theme Columns
     in_progress = "in_progress"
     blocked = "blocked"
+    paused = "paused"    # New status for paused tasks
     done = "done"
 
 class AppTheme(str, Enum):
@@ -108,6 +109,8 @@ class Task(SQLModel, table=True):
     estimated_duration: Optional[int] = None # legacy minutes
     effort_score: int = Field(default=50, ge=1, le=100)  # 1-100 effort proxy
     actual_duration: Optional[int] = None 
+    
+    is_deleted: bool = Field(default=False, index=True) # Soft delete
     
     # Recursive relation
     parent_id: Optional[str] = Field(default=None, foreign_key="task.id")

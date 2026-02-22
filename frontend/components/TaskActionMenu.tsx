@@ -8,10 +8,12 @@ interface TaskActionMenuProps {
   onDelete?: () => void
   onEdit?: () => void
   onToggleComplete?: () => void
+  onPause?: () => void
   isCompleted?: boolean
+  isPaused?: boolean
 }
 
-export default function TaskActionMenu({ onDelete, onEdit, onToggleComplete, isCompleted }: TaskActionMenuProps) {
+export default function TaskActionMenu({ onDelete, onEdit, onToggleComplete, onPause, isCompleted, isPaused }: TaskActionMenuProps) {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
@@ -33,6 +35,16 @@ export default function TaskActionMenu({ onDelete, onEdit, onToggleComplete, isC
             >
               <CheckCircle size={14} className={isCompleted ? "text-green-600" : "text-gray-400"} />
               {isCompleted ? 'Mark Active' : 'Complete'}
+            </DropdownMenu.Item>
+          )}
+
+          {onPause && !isCompleted && (
+            <DropdownMenu.Item
+              onSelect={onPause}
+              className="flex items-center gap-2 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg cursor-pointer outline-none"
+            >
+              <ArrowDownCircle size={14} className={isPaused ? "text-orange-600" : "text-gray-400"} />
+              {isPaused ? 'Resume Task' : 'Pause Task'}
             </DropdownMenu.Item>
           )}
           

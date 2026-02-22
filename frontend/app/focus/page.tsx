@@ -10,7 +10,11 @@ import { getTasks, updateTask, Task } from '@/lib/api'
 
 export default function FocusPage() {
   const router = useRouter()
-  const { activeTaskId, setActiveTaskId } = useAppStore()
+  const { 
+    activeTaskId, 
+    setActiveTaskId, 
+    setLastCompletedTask 
+  } = useAppStore()
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -40,12 +44,27 @@ export default function FocusPage() {
 
   const handleCompleteTask = async () => {
     if (!activeTask) return
-    await updateTask(activeTask.id, { status: 'done' })
-    fetchTasks()
+    try {
+      await updateTask(activeTask.id, { status: 'done' })
+      setLastCompletedTask({ ...activeTask })
+      // Clear after 30 seconds
+      setTimeout(() => {
+        setLastCompletedTask(null)
+      }, 30000)
+      fetchTasks()
+    } catch (err) {
+      console.error('Complete failed', err)
+    }
   }
 
-  const handlePause = () => {
-    console.log('Paused task:', activeTask?.title)
+  const handlePause = async () => {
+    if (!activeTask) return
+    try {
+      await updateTask(activeTask.id, { status: 'paused' })
+      fetchTasks()
+    } catch (err) {
+      console.error('Pause failed', err)
+    }
   }
 
   return (

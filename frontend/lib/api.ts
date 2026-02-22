@@ -40,7 +40,7 @@ export interface Task {
   title: string;
   description?: string;
   notes?: string;
-  status: 'backlog' | 'todo' | 'in_progress' | 'blocked' | 'done';
+  status: 'backlog' | 'todo' | 'in_progress' | 'blocked' | 'paused' | 'done';
   priority: 'high' | 'medium' | 'low';
   priority_score?: number; // 1-100
   start_date?: string;
@@ -63,7 +63,7 @@ export interface TaskCreate {
   notes?: string;
   priority?: 'high' | 'medium' | 'low';
   priority_score?: number;
-  status?: 'backlog' | 'todo' | 'in_progress' | 'blocked' | 'done';
+  status?: 'backlog' | 'todo' | 'in_progress' | 'blocked' | 'paused' | 'done';
   start_date?: string;
   due_date?: string;
   start_date_natural?: string;
@@ -174,6 +174,16 @@ export async function updateTask(taskId: string, data: Partial<Task>): Promise<T
 export async function deleteTask(taskId: string): Promise<void> {
   return request<void>(`${API_BASE_URL}/tasks/${taskId}`, {
     method: 'DELETE',
+  });
+}
+
+export async function getDeletedTasks(): Promise<Task[]> {
+  return request<Task[]>(`${API_BASE_URL}/tasks/deleted`);
+}
+
+export async function restoreTask(taskId: string): Promise<Task> {
+  return request<Task>(`${API_BASE_URL}/tasks/${taskId}/restore`, {
+    method: 'POST',
   });
 }
 

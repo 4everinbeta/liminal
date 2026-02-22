@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { TaskForm } from '@/components/TaskForm';
+import TaskForm from '@/components/TaskForm';
 
 export const metadata: Metadata = {
     title: 'Home',
