@@ -2,6 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
+from ..database import get_session
+from ..models import Task, TaskCreate, User
+from ..auth import get_current_user
 from .. import crud
 from ..websockets import manager
 from ..agents.prioritization import AIPrioritizationService

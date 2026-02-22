@@ -11,6 +11,17 @@ from ..config import get_settings
 from ..models import Task, TaskStatus
 from .. import crud
 
+def _extract_json_from_response(response_str: str) -> Optional[Dict[str, Any]]:
+    import json
+    # Handle markdown code fences
+    if "```json" in response_str:
+        response_str = response_str.split("```json")[1].split("```")[0]
+    
+    try:
+        return json.loads(response_str)
+    except json.JSONDecodeError:
+        return None
+
 class AIPrioritizationService:
     def __init__(self, session: AsyncSession, user_id: str):
         self.session = session
@@ -73,67 +84,41 @@ class AIPrioritizationService:
         for task in tasks:
             due_date_str = task.due_date.strftime("%Y-%m-%d %H:%M") if task.due_date else "No due date"
             task_list_str += (
-                f"- ID: {task.id}
-"
-                f"  Title: {task.title}
-"
-                f"  Status: {task.status.value}
-"
-                f"  Priority: {task.priority.value} ({task.priority_score})
-"
-                f"  Due: {due_date_str}
-"
-                f"  Estimated Duration: {task.estimated_duration or 'N/A'} minutes
-"
-                f"  Value Score: {task.value_score}
-"
-                f"  Effort Score: {task.effort_score}
-
-"
+                f"- ID: {task.id}\n"
+                f"  Title: {task.title}\n"
+                f"  Status: {task.status.value}\n"
+                f"  Priority: {task.priority.value} ({task.priority_score})\n"
+                f"  Due: {due_date_str}\n"
+                f"  Estimated Duration: {task.estimated_duration or 'N/A'} minutes\n"
+                f"  Value Score: {task.value_score}\n"
+                f"  Effort Score: {task.effort_score}\n\n"
             )
+        
+        prompt = f"""You are an AI assistant designed to help a user with ADHD prioritize tasks.
+Your goal is to suggest ONE single 'Do This Now' task from their current active tasks.
+The user needs a clear, actionable suggestion to overcome decision paralysis.
 
-        prompt = (
-            f"You are an AI assistant designed to help a user with ADHD prioritize tasks. "
-            f"Your goal is to suggest ONE single 'Do This Now' task from their current active tasks. "
-            f"The user needs a clear, actionable suggestion to overcome decision paralysis.
+**Prioritization Principles (critical for ADHD user):**
+1. **Urgency above all else:** Tasks with impending deadlines or that are overdue are highest priority.
+2. **Smallest next step:** Prefer tasks with smaller estimated durations to build momentum, especially if there are no urgent tasks.
+3. **Value:** Consider tasks with higher value if urgency and effort are equal.
+4. **Capacity:** Take into account the user's current estimated capacity for today. If capacity is low, suggest a quick win.
 
-"
-            f"**Prioritization Principles (critical for ADHD user):**
-"
-            f"1. **Urgency above all else:** Tasks with impending deadlines or that are overdue are highest priority.
-"
-            f"2. **Smallest next step:** Prefer tasks with smaller estimated durations to build momentum, especially if there are no urgent tasks.
-"
-            f"3. **Value:** Consider tasks with higher value if urgency and effort are equal.
-"
-            f"4. **Capacity:** Take into account the user's current estimated capacity for today. If capacity is low, suggest a quick win.
+**User's Current Capacity:** {current_capacity}
 
-"
-            f"**User's Current Capacity:** {current_capacity}
+**User's Active Tasks:**
+{task_list_str}
+Based on these principles, which ONE task should the user do NOW?
+Explain your reasoning briefly, focusing on urgency and momentum.
 
-"
-            f"**User's Active Tasks:**
-"
-            f"{task_list_str}"
-            f"Based on these principles, which ONE task should the user do NOW? "
-            f"Explain your reasoning briefly, focusing on urgency and momentum.
-
-"
-            f"**Respond ONLY in the following JSON format:**
-"
-            f"```json
-"
-            f"{{
-"
-            f'  "suggested_task_id": "string",
-'
-            f'  "reasoning": "string" // Max 3 sentences, concise, actionable
-'
-            f"}}
-"
-            f"```
-"
-        )
+**Respond ONLY in the following JSON format:**
+```json
+{{
+  "suggested_task_id": "string",
+  "reasoning": "string" // Max 3 sentences, concise, actionable
+}}
+```
+"""
         return prompt
 
     async def get_ai_suggestion(self) -> Optional[Dict[str, Any]]:
@@ -164,9 +149,9 @@ class AIPrioritizationService:
         # Call LLM
         try:
             result = await self.kernel.invoke_prompt(prompt, service_id="chat")
-            import json
-            suggestion = json.loads(str(result))
+            suggestion = _extract_json_from_response(str(result))
             return suggestion
         except Exception as e:
             print(f"Error getting AI suggestion: {e}")
             return None
+
