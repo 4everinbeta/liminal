@@ -64,8 +64,10 @@ async def init_db():
         await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS priority_score INTEGER DEFAULT 50"))
         await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS effort_score INTEGER DEFAULT 50"))
         await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS start_date TIMESTAMP WITHOUT TIME ZONE"))
+        await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE"))
         
         # Backfill defaults if needed
         await conn.execute(text("UPDATE task SET priority_score = 50 WHERE priority_score IS NULL"))
         await conn.execute(text("UPDATE task SET effort_score = COALESCE(effort_score, estimated_duration, 50) WHERE effort_score IS NULL"))
+        await conn.execute(text("UPDATE task SET is_deleted = FALSE WHERE is_deleted IS NULL"))
 

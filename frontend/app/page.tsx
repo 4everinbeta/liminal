@@ -77,6 +77,11 @@ function PlanningTaskRow({
 }
 
 export default function Home() {
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const {
     isFocusMode,
     toggleFocusMode,
@@ -326,6 +331,8 @@ export default function Home() {
       handleSwitchToFocus()
     }
   }
+
+  if (!hasMounted) return null;
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6">

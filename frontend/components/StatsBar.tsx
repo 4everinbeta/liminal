@@ -52,8 +52,15 @@ function StatsPills({ stats, impactMsg }: { stats: GamificationStats; impactMsg:
 }
 
 export function StatsBar({ stats }: { stats: GamificationStats }) {
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const [expanded, setExpanded] = useState(false)
   const impactMsg = formatImpactMessage(stats.impactHours)
+
+  if (!hasMounted) return <div className="mb-4 h-8" />; // Placeholder to prevent layout shift
 
   return (
     <div className="mb-4">
