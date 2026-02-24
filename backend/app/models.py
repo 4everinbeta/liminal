@@ -23,6 +23,13 @@ class AppTheme(str, Enum):
     dark = "dark"
     playful = "playful"
 
+class AISuggestionStatus(str, Enum):
+    none = "none"
+    suggested = "suggested"
+    accepted = "accepted"
+    dismissed = "dismissed"
+    ignored = "ignored"
+
 # --- Models ---
 
 class User(SQLModel, table=True):
@@ -111,6 +118,10 @@ class Task(SQLModel, table=True):
     actual_duration: Optional[int] = None 
     
     is_deleted: bool = Field(default=False, index=True) # Soft delete
+    
+    # AI Prioritization
+    ai_relevance_score: Optional[int] = Field(default=0, ge=0, le=100)
+    ai_suggestion_status: AISuggestionStatus = Field(default=AISuggestionStatus.none)
     
     # Recursive relation
     parent_id: Optional[str] = Field(default=None, foreign_key="task.id")

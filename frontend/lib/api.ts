@@ -55,6 +55,8 @@ export interface Task {
   user_id: string;
   created_at: string;
   updated_at?: string;
+  ai_relevance_score?: number;
+  ai_suggestion_status?: 'none' | 'suggested' | 'accepted' | 'dismissed' | 'ignored';
 }
 
 export interface TaskCreate {
@@ -194,6 +196,13 @@ export interface AISuggestion {
 
 export async function getAiSuggestion(): Promise<AISuggestion> {
   return request<AISuggestion>(`${API_BASE_URL}/tasks/ai-suggestion`);
+}
+
+export async function sendAiFeedback(taskId: string, status: 'accepted' | 'dismissed' | 'ignored'): Promise<Task> {
+  return request<Task>(`${API_BASE_URL}/tasks/${taskId}/ai-feedback`, {
+    method: 'POST',
+    body: JSON.stringify({ status }),
+  });
 }
 
 /**

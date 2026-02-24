@@ -121,9 +121,56 @@ Explain your reasoning briefly, focusing on urgency and momentum.
 """
         return prompt
 
-    async def get_ai_suggestion(self) -> Optional[Dict[str, Any]]:
+    async def get_list_prioritization_prompt(self, tasks: List[Task], current_capacity: str) -> str:
         """
-        Fetches an AI-powered prioritization suggestion.
+        Generates a prompt for the LLM to score all active tasks.
+        """
+        task_list_str = ""
+        for task in tasks:
+            due_date_str = task.due_date.strftime("%Y-%m-%d %H:%M") if task.due_date else "No due date"
+            task_list_str += (
+                f"- ID: {task.id}\n"
+                f"  Title: {task.title}\n"
+                f"  Status: {task.status.value}\n"
+                f"  Priority: {task.priority.value} ({task.priority_score})\n"
+                f"  Due: {due_date_str}\n"
+                f"  Estimated Duration: {task.estimated_duration or 'N/A'} minutes\n"
+                f"  Value Score: {task.value_score}\n"
+                f"  Effort Score: {task.effort_score}\n\n"
+            )
+
+        prompt = f"""You are an AI assistant designed to help a user with ADHD prioritize their entire task list.
+Your goal is to assign an 'AI Relevance Score' (0-100) to each task.
+High scores (80-100) mean "Do This Now". Low scores (0-20) mean "Can wait".
+
+**Prioritization Principles (critical for ADHD user):**
+1. **Urgency above all else:** Tasks with impending deadlines or that are overdue get the highest scores.
+2. **Smallest next step:** Prefer tasks with smaller estimated durations to build momentum.
+3. **Contextual Value:** Higher value tasks get a boost.
+4. **Capacity:** If capacity is low, favor 'Quick Wins' (small effort).
+
+**User's Current Capacity:** {current_capacity}
+
+**User's Active Tasks:**
+{task_list_str}
+Assign a score to EVERY task listed above. Explain the overall prioritization strategy in one sentence.
+
+**Respond ONLY in the following JSON format:**
+```json
+{{
+  "scores": [
+    {{ "task_id": "string", "score": number }},
+    ...
+  ],
+  "strategy_summary": "string"
+}}
+```
+"""
+        return prompt
+
+    async def update_task_scores(self) -> Optional[Dict[str, Any]]:
+        """
+        Calculates and updates AI relevance scores for all active tasks.
         """
         # Get active tasks
         tasks = await crud.get_tasks(self.session, self.user_id)
@@ -132,9 +179,8 @@ Explain your reasoning briefly, focusing on urgency and momentum.
         if not active_tasks:
             return None
 
-        # Get current capacity (placeholder for now, needs real implementation from frontend or monitor)
-        # For now, a simple heuristic:
-        capacity_hours = 8 # Assume 8 hour workday for simplicity
+        # Get current capacity
+        capacity_hours = 8 
         minutes_done_today = 0
         for task in tasks:
             if task.status == TaskStatus.done and task.updated_at and (datetime.utcnow() - task.updated_at) < timedelta(days=1):
@@ -144,14 +190,61 @@ Explain your reasoning briefly, focusing on urgency and momentum.
         current_capacity = f"{remaining_capacity_minutes // 60} hours and {remaining_capacity_minutes % 60} minutes remaining today."
 
         # Generate prompt
-        prompt = await self.get_prioritization_prompt(active_tasks, current_capacity)
+        prompt = await self.get_list_prioritization_prompt(active_tasks, current_capacity)
 
         # Call LLM
         try:
             result = await self.kernel.invoke_prompt(prompt, service_id="chat")
-            suggestion = _extract_json_from_response(str(result))
-            return suggestion
-        except Exception as e:
-            print(f"Error getting AI suggestion: {e}")
+            data = _extract_json_from_response(str(result))
+            
+            if data and "scores" in data:
+                # Update tasks in DB
+                for score_entry in data["scores"]:
+                    task_id = score_entry.get("task_id")
+                    score = score_entry.get("score")
+                    if task_id and score is not None:
+                        # Direct update to avoid overhead
+                        from sqlmodel import select
+                        statement = select(Task).where(Task.id == task_id, Task.user_id == self.user_id)
+                        res = await self.session.execute(statement)
+                        task = res.scalar_one_or_none()
+                        if task:
+                            task.ai_relevance_score = score
+                
+                await self.session.commit()
+                return data
             return None
+        except Exception as e:
+            print(f"Error updating task scores: {e}")
+            return None
+
+    async def get_ai_suggestion(self) -> Optional[Dict[str, Any]]:
+        """
+        Fetches an AI-powered prioritization suggestion by first updating all scores.
+        """
+        # 1. Update scores for all active tasks
+        scoring_data = await self.update_task_scores()
+        
+        # 2. Get the top task from updated scores
+        tasks = await crud.get_tasks(self.session, self.user_id)
+        active_tasks = [t for t in tasks if t.status not in [TaskStatus.done, TaskStatus.paused, TaskStatus.blocked]]
+        
+        if not active_tasks:
+            return None
+            
+        # Find task with highest ai_relevance_score
+        top_task = max(active_tasks, key=lambda t: t.ai_relevance_score or 0)
+        
+        if top_task.ai_relevance_score == 0:
+            # If no scores were assigned or all are 0, fallback to basic suggestion
+            # This handles cases where update_task_scores failed
+            return {
+                "suggested_task_id": active_tasks[0].id,
+                "reasoning": "Starting with your first task to build momentum."
+            }
+
+        return {
+            "suggested_task_id": top_task.id,
+            "reasoning": scoring_data.get("strategy_summary", "Suggested based on urgency and impact.") if scoring_data else "High impact task for right now."
+        }
 

@@ -120,3 +120,22 @@ async def test_task_priority_levels(authed_client: AsyncClient):
         assert response.status_code == 201
         assert response.json()["priority"] == priority
         assert response.json()["priority_score"] == score
+
+
+@pytest.mark.asyncio
+async def test_ai_feedback(authed_client: AsyncClient):
+    """Test AI suggestion feedback endpoint."""
+    task_data = {"title": "AI Feedback Task"}
+    create_response = await authed_client.post("/tasks", json=task_data)
+    task_id = create_response.json()["id"]
+
+    # Valid feedback
+    feedback_data = {"status": "accepted"}
+    response = await authed_client.post(f"/tasks/{task_id}/ai-feedback", json=feedback_data)
+    assert response.status_code == 200
+    assert response.json()["ai_suggestion_status"] == "accepted"
+
+    # Invalid feedback
+    bad_feedback = {"status": "invalid_status"}
+    response = await authed_client.post(f"/tasks/{task_id}/ai-feedback", json=bad_feedback)
+    assert response.status_code == 400

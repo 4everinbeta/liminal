@@ -58,14 +58,18 @@ async def test_get_ai_suggestion_flow(mock_session, mock_user, sample_tasks):
     """Test the full flow of getting an AI suggestion."""
     import json
     
-    response_data = {
-        "suggested_task_id": "1",
-        "reasoning": "This task is due very soon and is high priority."
+    # First call: update_task_scores
+    response_scores = {
+        "scores": [
+            { "task_id": "1", "score": 90 },
+            { "task_id": "2", "score": 60 },
+            { "task_id": "3", "score": 30 }
+        ],
+        "strategy_summary": "This task is due very soon and is high priority."
     }
-    # Simulate LLM returning JSON in a markdown code fence
-    mock_result_str = f"```json\n{json.dumps(response_data)}\n```"
+    
     mock_result = MagicMock()
-    mock_result.__str__.return_value = mock_result_str
+    mock_result.__str__.return_value = json.dumps(response_scores)
     
     with patch("app.agents.prioritization.get_settings") as mock_settings, \
          patch("app.agents.prioritization.crud.get_tasks", new=AsyncMock(return_value=sample_tasks)), \
@@ -77,8 +81,54 @@ async def test_get_ai_suggestion_flow(mock_session, mock_user, sample_tasks):
 
         service = AIPrioritizationService(mock_session, mock_user.id)
         
+        # Mock session.execute for update_task_scores
+        mock_session.execute = AsyncMock()
+        mock_session.execute.return_value = MagicMock(scalar_one_or_none=lambda: sample_tasks[0])
+
         suggestion = await service.get_ai_suggestion()
         
         assert suggestion is not None
         assert suggestion["suggested_task_id"] == "1"
         assert "due very soon" in suggestion["reasoning"]
+
+@pytest.mark.asyncio
+async def test_update_task_scores(mock_session, mock_user, sample_tasks):
+    """Test updating all task scores."""
+    import json
+    
+    response_data = {
+        "scores": [
+            { "task_id": "1", "score": 90 },
+            { "task_id": "2", "score": 60 },
+            { "task_id": "3", "score": 30 }
+        ],
+        "strategy_summary": "Prioritizing urgent tasks first."
+    }
+    mock_result = MagicMock()
+    mock_result.__str__.return_value = json.dumps(response_data)
+    
+    with patch("app.agents.prioritization.get_settings") as mock_settings, \
+         patch("app.agents.prioritization.crud.get_tasks", new=AsyncMock(return_value=sample_tasks)), \
+         patch("semantic_kernel.Kernel.invoke_prompt", new=AsyncMock(return_value=mock_result)):
+        
+        mock_settings.return_value.llm_provider = "local"
+        mock_settings.return_value.llm_model = "mock-model"
+        mock_settings.return_value.llm_base_url = "http://localhost:1234/v1"
+
+        service = AIPrioritizationService(mock_session, mock_user.id)
+        
+        # We need to mock the session.execute for the updates
+        mock_session.execute = AsyncMock()
+        mock_session.execute.side_effect = [
+            MagicMock(scalar_one_or_none=lambda: sample_tasks[0]),
+            MagicMock(scalar_one_or_none=lambda: sample_tasks[1]),
+            MagicMock(scalar_one_or_none=lambda: sample_tasks[2])
+        ]
+        
+        data = await service.update_task_scores()
+        
+        assert data is not None
+        assert len(data["scores"]) == 3
+        assert sample_tasks[0].ai_relevance_score == 90
+        assert sample_tasks[1].ai_relevance_score == 60
+        assert sample_tasks[2].ai_relevance_score == 30

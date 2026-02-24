@@ -55,6 +55,10 @@ interface AppState {
   lastDeletedTask: { task: any; timestamp: number } | null
   setLastDeletedTask: (task: any | null) => void
 
+  // AI Prioritization
+  sortingMode: 'manual' | 'ai'
+  setSortingMode: (mode: 'manual' | 'ai') => void
+
   // Global Refresh Signal
   lastUpdate: number
   triggerUpdate: () => void
@@ -117,6 +121,9 @@ export const useAppStore = create<AppState>()(
         lastDeletedTask: task ? { task, timestamp: Date.now() } : null 
       }),
 
+      sortingMode: 'ai', // Default to AI sorting for Phase 6
+      setSortingMode: (mode) => set({ sortingMode: mode }),
+
       lastUpdate: 0,
       triggerUpdate: () => set({ lastUpdate: Date.now() }),
     }),
@@ -136,6 +143,7 @@ export const useAppStore = create<AppState>()(
         eodSummaryEnabled: state.eodSummaryEnabled,
         lastCompletedTask: state.lastCompletedTask,
         lastDeletedTask: state.lastDeletedTask,
+        sortingMode: state.sortingMode,
       }),
     }
   )

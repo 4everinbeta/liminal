@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from ..database import get_session
-from ..models import Task, TaskCreate, User
+from ..models import Task, TaskCreate, User, AISuggestionStatus
 from ..auth import get_current_user
 from .. import crud
 from ..websockets import manager
@@ -31,6 +31,26 @@ async def get_ai_suggestion(
     if not suggestion:
         raise HTTPException(status_code=404, detail="No active tasks or AI failed to provide a suggestion.")
     return suggestion
+
+@router.post("/{task_id}/ai-feedback", response_model=Task)
+async def ai_feedback(
+    task_id: str,
+    feedback: dict,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    task = await crud.get_task_by_id(session, task_id, current_user.id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    status_val = feedback.get("status")
+    if status_val not in [s.value for s in AISuggestionStatus]:
+        raise HTTPException(status_code=400, detail=f"Invalid feedback status: {status_val}")
+    
+    task.ai_suggestion_status = AISuggestionStatus(status_val)
+    await session.commit()
+    await session.refresh(task)
+    return task
 
 @router.get("", response_model=List[Task])
 async def get_tasks(

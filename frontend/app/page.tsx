@@ -8,7 +8,7 @@ import EditTaskModal from '@/components/EditTaskModal'
 import ChatInterface from '@/components/ChatInterface'
 import CapacitySummary from '@/components/CapacitySummary'
 import UrgencyIndicator from '@/components/UrgencyIndicator'
-import { getTasks, updateTask, deleteTask, getDeletedTasks, restoreTask, getAiSuggestion, Task, type AISuggestion as AISuggestionType } from '@/lib/api'
+import { getTasks, updateTask, deleteTask, getDeletedTasks, restoreTask, getAiSuggestion, sendAiFeedback, Task, type AISuggestion as AISuggestionType } from '@/lib/api'
 import { AISuggestion } from '@/components/AISuggestion'
 import { useNotifications } from '@/lib/hooks/useNotifications'
 import { useUrgencyColor } from '@/lib/hooks/useUrgencyColor'
@@ -97,7 +97,9 @@ export default function Home() {
     lastCompletedTask,
     setLastCompletedTask,
     lastDeletedTask,
-    setLastDeletedTask
+    setLastDeletedTask,
+    sortingMode,
+    setSortingMode
   } = useAppStore()
 
   const [tasks, setTasks] = useState<Task[]>([])
@@ -147,9 +149,18 @@ export default function Home() {
           if (a.status === 'done' && b.status !== 'done') return 1
           if (a.status !== 'done' && b.status === 'done') return -1
 
+          if (sortingMode === 'ai') {
+            // AI Mode: AI Score is primary
+            const scoreA = a.ai_relevance_score || 0
+            const scoreB = b.ai_relevance_score || 0
+            if (scoreA !== scoreB) return scoreB - scoreA
+          }
+
+          // Fallback or Manual Mode: Traditional priority
           const pA = priorityMap[a.priority] || 0
           const pB = priorityMap[b.priority] || 0
           if (pA !== pB) return pB - pA
+          
           if (a.value_score !== b.value_score) return b.value_score - a.value_score
           return (a.estimated_duration || 0) - (b.estimated_duration || 0)
         })
@@ -176,7 +187,18 @@ export default function Home() {
   useEffect(() => {
     fetchTasks()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastUpdate])
+  }, [lastUpdate, sortingMode])
+
+  // AI Suggestion Polling (15 minutes)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log("Polling for fresh AI suggestions...");
+      fetchTasks();
+    }, 15 * 60 * 1000); // 15 minutes
+
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Trigger notification soft-ask and schedule notifications after tasks load
   useEffect(() => {
@@ -208,15 +230,29 @@ export default function Home() {
   const activeTasks = useMemo(() => tasks.filter(t => t.status !== 'done'), [tasks])
   const activeTask = activeTasks.find(t => t.id === activeTaskId)
 
-  const handleAcceptSuggestion = () => {
+  const handleAcceptSuggestion = async () => {
     if (aiSuggestion) {
-      setActiveTaskId(aiSuggestion.suggested_task_id);
+      const taskId = aiSuggestion.suggested_task_id;
+      setActiveTaskId(taskId);
       setAiSuggestion(null);
+      try {
+        await sendAiFeedback(taskId, 'accepted');
+      } catch (err) {
+        console.error("Failed to send AI feedback:", err);
+      }
     }
   }
 
-  const handleDismissSuggestion = () => {
-    setAiSuggestion(null);
+  const handleDismissSuggestion = async () => {
+    if (aiSuggestion) {
+      const taskId = aiSuggestion.suggested_task_id;
+      setAiSuggestion(null);
+      try {
+        await sendAiFeedback(taskId, 'dismissed');
+      } catch (err) {
+        console.error("Failed to send AI feedback:", err);
+      }
+    }
   }
 
   const previousTask = useMemo(() => {
@@ -486,22 +522,43 @@ export default function Home() {
       {/* PLANNING MODE VIEW */}
       {!isFocusMode && (
         <div className="space-y-6 py-6">
-          {/* EOD Summary opt-in toggle */}
-          <div className="flex items-center justify-end gap-2 text-xs text-gray-400">
-            <span>End-of-day summary</span>
-            <button
-              onClick={() => setEodSummaryEnabled(!eodSummaryEnabled)}
-              className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
-                eodSummaryEnabled ? 'bg-primary' : 'bg-gray-200'
-              }`}
-              aria-label="Toggle end-of-day summary"
-            >
-              <span
-                className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform ${
-                  eodSummaryEnabled ? 'translate-x-4' : 'translate-x-0.5'
+          {/* Toggles Row */}
+          <div className="flex items-center justify-end gap-6 text-xs text-gray-400">
+            {/* Sorting Toggle */}
+            <div className="flex items-center gap-2">
+              <span>AI Sorting</span>
+              <button
+                onClick={() => setSortingMode(sortingMode === 'ai' ? 'manual' : 'ai')}
+                className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
+                  sortingMode === 'ai' ? 'bg-primary' : 'bg-gray-200'
                 }`}
-              />
-            </button>
+                aria-label="Toggle AI sorting"
+              >
+                <span
+                  className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform ${
+                    sortingMode === 'ai' ? 'translate-x-4' : 'translate-x-0.5'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* EOD Summary opt-in toggle */}
+            <div className="flex items-center gap-2">
+              <span>End-of-day summary</span>
+              <button
+                onClick={() => setEodSummaryEnabled(!eodSummaryEnabled)}
+                className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
+                  eodSummaryEnabled ? 'bg-primary' : 'bg-gray-200'
+                }`}
+                aria-label="Toggle end-of-day summary"
+              >
+                <span
+                  className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform ${
+                    eodSummaryEnabled ? 'translate-x-4' : 'translate-x-0.5'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
 
           {/* Quick Capture */}
