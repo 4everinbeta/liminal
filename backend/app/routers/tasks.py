@@ -50,6 +50,7 @@ async def ai_feedback(
     task.ai_suggestion_status = AISuggestionStatus(status_val)
     await session.commit()
     await session.refresh(task)
+    await manager.broadcast("refresh", current_user.id)
     return task
 
 @router.get("", response_model=List[Task])
