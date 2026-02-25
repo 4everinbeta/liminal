@@ -139,3 +139,22 @@ async def test_ai_feedback(authed_client: AsyncClient):
     bad_feedback = {"status": "invalid_status"}
     response = await authed_client.post(f"/tasks/{task_id}/ai-feedback", json=bad_feedback)
     assert response.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_update_task_ai_fields(authed_client: AsyncClient):
+    """Ensure AI-related fields can be updated via PATCH."""
+    task_data = {"title": "AI Field Update Test"}
+    create_response = await authed_client.post("/tasks", json=task_data)
+    task_id = create_response.json()["id"]
+
+    update_data = {
+        "ai_relevance_score": 85,
+        "ai_suggestion_status": "accepted"
+    }
+    response = await authed_client.patch(f"/tasks/{task_id}", json=update_data)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ai_relevance_score"] == 85
+    assert data["ai_suggestion_status"] == "accepted"

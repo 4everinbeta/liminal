@@ -169,6 +169,8 @@ async def update_task(session: AsyncSession, task: Task, task_update: dict) -> T
         "notes",
         "theme_id",
         "initiative_id",
+        "ai_relevance_score",
+        "ai_suggestion_status",
     }
     for key, value in task_update.items():
         if key in allowed_fields:

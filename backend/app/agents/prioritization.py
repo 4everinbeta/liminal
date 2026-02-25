@@ -91,7 +91,8 @@ class AIPrioritizationService:
                 f"  Due: {due_date_str}\n"
                 f"  Estimated Duration: {task.estimated_duration or 'N/A'} minutes\n"
                 f"  Value Score: {task.value_score}\n"
-                f"  Effort Score: {task.effort_score}\n\n"
+                f"  Effort Score: {task.effort_score}\n"
+                f"  Feedback: {task.ai_suggestion_status.value}\n\n"
             )
         
         prompt = f"""You are an AI assistant designed to help a user with ADHD prioritize tasks.
@@ -103,6 +104,7 @@ The user needs a clear, actionable suggestion to overcome decision paralysis.
 2. **Smallest next step:** Prefer tasks with smaller estimated durations to build momentum, especially if there are no urgent tasks.
 3. **Value:** Consider tasks with higher value if urgency and effort are equal.
 4. **Capacity:** Take into account the user's current estimated capacity for today. If capacity is low, suggest a quick win.
+5. **Learn from Feedback:** Pay attention to the 'Feedback' field. If a task was 'accepted' previously, it's a good candidate. If 'dismissed', avoid suggesting it again immediately unless urgency has increased significantly.
 
 **User's Current Capacity:** {current_capacity}
 
@@ -136,7 +138,8 @@ Explain your reasoning briefly, focusing on urgency and momentum.
                 f"  Due: {due_date_str}\n"
                 f"  Estimated Duration: {task.estimated_duration or 'N/A'} minutes\n"
                 f"  Value Score: {task.value_score}\n"
-                f"  Effort Score: {task.effort_score}\n\n"
+                f"  Effort Score: {task.effort_score}\n"
+                f"  Feedback: {task.ai_suggestion_status.value}\n\n"
             )
 
         prompt = f"""You are an AI assistant designed to help a user with ADHD prioritize their entire task list.
@@ -148,6 +151,7 @@ High scores (80-100) mean "Do This Now". Low scores (0-20) mean "Can wait".
 2. **Smallest next step:** Prefer tasks with smaller estimated durations to build momentum.
 3. **Contextual Value:** Higher value tasks get a boost.
 4. **Capacity:** If capacity is low, favor 'Quick Wins' (small effort).
+5. **Learn from Feedback:** Pay attention to the 'Feedback' field. Tasks marked 'accepted' should maintain high relevance. Tasks marked 'dismissed' should generally receive lower scores unless their urgency has significantly increased.
 
 **User's Current Capacity:** {current_capacity}
 
