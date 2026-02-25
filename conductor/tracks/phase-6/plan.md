@@ -4,11 +4,11 @@
 - [x] Task: Extend task model for AI interaction logging (e809029)
     - [x] Add `ai_relevance_score` field to Task model
     - [x] Add `ai_suggestion_status` (accepted, dismissed, ignored)
-- [ ] Task: Update AIPrioritizationService for list-wide scoring
-    - [ ] Implement multi-task scoring logic in service
-    - [ ] Integrate user feedback (accepted/dismissed) into scoring
-- [ ] Task: Implement suggestion feedback endpoint
-    - [ ] POST `/tasks/{id}/ai-feedback`
+- [x] Task: Update AIPrioritizationService for list-wide scoring (e809029)
+    - [x] Implement multi-task scoring logic in service
+    - [x] Integrate user feedback (accepted/dismissed) into scoring
+- [x] Task: Implement suggestion feedback endpoint (709fda8)
+    - [x] POST `/tasks/{id}/ai-feedback`
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Backend' (Protocol in workflow.md)
 
 ## Phase 2: Dynamic UI & Auto-Sorting
