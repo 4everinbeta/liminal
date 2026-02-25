@@ -9,7 +9,7 @@
     - [x] Integrate user feedback (accepted/dismissed) into scoring
 - [x] Task: Implement suggestion feedback endpoint (709fda8)
     - [x] POST `/tasks/{id}/ai-feedback`
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Backend' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 1: Backend' (Protocol in workflow.md)
 
 ## Phase 2: Dynamic UI & Auto-Sorting
 - [x] Task: Implement frontend suggestion polling
