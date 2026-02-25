@@ -1,9 +1,9 @@
 # Implementation Plan: AI Prioritization (Phase 6)
 
 ## Phase 1: Backend Learning & Scoring
-- [ ] Task: Extend task model for AI interaction logging
-    - [ ] Add `ai_relevance_score` field to Task model
-    - [ ] Add `ai_suggestion_status` (accepted, dismissed, ignored)
+- [x] Task: Extend task model for AI interaction logging (e809029)
+    - [x] Add `ai_relevance_score` field to Task model
+    - [x] Add `ai_suggestion_status` (accepted, dismissed, ignored)
 - [ ] Task: Update AIPrioritizationService for list-wide scoring
     - [ ] Implement multi-task scoring logic in service
     - [ ] Integrate user feedback (accepted/dismissed) into scoring

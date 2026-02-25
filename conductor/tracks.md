@@ -23,5 +23,5 @@ This file tracks all major tracks for the project. Each track has its own detail
   *Link: [./tracks/phase-5/index.md](./tracks/phase-5/index.md)*
 
 ---
-- [x] **Track: phase-6**
+- [~] **Track: phase-6**
   *Link: [./tracks/phase-6/index.md](./tracks/phase-6/index.md)*
