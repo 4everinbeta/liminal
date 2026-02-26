@@ -5,10 +5,10 @@
     - [x] Create `frontend/components/NoisePlayer.tsx`
     - [x] Implement audio playback for Pink, Brown, and White noise
     - [x] Write unit tests for playback and volume control
-- [ ] Task: Integrate NoisePlayer into Focus Mode
-    - [ ] Add `NoisePlayer` to `frontend/app/focus/page.tsx`
-    - [ ] Implement direct toggle UI and volume control
-    - [ ] Write tests for UI interactions
+- [x] Task: Integrate NoisePlayer into Focus Mode (99555ff)
+    - [x] Add `NoisePlayer` to `frontend/app/focus/page.tsx`
+    - [x] Implement direct toggle UI and volume control
+    - [x] Write tests for UI interactions
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Ambient Noise' (Protocol in workflow.md)
 
 ## Phase 2: Adaptive Pomodoro Timer
