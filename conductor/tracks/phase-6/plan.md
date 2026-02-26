@@ -11,7 +11,7 @@
     - [x] POST `/tasks/{id}/ai-feedback`
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Backend' (Protocol in workflow.md)
 
-## Phase 2: Dynamic UI & Auto-Sorting
+## Phase 2: Dynamic UI & Auto-Sorting [checkpoint:cef0d35]
 - [x] Task: Implement frontend suggestion polling
     - [x] Set up 15-minute refresh interval
 - [x] Task: Implement dynamic list auto-sorting
