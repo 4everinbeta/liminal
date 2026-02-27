@@ -17,11 +17,11 @@
     - [x] Implement `min(task_duration, 60)` or `20` default logic
     - [x] Implement break state transitions
     - [x] Write unit tests for timer calculations and transitions
-- [ ] Task: Integrate Pomodoro UI into Focus Mode
-    - [ ] Create `frontend/components/Pomodoro.tsx`
-    - [ ] Display countdown and progress circle in `focus/page.tsx`
-    - [ ] Integrate `canvas-confetti` for completion
-    - [ ] Write tests for timer display and celebration trigger
+- [x] Task: Integrate Pomodoro UI into Focus Mode (878340b)
+    - [x] Create `frontend/components/Pomodoro.tsx`
+    - [x] Display countdown and progress circle in `focus/page.tsx`
+    - [x] Integrate `canvas-confetti` for completion
+    - [x] Write tests for timer display and celebration trigger
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Adaptive Pomodoro Timer' (Protocol in workflow.md)
 
 ## Phase 3: Music Integration & Smart Interactions
