@@ -26,8 +26,11 @@ interface AppState {
   timerStatus: 'idle' | 'running' | 'paused'
   timeLeft: number
   timerDuration: number // in seconds
+  sessionType: 'work' | 'break'
   setTimerStatus: (status: 'idle' | 'running' | 'paused') => void
   setTimeLeft: (time: number) => void
+  setTimerDuration: (duration: number) => void
+  setSessionType: (type: 'work' | 'break') => void
   resetTimer: () => void
 
   // Chat
@@ -83,8 +86,11 @@ export const useAppStore = create<AppState>()(
       timerStatus: 'idle',
       timeLeft: DEFAULT_DURATION,
       timerDuration: DEFAULT_DURATION,
+      sessionType: 'work',
       setTimerStatus: (status) => set({ timerStatus: status }),
       setTimeLeft: (time) => set({ timeLeft: time }),
+      setTimerDuration: (duration) => set({ timerDuration: duration }),
+      setSessionType: (type) => set({ sessionType: type }),
       resetTimer: () =>
         set((state) => ({
           timerStatus: 'idle',
