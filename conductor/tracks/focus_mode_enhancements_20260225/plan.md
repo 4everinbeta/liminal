@@ -1,6 +1,6 @@
 # Implementation Plan: Focus Mode Enhancements (Pomodoro & Ambient Sounds)
 
-## Phase 1: Foundation & Ambient Noise
+## Phase 1: Foundation & Ambient Noise [checkpoint: 99dd2de]
 - [x] Task: Create ambient noise component (78d6476)
     - [x] Create `frontend/components/NoisePlayer.tsx`
     - [x] Implement audio playback for Pink, Brown, and White noise
@@ -9,7 +9,7 @@
     - [x] Add `NoisePlayer` to `frontend/app/focus/page.tsx`
     - [x] Implement direct toggle UI and volume control
     - [x] Write tests for UI interactions
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Ambient Noise' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Ambient Noise' (Protocol in workflow.md)
 
 ## Phase 2: Adaptive Pomodoro Timer
 - [ ] Task: Implement adaptive timer logic
