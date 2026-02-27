@@ -12,11 +12,11 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Ambient Noise' (Protocol in workflow.md)
 
 ## Phase 2: Adaptive Pomodoro Timer
-- [ ] Task: Implement adaptive timer logic
-    - [ ] Create `frontend/lib/hooks/usePomodoro.ts`
-    - [ ] Implement `min(task_duration, 60)` or `20` default logic
-    - [ ] Implement break state transitions
-    - [ ] Write unit tests for timer calculations and transitions
+- [x] Task: Implement adaptive timer logic (c55e2d1)
+    - [x] Create `frontend/lib/hooks/usePomodoro.ts`
+    - [x] Implement `min(task_duration, 60)` or `20` default logic
+    - [x] Implement break state transitions
+    - [x] Write unit tests for timer calculations and transitions
 - [ ] Task: Integrate Pomodoro UI into Focus Mode
     - [ ] Create `frontend/components/Pomodoro.tsx`
     - [ ] Display countdown and progress circle in `focus/page.tsx`
