@@ -25,10 +25,10 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Adaptive Pomodoro Timer' (Protocol in workflow.md)
 
 ## Phase 3: Music Integration & Smart Interactions
-- [ ] Task: Implement Spotify Embedded Player
-    - [ ] Create `frontend/components/SpotifyPlayer.tsx`
-    - [ ] Add to Focus Mode UI
-    - [ ] Write tests for player rendering
+- [x] Task: Implement Spotify Embedded Player (39727d6)
+    - [x] Create `frontend/components/SpotifyPlayer.tsx`
+    - [x] Add to Focus Mode UI
+    - [x] Write tests for player rendering
 - [ ] Task: Implement Smart Audio Interaction
     - [ ] Add logic to pause `NoisePlayer` when `SpotifyPlayer` starts
     - [ ] Write integration tests for auto-pause behavior
