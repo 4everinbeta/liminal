@@ -1,11 +1,28 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useAppStore } from '@/lib/store';
 
 export default function SpotifyPlayer() {
+  const { isNoisePlaying, setIsNoisePlaying } = useAppStore();
   // Using a generic Lo-Fi focus playlist as default
   const playlistUri = 'spotify:playlist:37i9dQZF1DWWQRwovXQM9n';
   const embedUrl = `https://open.spotify.com/embed/playlist/${playlistUri.split(':').pop()}?utm_source=generator&theme=0`;
+
+  useEffect(() => {
+    // Detect when user clicks into the Spotify iframe
+    const handleBlur = () => {
+      if (document.activeElement?.tagName === 'IFRAME' && (document.activeElement as HTMLIFrameElement).title === 'Spotify Player') {
+        if (isNoisePlaying) {
+          console.log('Spotify interaction detected, pausing ambient noise...');
+          setIsNoisePlaying(false);
+        }
+      }
+    };
+
+    window.addEventListener('blur', handleBlur);
+    return () => window.removeEventListener('blur', handleBlur);
+  }, [isNoisePlaying, setIsNoisePlaying]);
 
   return (
     <div className="w-full bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">

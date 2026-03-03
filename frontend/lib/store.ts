@@ -62,6 +62,10 @@ interface AppState {
   sortingMode: 'manual' | 'ai'
   setSortingMode: (mode: 'manual' | 'ai') => void
 
+  // Ambient Noise
+  isNoisePlaying: boolean
+  setIsNoisePlaying: (playing: boolean) => void
+
   // Global Refresh Signal
   lastUpdate: number
   triggerUpdate: () => void
@@ -129,6 +133,9 @@ export const useAppStore = create<AppState>()(
 
       sortingMode: 'ai', // Default to AI sorting for Phase 6
       setSortingMode: (mode) => set({ sortingMode: mode }),
+
+      isNoisePlaying: false,
+      setIsNoisePlaying: (playing) => set({ isNoisePlaying: playing }),
 
       lastUpdate: 0,
       triggerUpdate: () => set({ lastUpdate: Date.now() }),

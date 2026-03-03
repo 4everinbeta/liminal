@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Activity, Volume2 } from 'lucide-react';
+import { useAppStore } from '@/lib/store';
 
 type NoiseType = 'white' | 'pink' | 'brown';
 
 export default function NoisePlayer() {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const { isNoisePlaying, setIsNoisePlaying } = useAppStore();
   const [noiseType, setNoiseType] = useState<NoiseType>('pink');
   const [volume, setVolume] = useState(0.1);
   
@@ -75,7 +76,6 @@ export default function NoisePlayer() {
     
     noiseNodeRef.current = noiseNode;
     gainNodeRef.current = gainNode;
-    setIsPlaying(true);
   };
 
   const stopNoise = () => {
@@ -88,11 +88,10 @@ export default function NoisePlayer() {
       gainNodeRef.current.disconnect();
       gainNodeRef.current = null;
     }
-    setIsPlaying(false);
   };
 
   useEffect(() => {
-    if (isPlaying) {
+    if (isNoisePlaying) {
       stopNoise();
       startNoise();
     }
@@ -114,12 +113,16 @@ export default function NoisePlayer() {
   }, []);
 
   const togglePlay = () => {
-    if (isPlaying) {
-      stopNoise();
-    } else {
-      startNoise();
-    }
+    setIsNoisePlaying(!isNoisePlaying);
   };
+
+  useEffect(() => {
+    if (isNoisePlaying && !noiseNodeRef.current) {
+      startNoise();
+    } else if (!isNoisePlaying && noiseNodeRef.current) {
+      stopNoise();
+    }
+  }, [isNoisePlaying]);
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
@@ -131,11 +134,11 @@ export default function NoisePlayer() {
         <button
           onClick={togglePlay}
           className={`p-2 rounded-full transition-colors ${
-            isPlaying ? 'bg-primary text-white' : 'bg-primary/10 text-primary'
+            isNoisePlaying ? 'bg-primary text-white' : 'bg-primary/10 text-primary'
           }`}
-          aria-label={isPlaying ? 'Pause' : 'Play'}
+          aria-label={isNoisePlaying ? 'Pause' : 'Play'}
         >
-          {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+          {isNoisePlaying ? <Pause size={18} /> : <Play size={18} />}
         </button>
       </div>
 
