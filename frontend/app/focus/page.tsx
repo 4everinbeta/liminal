@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, CheckCircle, PauseCircle } from 'lucide-react'
 import Pomodoro from '@/components/Pomodoro'
 import NoisePlayer from '@/components/NoisePlayer'
+import SpotifyPlayer from '@/components/SpotifyPlayer'
 import { useAppStore } from '@/lib/store'
 import { getTasks, updateTask, Task } from '@/lib/api'
 
@@ -96,6 +97,8 @@ export default function FocusPage() {
                     <NoisePlayer />
                 </div>
             </div>
+
+            <SpotifyPlayer />
             
             <div className="flex gap-4">
               <button
