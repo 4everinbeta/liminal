@@ -22,7 +22,7 @@
     - [x] Display countdown and progress circle in `focus/page.tsx`
     - [x] Integrate `canvas-confetti` for completion
     - [x] Write tests for timer display and celebration trigger
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Adaptive Pomodoro Timer' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 2: Adaptive Pomodoro Timer' (Protocol in workflow.md)
 
 ## Phase 3: Music Integration & Smart Interactions
 - [ ] Task: Implement Spotify Embedded Player
