@@ -15,7 +15,7 @@ Liminal is an ADHD-optimized productivity system designed to reduce cognitive lo
 - **Forgiving Workflow:** Easy recovery from interruptions and flexible rescheduling.
 
 ## Key Features
-- **Focus Mode:** A single-task view with integrated Pomodoro timer and environmental noise control.
+- **Focus Mode:** A single-task view with an adaptive Pomodoro timer (tailored to task effort), integrated ambient noise (Pink/Brown/White), and Spotify/Last.fm integration for a personalized deep-work environment.
 - **Quick Capture:** A persistent, LLM-powered chat intake for natural language task creation.
 - **Urgency Visualization:** Visual cues (gradients, aging) that indicate task pressure without causing shame.
 - **AI Coach:** Natural language interface for prioritizing tasks and breaking down complex goals.

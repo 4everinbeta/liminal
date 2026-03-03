@@ -9,6 +9,7 @@ Liminal is a modern, full-stack application built with a Python (FastAPI) backen
 - **Styling:** Tailwind CSS for a utility-first, responsive design.
 - **State Management:** Zustand for lightweight, predictable state handling.
 - **Animations:** Framer Motion and canvas-confetti for immediate, rewarding visual feedback.
+- **Audio:** Web Audio API for real-time synthesized ambient noise; Spotify Embed SDK for integrated music playback.
 - **Authentication:** OIDC-compliant integration (Keycloak) for secure, flexible user management.
 
 ## Backend
