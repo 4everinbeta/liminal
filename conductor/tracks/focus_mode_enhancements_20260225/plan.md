@@ -34,4 +34,4 @@
     - [x] Write integration tests for auto-pause behavior
 - [x] Task: Add Last.fm support (8204077)
     - [x] Implement Last.fm login and scrobbling logic (if API allows easily)
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Music Integration & Smart Interactions' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 3: Music Integration & Smart Interactions' (Protocol in workflow.md)
