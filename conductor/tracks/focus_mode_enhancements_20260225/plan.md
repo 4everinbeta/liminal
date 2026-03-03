@@ -32,6 +32,6 @@
 - [x] Task: Implement Smart Audio Interaction (ab85d9c)
     - [x] Add logic to pause `NoisePlayer` when `SpotifyPlayer` starts
     - [x] Write integration tests for auto-pause behavior
-- [ ] Task: Add Last.fm support
-    - [ ] Implement Last.fm login and scrobbling logic (if API allows easily)
+- [x] Task: Add Last.fm support (8204077)
+    - [x] Implement Last.fm login and scrobbling logic (if API allows easily)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Music Integration & Smart Interactions' (Protocol in workflow.md)
