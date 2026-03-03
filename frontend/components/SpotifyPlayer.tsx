@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
+import LastFmProfile from './LastFmProfile';
 
 export default function SpotifyPlayer() {
   const { isNoisePlaying, setIsNoisePlaying } = useAppStore();
@@ -40,6 +41,9 @@ export default function SpotifyPlayer() {
           loading="lazy"
           className="rounded-b-xl"
         ></iframe>
+      </div>
+      <div className="px-3 pb-3">
+        <LastFmProfile />
       </div>
     </div>
   );
