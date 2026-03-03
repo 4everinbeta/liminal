@@ -29,9 +29,9 @@
     - [x] Create `frontend/components/SpotifyPlayer.tsx`
     - [x] Add to Focus Mode UI
     - [x] Write tests for player rendering
-- [ ] Task: Implement Smart Audio Interaction
-    - [ ] Add logic to pause `NoisePlayer` when `SpotifyPlayer` starts
-    - [ ] Write integration tests for auto-pause behavior
+- [x] Task: Implement Smart Audio Interaction (ab85d9c)
+    - [x] Add logic to pause `NoisePlayer` when `SpotifyPlayer` starts
+    - [x] Write integration tests for auto-pause behavior
 - [ ] Task: Add Last.fm support
     - [ ] Implement Last.fm login and scrobbling logic (if API allows easily)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Music Integration & Smart Interactions' (Protocol in workflow.md)
