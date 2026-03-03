@@ -24,7 +24,7 @@
     - [x] Write tests for timer display and celebration trigger
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Adaptive Pomodoro Timer' (Protocol in workflow.md)
 
-## Phase 3: Music Integration & Smart Interactions
+## Phase 3: Music Integration & Smart Interactions [checkpoint: a792b94]
 - [x] Task: Implement Spotify Embedded Player (39727d6)
     - [x] Create `frontend/components/SpotifyPlayer.tsx`
     - [x] Add to Focus Mode UI
@@ -34,4 +34,4 @@
     - [x] Write integration tests for auto-pause behavior
 - [x] Task: Add Last.fm support (8204077)
     - [x] Implement Last.fm login and scrobbling logic (if API allows easily)
-- [~] Task: Conductor - User Manual Verification 'Phase 3: Music Integration & Smart Interactions' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Music Integration & Smart Interactions' (Protocol in workflow.md)
