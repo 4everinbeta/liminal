@@ -11,7 +11,7 @@
     - [x] Write tests for UI interactions
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Ambient Noise' (Protocol in workflow.md)
 
-## Phase 2: Adaptive Pomodoro Timer
+## Phase 2: Adaptive Pomodoro Timer [checkpoint: a567df0]
 - [x] Task: Implement adaptive timer logic (c55e2d1)
     - [x] Create `frontend/lib/hooks/usePomodoro.ts`
     - [x] Implement `min(task_duration, 60)` or `20` default logic
@@ -22,7 +22,7 @@
     - [x] Display countdown and progress circle in `focus/page.tsx`
     - [x] Integrate `canvas-confetti` for completion
     - [x] Write tests for timer display and celebration trigger
-- [~] Task: Conductor - User Manual Verification 'Phase 2: Adaptive Pomodoro Timer' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Adaptive Pomodoro Timer' (Protocol in workflow.md)
 
 ## Phase 3: Music Integration & Smart Interactions
 - [ ] Task: Implement Spotify Embedded Player
