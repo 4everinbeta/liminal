@@ -1,0 +1,37 @@
+# Implementation Plan: Focus Mode Enhancements (Pomodoro & Ambient Sounds)
+
+## Phase 1: Foundation & Ambient Noise [checkpoint: 99dd2de]
+- [x] Task: Create ambient noise component (78d6476)
+    - [x] Create `frontend/components/NoisePlayer.tsx`
+    - [x] Implement audio playback for Pink, Brown, and White noise
+    - [x] Write unit tests for playback and volume control
+- [x] Task: Integrate NoisePlayer into Focus Mode (99555ff)
+    - [x] Add `NoisePlayer` to `frontend/app/focus/page.tsx`
+    - [x] Implement direct toggle UI and volume control
+    - [x] Write tests for UI interactions
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Ambient Noise' (Protocol in workflow.md)
+
+## Phase 2: Adaptive Pomodoro Timer [checkpoint: a567df0]
+- [x] Task: Implement adaptive timer logic (c55e2d1)
+    - [x] Create `frontend/lib/hooks/usePomodoro.ts`
+    - [x] Implement `min(task_duration, 60)` or `20` default logic
+    - [x] Implement break state transitions
+    - [x] Write unit tests for timer calculations and transitions
+- [x] Task: Integrate Pomodoro UI into Focus Mode (878340b)
+    - [x] Create `frontend/components/Pomodoro.tsx`
+    - [x] Display countdown and progress circle in `focus/page.tsx`
+    - [x] Integrate `canvas-confetti` for completion
+    - [x] Write tests for timer display and celebration trigger
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Adaptive Pomodoro Timer' (Protocol in workflow.md)
+
+## Phase 3: Music Integration & Smart Interactions [checkpoint: a792b94]
+- [x] Task: Implement Spotify Embedded Player (39727d6)
+    - [x] Create `frontend/components/SpotifyPlayer.tsx`
+    - [x] Add to Focus Mode UI
+    - [x] Write tests for player rendering
+- [x] Task: Implement Smart Audio Interaction (ab85d9c)
+    - [x] Add logic to pause `NoisePlayer` when `SpotifyPlayer` starts
+    - [x] Write integration tests for auto-pause behavior
+- [x] Task: Add Last.fm support (8204077)
+    - [x] Implement Last.fm login and scrobbling logic (if API allows easily)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Music Integration & Smart Interactions' (Protocol in workflow.md)

@@ -1,0 +1,8 @@
+{
+  "track_id": "focus_mode_enhancements_20260225",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-25T16:55:00Z",
+  "updated_at": "2026-02-25T16:55:00Z",
+  "description": "Add a pomodoro type timer in focus mode and re-add ambient sounds (pink/brown/white noise) to help ADHD users focus, including Spotify and Last.fm integration."
+}
