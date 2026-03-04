@@ -41,33 +41,45 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 async def init_db():
-    async with engine.begin() as conn:
-        # In production, use Alembic for migrations. 
-        # For scaffolding/dev, this creates tables automatically if they don't exist.
-        await conn.run_sync(SQLModel.metadata.create_all)
-        
-        # --- SAFEGUARD MIGRATIONS ---
-        # Ensure 'user' table has 'oidc_issuer' and 'updated_at'
-        await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS oidc_issuer TEXT'))
-        await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
-        
-        # Ensure 'theme' table has 'order', 'created_at', 'updated_at'
-        await conn.execute(text('ALTER TABLE theme ADD COLUMN IF NOT EXISTS "order" INTEGER DEFAULT 0'))
-        await conn.execute(text('ALTER TABLE theme ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
-        await conn.execute(text('ALTER TABLE theme ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
+    print(f"Initializing database at {engine.url.render_as_string(hide_password=True)}")
+    try:
+        async with engine.begin() as conn:
+            # In production, use Alembic for migrations. 
+            # For scaffolding/dev, this creates tables automatically if they don't exist.
+            print("Creating tables if they don't exist...")
+            await conn.run_sync(SQLModel.metadata.create_all)
+            
+            # --- SAFEGUARD MIGRATIONS ---
+            print("Running safeguard migrations...")
+            # Ensure 'user' table has 'oidc_issuer', 'google_sub' and 'updated_at'
+            await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS oidc_issuer TEXT'))
+            await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS google_sub TEXT'))
+            await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
+            
+            # Ensure 'theme' table has 'order', 'created_at', 'updated_at'
+            await conn.execute(text('ALTER TABLE theme ADD COLUMN IF NOT EXISTS "order" INTEGER DEFAULT 0'))
+            await conn.execute(text('ALTER TABLE theme ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
+            await conn.execute(text('ALTER TABLE theme ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
 
-        # Ensure 'initiative' table has 'created_at', 'updated_at'
-        await conn.execute(text('ALTER TABLE initiative ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
-        await conn.execute(text('ALTER TABLE initiative ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
-        
-        # Ensure 'task' table has score columns
-        await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS priority_score INTEGER DEFAULT 50"))
-        await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS effort_score INTEGER DEFAULT 50"))
-        await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS start_date TIMESTAMP WITHOUT TIME ZONE"))
-        await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE"))
-        
-        # Backfill defaults if needed
-        await conn.execute(text("UPDATE task SET priority_score = 50 WHERE priority_score IS NULL"))
-        await conn.execute(text("UPDATE task SET effort_score = COALESCE(effort_score, estimated_duration, 50) WHERE effort_score IS NULL"))
-        await conn.execute(text("UPDATE task SET is_deleted = FALSE WHERE is_deleted IS NULL"))
+            # Ensure 'initiative' table has 'created_at', 'updated_at'
+            await conn.execute(text('ALTER TABLE initiative ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
+            await conn.execute(text('ALTER TABLE initiative ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
+            
+            # Ensure 'task' table has score columns
+            await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS priority_score INTEGER DEFAULT 50"))
+            await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS effort_score INTEGER DEFAULT 50"))
+            await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS start_date TIMESTAMP WITHOUT TIME ZONE"))
+            await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE"))
+            
+            # Backfill defaults if needed
+            await conn.execute(text("UPDATE task SET priority_score = 50 WHERE priority_score IS NULL"))
+            await conn.execute(text("UPDATE task SET effort_score = COALESCE(effort_score, estimated_duration, 50) WHERE effort_score IS NULL"))
+            await conn.execute(text("UPDATE task SET is_deleted = FALSE WHERE is_deleted IS NULL"))
+            print("Database initialization complete.")
+    except Exception as e:
+        print(f"CRITICAL: Database initialization failed: {e}")
+        import traceback
+        traceback.print_exc()
+        # Re-raise to prevent app from starting in broken state
+        raise
 

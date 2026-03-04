@@ -224,6 +224,9 @@ async def get_current_user(
     session: AsyncSession = Depends(get_session),
 ) -> User:
     settings = get_settings()
+    if os.getenv("DEBUG_AUTH", "").lower() in ("1", "true", "yes"):
+        print(f"DEBUG: Validating token (starts with: {token[:10]}...)")
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -263,7 +266,9 @@ async def get_current_user(
     try:
         payload = await _decode_oidc_token(token)
     except Exception as e:
-        # Log error here in a real app
+        print(f"OIDC Token Validation Failed: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise credentials_exception
 
     return await _get_oidc_user(payload, session, settings)

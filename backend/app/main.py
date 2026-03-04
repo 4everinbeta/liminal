@@ -1,7 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import os
 import asyncio
+import traceback
 
 from .database import init_db, async_session
 from .routers import auth, users, tasks, themes, llm, ws
@@ -27,7 +29,12 @@ if cors_env:
 
 frontend_url = os.getenv("NEXT_PUBLIC_FRONTEND_BASE_URL")
 if frontend_url:
-    origins.append(frontend_url.strip())
+    url = frontend_url.strip()
+    origins.append(url)
+    if url.endswith("/"):
+        origins.append(url[:-1])
+    else:
+        origins.append(url + "/")
 
 # Deduplicate
 origins = list(set(origins))
@@ -35,11 +42,42 @@ origins = list(set(origins))
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"https://.*\.up\.railway\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    try:
+        response = await call_next(request)
+        return response
+    except Exception as exc:
+        origin = request.headers.get("origin")
+        # If the origin is in our allowed list, use it. Otherwise use the first one or '*'
+        allow_origin = origin if origin in origins else (origins[0] if origins else "*")
+        
+        print(f"CRITICAL ERROR: {request.method} {request.url.path} - {str(exc)}")
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Internal Server Error: {str(exc)}", "traceback": traceback.format_exc()},
+            headers={
+                "Access-Control-Allow-Origin": allow_origin,
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Allow-Methods": "*",
+                "Access-Control-Allow-Headers": "*",
+            }
+        )
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "version": "1.2.0",
+        "database": str(engine.url.render_as_string(hide_password=True))
+    }
 
 @app.on_event("startup")
 async def on_startup():
