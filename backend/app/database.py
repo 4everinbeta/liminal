@@ -65,16 +65,25 @@ async def init_db():
             await conn.execute(text('ALTER TABLE initiative ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
             await conn.execute(text('ALTER TABLE initiative ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
             
-            # Ensure 'task' table has score columns
+            # Ensure 'task' table has score columns and other new fields
+            await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS notes TEXT"))
             await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS priority_score INTEGER DEFAULT 50"))
             await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS effort_score INTEGER DEFAULT 50"))
+            await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS value_score INTEGER DEFAULT 50"))
             await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS start_date TIMESTAMP WITHOUT TIME ZONE"))
             await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE"))
+            await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS ai_relevance_score INTEGER DEFAULT 0"))
+            await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS ai_suggestion_status TEXT DEFAULT 'none'"))
+            await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS parent_id TEXT"))
+            await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()"))
             
             # Backfill defaults if needed
             await conn.execute(text("UPDATE task SET priority_score = 50 WHERE priority_score IS NULL"))
             await conn.execute(text("UPDATE task SET effort_score = COALESCE(effort_score, estimated_duration, 50) WHERE effort_score IS NULL"))
+            await conn.execute(text("UPDATE task SET value_score = 50 WHERE value_score IS NULL"))
             await conn.execute(text("UPDATE task SET is_deleted = FALSE WHERE is_deleted IS NULL"))
+            await conn.execute(text("UPDATE task SET ai_relevance_score = 0 WHERE ai_relevance_score IS NULL"))
+            await conn.execute(text("UPDATE task SET ai_suggestion_status = 'none' WHERE ai_suggestion_status IS NULL"))
             print("Database initialization complete.")
     except Exception as e:
         print(f"CRITICAL: Database initialization failed: {e}")
