@@ -53,15 +53,17 @@ Exceptions:
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px | 400 | 1.5 |
-| Label | 12px | 500 | 1.4 |
+| Label | 10px | 400 | 1.4 |
 | Heading | 16px | 600 | 1.3 |
-| Display | 24px | 700 | 1.2 |
+| Display | 24px | 600 | 1.2 |
+
+**Weight mapping:** 2 weights only — 400 (body/regular) and 600 (emphasis/headings/CTAs). Former 500 (Label) → 400. Former 700 (Display) → 600.
 
 **Phase-specific notes:**
-- Undo banner action label "UNDO": 14px, weight 700, uppercase — matches existing UndoBanner pattern
+- Undo banner action label "UNDO": 14px, weight 600, uppercase — visually prominent via uppercase + weight 600
 - Interrupted badge label (if text used): 10px, uppercase, tracking-wider — matches existing `text-[10px] uppercase tracking-wider` pattern in page.tsx
 - "Where you left off" section label: 10px, uppercase, tracking-wider, primary color — same pattern as existing "Previous interruption" label
-- Restored task confirmation in undo banner: 14px, weight 500
+- Restored task confirmation in undo banner: 14px, weight 400
 
 ---
 
