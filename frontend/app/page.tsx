@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAppStore } from '@/lib/store'
 import TaskForm from '@/components/TaskForm'
 import TaskActionMenu from '@/components/TaskActionMenu'
@@ -13,7 +13,8 @@ import { AISuggestion } from '@/components/AISuggestion'
 import { useNotifications } from '@/lib/hooks/useNotifications'
 import { useUrgencyColor } from '@/lib/hooks/useUrgencyColor'
 import { isStaleTask } from '@/lib/urgency'
-import { CheckCircle, ArrowRight, CircleDashed, ListTodo, ArrowDownCircle, RotateCcw } from 'lucide-react'
+import { CheckCircle, ArrowRight, CircleDashed, ListTodo, ArrowDownCircle, RotateCcw, PauseCircle } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { StatsBar } from '@/components/StatsBar'
 import { EodSummaryToast, useEodSummaryScheduler } from '@/components/EodSummaryToast'
 import { useGamificationStats } from '@/lib/hooks/useGamificationStats'
@@ -27,6 +28,9 @@ function PlanningTaskRow({
   onComplete,
   onEdit,
   onPause,
+  isWhereYouLeftOff,
+  isInterrupted,
+  onResumeFromInterrupt,
 }: {
   task: Task
   isActive: boolean
@@ -35,6 +39,9 @@ function PlanningTaskRow({
   onComplete: () => void
   onEdit: () => void
   onPause: () => void
+  isWhereYouLeftOff?: boolean
+  isInterrupted?: boolean
+  onResumeFromInterrupt?: () => void
 }) {
   const urgencyColor = useUrgencyColor(task.due_date, task.created_at, task.status)
   const stale = isStaleTask(task.created_at, task.status)
@@ -46,9 +53,9 @@ function PlanningTaskRow({
 
   return (
     <li
-      className={`border rounded-2xl px-4 py-3 transition-all group ${
+      className={`relative border rounded-2xl px-4 py-3 transition-all group ${
         isActive ? 'border-primary bg-primary/5' : 'border-gray-100 bg-gray-50/60 hover:bg-white'
-      }`}
+      } ${isWhereYouLeftOff ? 'ring-2 ring-primary/30 ring-offset-2' : ''}`}
       style={{ opacity: stale || isPaused ? 0.5 : 1, filter: stale ? 'grayscale(30%)' : undefined, ...borderStyle }}
     >
       <div className="flex items-start justify-between gap-3">
@@ -72,6 +79,21 @@ function PlanningTaskRow({
           isPaused={isPaused}
         />
       </div>
+      <AnimatePresence>
+        {isInterrupted && (
+          <motion.span
+            key="interrupted-badge"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="absolute top-2 right-2 flex items-center bg-orange-50 rounded px-1.5 py-0.5 cursor-pointer"
+            onClick={(e) => { e.stopPropagation(); onResumeFromInterrupt?.() }}
+          >
+            <PauseCircle size={14} className="text-orange-500" />
+          </motion.span>
+        )}
+      </AnimatePresence>
     </li>
   )
 }
@@ -98,9 +120,47 @@ export default function Home() {
     setLastCompletedTask,
     lastDeletedTask,
     setLastDeletedTask,
+    interruptedTaskId,
+    setInterruptedTaskId,
     sortingMode,
     setSortingMode
   } = useAppStore()
+
+  // Interruption tracking: ref to avoid cleanup firing on re-renders (Pitfall 3)
+  const activeTaskIdRef = useRef(activeTaskId)
+  useEffect(() => {
+    activeTaskIdRef.current = activeTaskId
+  }, [activeTaskId])
+
+  // Trigger 1: Tab close / page reload
+  useEffect(() => {
+    const handleUnload = () => {
+      if (activeTaskIdRef.current) {
+        setInterruptedTaskId(activeTaskIdRef.current)
+        // Belt-and-suspenders: direct localStorage write (Pitfall 2)
+        try {
+          const stored = JSON.parse(localStorage.getItem('liminal-app') || '{}')
+          if (stored.state) {
+            stored.state.interruptedTaskId = activeTaskIdRef.current
+            localStorage.setItem('liminal-app', JSON.stringify(stored))
+          }
+        } catch (e) {
+          // Ignore — Zustand write is primary
+        }
+      }
+    }
+    window.addEventListener('beforeunload', handleUnload)
+    return () => window.removeEventListener('beforeunload', handleUnload)
+  }, [setInterruptedTaskId])
+
+  // Trigger 2: Component unmount (route change in Next.js App Router)
+  useEffect(() => {
+    return () => {
+      if (activeTaskIdRef.current) {
+        setInterruptedTaskId(activeTaskIdRef.current)
+      }
+    }
+  }, []) // Empty deps — only fires on true unmount
 
   const [tasks, setTasks] = useState<Task[]>([])
   const [deletedTasks, setDeletedTasks] = useState<Task[]>([])
@@ -271,6 +331,7 @@ export default function Home() {
           setLastCompletedTask(null)
         }, 30000)
       }
+      if (taskId === interruptedTaskId) setInterruptedTaskId(null)
       setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'done', updated_at: new Date().toISOString() } : t))
 
       // Move to next task
@@ -326,6 +387,7 @@ export default function Home() {
           setLastDeletedTask(null)
         }, 30000)
       }
+      if (taskId === interruptedTaskId) setInterruptedTaskId(null)
       setTasks((prev) => prev.filter((t) => t.id !== taskId))
       fetchTasks()
     } catch (err) {
@@ -600,6 +662,16 @@ export default function Home() {
                     key={task.id}
                     task={task}
                     isActive={task.id === activeTaskId}
+                    isWhereYouLeftOff={
+                      task.id === previouslyActiveTaskId &&
+                      task.id !== activeTaskId &&
+                      task.status !== 'done'
+                    }
+                    isInterrupted={task.id === interruptedTaskId}
+                    onResumeFromInterrupt={() => {
+                      setActiveTaskId(task.id)
+                      setInterruptedTaskId(null)
+                    }}
                     onTaskClick={() => handleTaskClick(task.id)}
                     onDelete={() => handleDeleteTask(task.id)}
                     onComplete={() => handleCompleteTask(task.id)}
