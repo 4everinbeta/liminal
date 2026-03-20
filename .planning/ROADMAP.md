@@ -107,10 +107,11 @@ Plans:
   6. User can pause task and it auto-resumes on next session
   7. Dashboard shows "Where you left off" on page load
   8. Interruptions are tracked and surfaced for recovery
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD during planning
+- [ ] 05-01-PLAN.md — Store extension and UI wiring (interruptedTaskId, where-you-left-off ring, interrupted badge, interruption tracker)
+- [ ] 05-02-PLAN.md — Human verification of all 8 recovery requirements
 
 ### Phase 6: AI Prioritization
 **Goal**: Users receive intelligent "do this now" suggestions that eliminate decision paralysis
@@ -139,5 +140,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 2. Capture & Feedback | 4/4 | Complete | 2026-02-07 |
 | 3. Urgency System | 3/3 | Complete | 2026-02-19 |
 | 4. Gamification | 3/3 | Complete | 2026-02-19 |
-| 5. Forgiveness | 0/0 | Not started | - |
+| 5. Forgiveness | 0/2 | In progress | - |
 | 6. AI Prioritization | 0/0 | Not started | - |
