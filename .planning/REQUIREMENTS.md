@@ -25,10 +25,10 @@ Requirements for ADHD-optimized release. Each maps to roadmap phases.
 
 ### Forgiveness & Recovery
 
-- [ ] **RECOVERY-01**: User can undo task completion (30 second undo window)
-- [ ] **RECOVERY-02**: Session state persists across page reload (Zustand persist middleware)
-- [ ] **RECOVERY-03**: Draft task inputs auto-recover after browser crash
-- [ ] **RECOVERY-04**: User can restore recently deleted tasks (soft delete with 24hr retention)
+- [x] **RECOVERY-01**: User can undo task completion (30 second undo window)
+- [x] **RECOVERY-02**: Session state persists across page reload (Zustand persist middleware)
+- [x] **RECOVERY-03**: Draft task inputs auto-recover after browser crash
+- [x] **RECOVERY-04**: User can restore recently deleted tasks (soft delete with 24hr retention)
 
 ### Single Primary Interface
 
@@ -81,10 +81,10 @@ Requirements for ADHD-optimized release. Each maps to roadmap phases.
 
 ### Working Memory Support
 
-- [ ] **MEMORY-01**: User sees "Currently working on" task prominently displayed
-- [ ] **MEMORY-02**: User can mark task "paused" and it auto-resumes on next session
-- [ ] **MEMORY-03**: Dashboard shows "Where you left off" on page load
-- [ ] **MEMORY-04**: Interruptions tracked and surfaced ("You were working on X before distraction")
+- [x] **MEMORY-01**: User sees "Currently working on" task prominently displayed
+- [x] **MEMORY-02**: User can mark task "paused" and it auto-resumes on next session
+- [x] **MEMORY-03**: Dashboard shows "Where you left off" on page load
+- [x] **MEMORY-04**: Interruptions tracked and surfaced ("You were working on X before distraction")
 
 ### Anti-Features (Explicitly Removed)
 
@@ -145,10 +145,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FEEDBACK-02 | Phase 2 | Pending |
 | FEEDBACK-03 | Phase 2 | Pending |
 | FEEDBACK-04 | Phase 2 | Pending |
-| RECOVERY-01 | Phase 5 | Pending |
-| RECOVERY-02 | Phase 5 | Pending |
-| RECOVERY-03 | Phase 5 | Pending |
-| RECOVERY-04 | Phase 5 | Pending |
+| RECOVERY-01 | Phase 5 | Complete |
+| RECOVERY-02 | Phase 5 | Complete |
+| RECOVERY-03 | Phase 5 | Complete |
+| RECOVERY-04 | Phase 5 | Complete |
 | INTERFACE-01 | Phase 1 | Pending |
 | INTERFACE-02 | Phase 1 | Pending |
 | INTERFACE-03 | Phase 1 | Pending |
@@ -180,10 +180,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SIMPLIFY-02 | Phase 1 | Pending |
 | SIMPLIFY-03 | Phase 1 | Pending |
 | SIMPLIFY-04 | Phase 1 | Pending |
-| MEMORY-01 | Phase 5 | Pending |
-| MEMORY-02 | Phase 5 | Pending |
-| MEMORY-03 | Phase 5 | Pending |
-| MEMORY-04 | Phase 5 | Pending |
+| MEMORY-01 | Phase 5 | Complete |
+| MEMORY-02 | Phase 5 | Complete |
+| MEMORY-03 | Phase 5 | Complete |
+| MEMORY-04 | Phase 5 | Complete |
 | REMOVE-01 | Phase 1 | Pending |
 | REMOVE-02 | Phase 1 | Pending |
 | REMOVE-03 | Phase 1 | Pending |

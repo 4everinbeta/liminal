@@ -110,7 +110,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Store extension and UI wiring (interruptedTaskId, where-you-left-off ring, interrupted badge, interruption tracker)
+- [x] 05-01-PLAN.md — Store extension and UI wiring (interruptedTaskId, where-you-left-off ring, interrupted badge, interruption tracker)
 - [ ] 05-02-PLAN.md — Human verification of all 8 recovery requirements
 
 ### Phase 6: AI Prioritization
@@ -140,5 +140,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 2. Capture & Feedback | 4/4 | Complete | 2026-02-07 |
 | 3. Urgency System | 3/3 | Complete | 2026-02-19 |
 | 4. Gamification | 3/3 | Complete | 2026-02-19 |
-| 5. Forgiveness | 0/2 | In progress | - |
+| 5. Forgiveness | 1/2 | In Progress|  |
 | 6. AI Prioritization | 0/0 | Not started | - |
