@@ -60,4 +60,28 @@ describe('TaskCard Component', () => {
     const card = container.querySelector('.hover\\:shadow-md');
     expect(card).toBeInTheDocument();
   });
+
+  it('should apply where-you-left-off ring when isWhereYouLeftOff is true', () => {
+    const { container } = render(<TaskCard task={mockTask} isWhereYouLeftOff={true} />)
+    const card = container.querySelector('.ring-2')
+    expect(card).toBeInTheDocument()
+  })
+
+  it('should not apply ring when isWhereYouLeftOff is false', () => {
+    const { container } = render(<TaskCard task={mockTask} isWhereYouLeftOff={false} />)
+    const card = container.querySelector('.ring-2')
+    expect(card).toBeNull()
+  })
+
+  it('should render interrupted badge when isInterrupted is true', () => {
+    render(<TaskCard task={mockTask} isInterrupted={true} />)
+    const badge = document.querySelector('.bg-orange-50')
+    expect(badge).toBeInTheDocument()
+  })
+
+  it('should not render interrupted badge when isInterrupted is false', () => {
+    render(<TaskCard task={mockTask} isInterrupted={false} />)
+    const badge = document.querySelector('.bg-orange-50')
+    expect(badge).toBeNull()
+  })
 });

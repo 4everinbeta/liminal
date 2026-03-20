@@ -1,7 +1,7 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { CheckCircle2, Circle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { CheckCircle2, Circle, PauseCircle } from 'lucide-react'
 import { forwardRef, memo, useState } from 'react'
 import TaskActionMenu from './TaskActionMenu'
 import UrgencyIndicator from './UrgencyIndicator'
@@ -22,9 +22,12 @@ interface TaskProps {
   }
   onComplete?: (id: string) => void
   onDelete?: (id: string) => void
+  isWhereYouLeftOff?: boolean
+  isInterrupted?: boolean
+  onResumeFromInterrupt?: () => void
 }
 
-const TaskCard = memo(forwardRef<HTMLDivElement, TaskProps>(({ task, onComplete, onDelete }, ref) => {
+const TaskCard = memo(forwardRef<HTMLDivElement, TaskProps>(({ task, onComplete, onDelete, isWhereYouLeftOff, isInterrupted, onResumeFromInterrupt }, ref) => {
   const [isCompleting, setIsCompleting] = useState(false)
 
   const urgencyColor = useUrgencyColor(task.due_date, task.created_at || '', task.status || '')
@@ -69,9 +72,9 @@ const TaskCard = memo(forwardRef<HTMLDivElement, TaskProps>(({ task, onComplete,
       }}
       transition={{ duration: 0.5 }}
       whileHover={{ scale: 1.01 }}
-      className={`group bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex items-center gap-3 ${
+      className={`relative group bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex items-center gap-3 ${
         task.themeColor || task.due_date ? '' : priorityColorClass
-      }`}
+      } ${isWhereYouLeftOff ? 'ring-2 ring-primary/30 ring-offset-2' : ''}`}
       style={cardBorderStyle}
     >
       <motion.button
@@ -106,12 +109,27 @@ const TaskCard = memo(forwardRef<HTMLDivElement, TaskProps>(({ task, onComplete,
       </div>
 
       <div onClick={e => e.stopPropagation()}>
-        <TaskActionMenu 
+        <TaskActionMenu
             onDelete={onDelete ? () => onDelete(task.id) : undefined}
             onToggleComplete={onComplete ? handleComplete : undefined}
-            isCompleted={false} 
+            isCompleted={false}
         />
       </div>
+      <AnimatePresence>
+        {isInterrupted && (
+          <motion.span
+            key="interrupted-badge"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="absolute top-2 right-2 flex items-center bg-orange-50 rounded px-1.5 py-0.5 cursor-pointer"
+            onClick={(e) => { e.stopPropagation(); onResumeFromInterrupt?.() }}
+          >
+            <PauseCircle size={14} className="text-orange-500" />
+          </motion.span>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }))

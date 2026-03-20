@@ -57,6 +57,8 @@ interface AppState {
   setLastCompletedTask: (task: any | null) => void
   lastDeletedTask: { task: any; timestamp: number } | null
   setLastDeletedTask: (task: any | null) => void
+  interruptedTaskId: string | null
+  setInterruptedTaskId: (id: string | null) => void
 
   // AI Prioritization
   sortingMode: 'manual' | 'ai'
@@ -127,9 +129,11 @@ export const useAppStore = create<AppState>()(
         lastCompletedTask: task ? { task, timestamp: Date.now() } : null 
       }),
       lastDeletedTask: null,
-      setLastDeletedTask: (task) => set({ 
-        lastDeletedTask: task ? { task, timestamp: Date.now() } : null 
+      setLastDeletedTask: (task) => set({
+        lastDeletedTask: task ? { task, timestamp: Date.now() } : null
       }),
+      interruptedTaskId: null,
+      setInterruptedTaskId: (id) => set({ interruptedTaskId: id }),
 
       sortingMode: 'ai', // Default to AI sorting for Phase 6
       setSortingMode: (mode) => set({ sortingMode: mode }),
@@ -156,6 +160,7 @@ export const useAppStore = create<AppState>()(
         eodSummaryEnabled: state.eodSummaryEnabled,
         lastCompletedTask: state.lastCompletedTask,
         lastDeletedTask: state.lastDeletedTask,
+        interruptedTaskId: state.interruptedTaskId,
         sortingMode: state.sortingMode,
       }),
     }
