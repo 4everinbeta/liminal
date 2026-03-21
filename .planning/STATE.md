@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-03-21T18:14:37.324Z"
+stopped_at: Completed 06-02-PLAN.md — Phase 06 ai-prioritization complete
+last_updated: "2026-03-21T19:04:19.262Z"
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 17
-  completed_plans: 16
+  completed_plans: 17
 ---
 
 # Project State
@@ -51,6 +51,7 @@ Plan: 2 of 2
 *Updated after each plan completion*
 | Phase 05 P01 | 4.5 | 2 tasks | 4 files |
 | Phase 06-ai-prioritization P01 | 102 | 2 tasks | 2 files |
+| Phase 06-ai-prioritization P02 | 5 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -120,6 +121,8 @@ Recent decisions affecting current work:
 - [Phase 05]: isWhereYouLeftOff guard excludes active task and done tasks to prevent ring on wrong task
 - [Phase 06-ai-prioritization]: Use local date parsing (year/month/day split) to avoid UTC timezone offset when displaying due dates in AISuggestion
 - [Phase 06-ai-prioritization]: Find buttons by visible text (getByText) not role+name when aria-label overrides accessible name in RTL tests
+- [Phase 06-ai-prioritization]: Call handleSwitchToFocus after setAiSuggestion(null) for optimistic card clear before mode switch
+- [Phase 06-ai-prioritization]: isVisible guards on both aiSuggestion presence AND task found in tasks array to prevent blank-title card
 
 ### Pending Todos
 
@@ -131,8 +134,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T18:14:37.321Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-03-21T19:04:19.259Z
+Stopped at: Completed 06-02-PLAN.md — Phase 06 ai-prioritization complete
 Resume file: None
 
 **Phase 1 Status:** ✅ Complete - Foundation established

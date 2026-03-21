@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Urgency System** - Visual time pressure and scarcity framing
 - [ ] **Phase 4: Gamification** - Streaks, progress tracking, and momentum
 - [ ] **Phase 5: Forgiveness** - Working memory support and interruption recovery
-- [ ] **Phase 6: AI Prioritization** - Intelligent "do this now" suggestions
+- [x] **Phase 6: AI Prioritization** - Intelligent "do this now" suggestions (completed 2026-03-21)
 
 ## Phase Details
 
@@ -128,7 +128,7 @@ Plans:
 
 Plans:
 - [x] 06-01-PLAN.md — Refactor AISuggestion component to inline card with tests (TDD: tests + component refactor)
-- [ ] 06-02-PLAN.md — Wire inline AI suggestion into dashboard and verify (page.tsx wiring + human verification)
+- [x] 06-02-PLAN.md — Wire inline AI suggestion into dashboard and verify (page.tsx wiring + human verification)
 
 ## Progress
 
@@ -142,4 +142,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 3. Urgency System | 3/3 | Complete | 2026-02-19 |
 | 4. Gamification | 3/3 | Complete | 2026-02-19 |
 | 5. Forgiveness | 1/2 | In Progress|  |
-| 6. AI Prioritization | 1/2 | In Progress|  |
+| 6. AI Prioritization | 2/2 | Complete   | 2026-03-21 |

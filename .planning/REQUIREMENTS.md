@@ -65,12 +65,12 @@ Requirements for ADHD-optimized release. Each maps to roadmap phases.
 
 ### AI Prioritization
 
-- [ ] **AI-01**: User sees "Do This Now" AI suggestion at top of task list
-- [ ] **AI-02**: AI suggestion considers time of day, deadline proximity, estimated duration
-- [ ] **AI-03**: User can easily dismiss/override AI suggestion (one click)
-- [ ] **AI-04**: AI adapts to user patterns (learns what gets done vs ignored)
-- [ ] **AI-05**: AI suggestion updates every 15 minutes (fresh recommendations)
-- [ ] **AI-06**: Task list auto-sorts by urgency + AI score (manual override available)
+- [x] **AI-01**: User sees "Do This Now" AI suggestion at top of task list
+- [x] **AI-02**: AI suggestion considers time of day, deadline proximity, estimated duration
+- [x] **AI-03**: User can easily dismiss/override AI suggestion (one click)
+- [x] **AI-04**: AI adapts to user patterns (learns what gets done vs ignored)
+- [x] **AI-05**: AI suggestion updates every 15 minutes (fresh recommendations)
+- [x] **AI-06**: Task list auto-sorts by urgency + AI score (manual override available)
 
 ### Simplified Scoring
 
@@ -170,12 +170,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VOICE-03 | Phase 2 | Pending |
 | VOICE-04 | Phase 2 | Pending |
 | VOICE-05 | Phase 2 | Pending |
-| AI-01 | Phase 6 | Pending |
-| AI-02 | Phase 6 | Pending |
-| AI-03 | Phase 6 | Pending |
-| AI-04 | Phase 6 | Pending |
-| AI-05 | Phase 6 | Pending |
-| AI-06 | Phase 6 | Pending |
+| AI-01 | Phase 6 | Complete |
+| AI-02 | Phase 6 | Complete |
+| AI-03 | Phase 6 | Complete |
+| AI-04 | Phase 6 | Complete |
+| AI-05 | Phase 6 | Complete |
+| AI-06 | Phase 6 | Complete |
 | SIMPLIFY-01 | Phase 1 | Pending |
 | SIMPLIFY-02 | Phase 1 | Pending |
 | SIMPLIFY-03 | Phase 1 | Pending |
