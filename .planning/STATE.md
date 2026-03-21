@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-03-21T16:35:56.271Z"
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-03-21T18:14:37.324Z"
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 15
-  completed_plans: 15
+  total_plans: 17
+  completed_plans: 16
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-01-31)
 
 **Core value:** ADHD brains respond to NOW/NOT NOW, not IMPORTANT/NOT IMPORTANT
-**Current focus:** Phase 05 — forgiveness
+**Current focus:** Phase 06 — ai-prioritization
 
 ## Current Position
 
-Phase: 6
-Plan: Not started
+Phase: 06 (ai-prioritization) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Plan: Not started
 
 *Updated after each plan completion*
 | Phase 05 P01 | 4.5 | 2 tasks | 4 files |
+| Phase 06-ai-prioritization P01 | 102 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -117,6 +118,8 @@ Recent decisions affecting current work:
 - [Phase 05]: Use useRef for interruption tracker to avoid stale closure in useEffect cleanup
 - [Phase 05]: Direct localStorage write in beforeunload as belt-and-suspenders for Zustand persist timing
 - [Phase 05]: isWhereYouLeftOff guard excludes active task and done tasks to prevent ring on wrong task
+- [Phase 06-ai-prioritization]: Use local date parsing (year/month/day split) to avoid UTC timezone offset when displaying due dates in AISuggestion
+- [Phase 06-ai-prioritization]: Find buttons by visible text (getByText) not role+name when aria-label overrides accessible name in RTL tests
 
 ### Pending Todos
 
@@ -128,8 +131,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-20T23:53:29.959Z
-Stopped at: Completed 05-01-PLAN.md
+Last session: 2026-03-21T18:14:37.321Z
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None
 
 **Phase 1 Status:** ✅ Complete - Foundation established
