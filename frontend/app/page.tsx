@@ -295,6 +295,7 @@ export default function Home() {
       const taskId = aiSuggestion.suggested_task_id;
       setActiveTaskId(taskId);
       setAiSuggestion(null);
+      handleSwitchToFocus();
       try {
         await sendAiFeedback(taskId, 'accepted');
       } catch (err) {
@@ -623,6 +624,17 @@ export default function Home() {
             </div>
           </div>
 
+          {/* AI Suggestion — inline pinned card (D-01) */}
+          <AISuggestion
+            isVisible={!!aiSuggestion && !!tasks.find(t => t.id === aiSuggestion?.suggested_task_id)}
+            taskTitle={tasks.find(t => t.id === aiSuggestion?.suggested_task_id)?.title || ''}
+            dueDate={tasks.find(t => t.id === aiSuggestion?.suggested_task_id)?.due_date}
+            estimatedDuration={tasks.find(t => t.id === aiSuggestion?.suggested_task_id)?.estimated_duration}
+            reasoning={aiSuggestion?.reasoning || ''}
+            onAccept={handleAcceptSuggestion}
+            onDismiss={handleDismissSuggestion}
+          />
+
           {/* Quick Capture */}
           <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-5">
             <h3 className="text-base font-semibold text-gray-900 mb-2">Quick capture</h3>
@@ -726,13 +738,6 @@ export default function Home() {
         onDismiss={dismissSummary}
       />
 
-      <AISuggestion
-        isVisible={!!aiSuggestion}
-        taskTitle={tasks.find(t => t.id === aiSuggestion?.suggested_task_id)?.title || ""}
-        reasoning={aiSuggestion?.reasoning || ""}
-        onAccept={handleAcceptSuggestion}
-        onDismiss={handleDismissSuggestion}
-      />
     </div>
   )
 }
