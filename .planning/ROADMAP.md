@@ -124,10 +124,11 @@ Plans:
   4. AI learns from user patterns (what gets done vs ignored)
   5. AI suggestion updates every 15 minutes (fresh recommendations)
   6. Task list auto-sorts by urgency + AI score (manual override available)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: TBD during planning
+- [ ] 06-01-PLAN.md — Refactor AISuggestion component to inline card with tests (TDD: tests + component refactor)
+- [ ] 06-02-PLAN.md — Wire inline AI suggestion into dashboard and verify (page.tsx wiring + human verification)
 
 ## Progress
 
@@ -141,4 +142,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 3. Urgency System | 3/3 | Complete | 2026-02-19 |
 | 4. Gamification | 3/3 | Complete | 2026-02-19 |
 | 5. Forgiveness | 1/2 | In Progress|  |
-| 6. AI Prioritization | 0/0 | Not started | - |
+| 6. AI Prioritization | 0/2 | Not started | - |
