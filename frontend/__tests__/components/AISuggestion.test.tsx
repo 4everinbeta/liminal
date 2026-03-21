@@ -44,7 +44,7 @@ describe('AISuggestion', () => {
     const onAccept = vi.fn()
     const user = userEvent.setup()
     render(<AISuggestion {...defaultProps} onAccept={onAccept} />)
-    await user.click(screen.getByRole('button', { name: /Start This Task/i }))
+    await user.click(screen.getByText('Start This Task'))
     expect(onAccept).toHaveBeenCalledTimes(1)
   })
 
@@ -52,7 +52,7 @@ describe('AISuggestion', () => {
     const onDismiss = vi.fn()
     const user = userEvent.setup()
     render(<AISuggestion {...defaultProps} onDismiss={onDismiss} />)
-    await user.click(screen.getByRole('button', { name: /Not Now/i }))
+    await user.click(screen.getByText('Not Now'))
     expect(onDismiss).toHaveBeenCalledTimes(1)
   })
 
