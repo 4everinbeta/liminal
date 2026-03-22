@@ -71,6 +71,10 @@ interface AppState {
   // Global Refresh Signal
   lastUpdate: number
   triggerUpdate: () => void
+
+  // Network status (offline queue)
+  isOnline: boolean
+  setIsOnline: (online: boolean) => void
 }
 
 export const useAppStore = create<AppState>()(
@@ -143,6 +147,9 @@ export const useAppStore = create<AppState>()(
 
       lastUpdate: 0,
       triggerUpdate: () => set({ lastUpdate: Date.now() }),
+
+      isOnline: true,
+      setIsOnline: (online: boolean) => set({ isOnline: online }),
     }),
     {
       name: 'liminal-app',
