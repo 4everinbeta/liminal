@@ -49,3 +49,4 @@ venv/
 *.local
 *.tsbuildinfo
 .gemini/.claude/
+frontend/.next-e2e
