@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  distDir: '.next-clean',
+  distDir: process.env.NEXT_DIST_DIR || '.next-clean',
   transpilePackages: ['chroma-js'],
   eslint: {
     ignoreDuringBuilds: true,
