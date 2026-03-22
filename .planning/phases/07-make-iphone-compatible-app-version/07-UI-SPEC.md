@@ -64,8 +64,8 @@ Source: D-05 (CONTEXT.md) — safe area insets via `env(safe-area-inset-*)` with
 
 Notes:
 - Font family: Inter — already loaded via `font-sans` in Tailwind config. No change needed.
-- Tab bar labels: 12px at weight 400 (standard iOS tab bar label size). This is the only 5th size allowed — reserved for tab bar chrome only.
-- No new font sizes beyond the 4 declared above (excluding 12px tab labels). Existing components already use `text-sm` (14px) and `text-base` (16px) consistently.
+- Tab bar labels use 12px at weight 400 (standard iOS tab bar label size). This is a component-internal override inside `BottomTabBar.tsx` only — it is NOT a declared scale token and must not be used outside that component.
+- No new font sizes beyond the 4 declared above. Existing components already use `text-sm` (14px) and `text-base` (16px) consistently.
 - Mobile body text must not fall below 16px to prevent iOS auto-zoom on focused inputs. All `<input>` and `<textarea>` must use `text-base` (16px) or larger.
 
 Source: Existing component patterns (TaskCard uses `font-medium text-text`, `text-xs text-muted`), iOS auto-zoom rule.
@@ -126,6 +126,7 @@ Existing components adapted (not replaced):
 - Tab order left-to-right: Dashboard | Board | [Plus] | More (disabled)
 - Active tab: accent color (`#4F46E5`) icon + 12px label. Inactive tab: `#6B7280` (muted) icon + label.
 - Center Plus button: 56px circle, filled accent (`#4F46E5`), white Plus icon (24px). Elevated 8px above bar baseline with `shadow-lg`. Tapping opens `GlobalQuickCapture` modal.
+- Center Plus button accessibility: `aria-label="Capture Task"` must be declared on the button element. It is icon-only with no visible label.
 - Tab bar background: white (`#FFFFFF`) with `border-t border-gray-100` separator. `backdrop-blur-md` may be applied if performance allows on older devices.
 - Fixed to bottom with `position: fixed; bottom: 0`. Padding bottom equals `env(safe-area-inset-bottom)` so content clears home indicator.
 
@@ -187,10 +188,10 @@ Source: D-05 (CONTEXT.md), existing `pb-20 md:pb-0` pattern in `layout.tsx`.
 | Swipe left hint (first-run only) | "Swipe left to complete" |
 | Swipe right hint (first-run only) | "Swipe right to edit" |
 | Error state (sync failure) | "Sync failed. Your changes are saved locally and will retry automatically." |
-| Destructive confirmation (delete task) | "Delete task?" with secondary copy "This can be undone within 30 seconds." and buttons "Delete" (destructive red) / "Cancel" |
+| Destructive confirmation (delete task) | "Delete task?" with secondary copy "This can be undone within 30 seconds." and buttons "Delete" (destructive red) / "Keep Task" (ghost) |
 
 Notes:
-- Destructive confirmation uses a modal bottom sheet on mobile (not a blocking alert dialog). Two buttons: "Delete" (filled red, 44px) and "Cancel" (ghost, 44px).
+- Destructive confirmation uses a modal bottom sheet on mobile (not a blocking alert dialog). Two buttons: "Delete" (filled red, 44px) and "Keep Task" (ghost, 44px).
 - First-run swipe hints appear as 2-second tooltip overlays on first app open only. Dismissed on first swipe or tap-outside. State stored in `localStorage` key `liminal_swipe_hint_seen`.
 - "Capture Task" label replaces the desktop "Quick Capture" label in the modal for mobile context.
 - All copy respects the ADHD-safe tone: no shame language, no urgency language in error states, no "You failed to sync" framing.
