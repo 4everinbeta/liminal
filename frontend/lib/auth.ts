@@ -23,9 +23,25 @@ let _userManager: UserManager | null = null
 
 export function getAuthConfig(): Promise<AuthConfig> {
   if (!_configPromise) {
-    _configPromise = fetch('/api/config', { cache: 'no-store' }).then(async (r) => {
-      if (!r.ok) throw new Error('Failed to load auth config')
-      return (await r.json()) as AuthConfig
+    _configPromise = Promise.resolve({
+      oidcAuthority: process.env.NEXT_PUBLIC_OIDC_AUTHORITY || '',
+      oidcClientId: process.env.NEXT_PUBLIC_OIDC_CLIENT_ID || '',
+      oidcRedirectUri: process.env.NEXT_PUBLIC_OIDC_REDIRECT_URI || (typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : ''),
+      oidcPostLogoutRedirectUri: process.env.NEXT_PUBLIC_OIDC_POST_LOGOUT_REDIRECT_URI || (typeof window !== 'undefined' ? `${window.location.origin}/login` : ''),
+      oidcScope: process.env.NEXT_PUBLIC_OIDC_SCOPE || 'openid profile email offline_access',
+      authRequired: (() => {
+        const val = (process.env.NEXT_PUBLIC_AUTH_REQUIRED || '').toLowerCase()
+        return val !== 'false' && val !== '0' && val !== 'no' && Boolean(process.env.NEXT_PUBLIC_OIDC_AUTHORITY && process.env.NEXT_PUBLIC_OIDC_CLIENT_ID)
+      })(),
+      authProviders: (() => {
+        const input = process.env.NEXT_PUBLIC_OIDC_PROVIDERS || ''
+        if (!input) return [{ key: 'default', label: 'Continue with Liminal', idpHint: undefined }]
+        return input.split('##').map(e => e.trim()).filter(Boolean).map(entry => {
+          const [rawKey, rawLabel] = entry.split('=').map(p => p?.trim())
+          if (!rawKey) return null
+          return { key: rawKey, label: rawLabel || rawKey.replace(/_/g, ' '), idpHint: rawKey === 'default' ? undefined : rawKey }
+        }).filter((p): p is AuthProvider => Boolean(p))
+      })(),
     })
   }
   return _configPromise
