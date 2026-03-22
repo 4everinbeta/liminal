@@ -18,6 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 4: Gamification** - Streaks, progress tracking, and momentum
 - [ ] **Phase 5: Forgiveness** - Working memory support and interruption recovery
 - [x] **Phase 6: AI Prioritization** - Intelligent "do this now" suggestions (completed 2026-03-21)
+- [ ] **Phase 7: Make iPhone compatible app version** - Capacitor iOS shell, mobile UI, offline sync
 
 ## Phase Details
 
@@ -130,10 +131,32 @@ Plans:
 - [x] 06-01-PLAN.md — Refactor AISuggestion component to inline card with tests (TDD: tests + component refactor)
 - [x] 06-02-PLAN.md — Wire inline AI suggestion into dashboard and verify (page.tsx wiring + human verification)
 
+### Phase 7: Make iPhone compatible app version
+**Goal:** Wrap the existing Next.js web app in a Capacitor iOS shell with mobile-optimized bottom tab navigation, offline mutation queue, and swipe gesture task interactions, delivering a TestFlight-ready iPhone build with full ADHD feature parity
+**Requirements**: D-01, D-02, D-03, D-04, D-05, D-06, D-07, D-08, D-09, D-10, D-11, D-12
+**Depends on:** Phase 6
+**Success Criteria** (what must be TRUE):
+  1. Static export build succeeds with output: 'export'
+  2. Capacitor iOS project is scaffolded and configured
+  3. Bottom tab bar replaces top navigation on mobile (Today, Board, Plus capture, More)
+  4. Offline mutations queue to IndexedDB and replay on reconnect
+  5. Amber offline banner shows/hides based on connectivity
+  6. Task cards support swipe left to complete, swipe right to edit
+  7. Safe area insets prevent content clipping on notched iPhones
+  8. All prior ADHD features work at full parity on mobile
+**Plans:** 5 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Build infrastructure (static export, /api/config fix, Capacitor scaffold, package installs)
+- [ ] 07-02-PLAN.md — Offline mutation queue (Dexie.js schema, store isOnline, api.ts wrapping, network hook, OfflineBanner)
+- [ ] 07-03-PLAN.md — Mobile navigation shell (BottomTabBar, safe area CSS, layout restructure, hide sidebar/FAB on mobile)
+- [ ] 07-04-PLAN.md — Swipe gesture task cards (SwipeableTaskCard, haptics, dashboard/board wiring)
+- [ ] 07-05-PLAN.md — Final verification and human checkpoint (test suite, build, mobile UI review)
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -143,3 +166,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 4. Gamification | 3/3 | Complete | 2026-02-19 |
 | 5. Forgiveness | 1/2 | In Progress|  |
 | 6. AI Prioritization | 2/2 | Complete   | 2026-03-21 |
+| 7. iPhone App | 0/5 | Planned | |
