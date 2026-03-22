@@ -1,0 +1,24 @@
+{
+  "name": "agent-aba6bd18",
+  "version": "1.0.0",
+  "description": "Designed for neurodiverse minds. Principles: - **Reduce Cognitive Load:** Minimalism first. - **Immediate Feedback:** Visual cues for progress. - **Forgiving Workflow:** Easy capture, flexible scheduling.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@capacitor/cli": "^8.2.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.2.0",
+    "@capacitor/ios": "^8.2.0"
+  }
+}

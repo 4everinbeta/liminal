@@ -40,6 +40,9 @@ AGENTS.md
 CLAUDE.md
 GEMINI.md
 
+# iOS Xcode project (regenerated with `npx cap add ios`)
+ios/
+
 # User Suggested Exclusions
 node_modules/
 dist/
