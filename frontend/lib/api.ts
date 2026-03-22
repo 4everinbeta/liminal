@@ -1,8 +1,17 @@
 /**
  * API client for Liminal backend
  */
+import { enqueueOfflineMutation, type QueuedMutation } from '@/lib/offlineQueue'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+// Fallback: use navigator.onLine if no checker has been registered yet
+let getIsOnline = () => typeof navigator !== 'undefined' ? navigator.onLine : true
+
+// Export a setter so the store can register itself (called once from MobileProviders in plan 07-03)
+export function registerOnlineChecker(fn: () => boolean) {
+  getIsOnline = fn
+}
 console.log('API_BASE_URL:', API_BASE_URL);
 
 const authRequired = (() => {
@@ -156,6 +165,21 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
  * Tasks
  */
 export async function createTask(data: TaskCreate): Promise<Task> {
+  if (!getIsOnline()) {
+    await enqueueOfflineMutation({ type: 'createTask', payload: data as unknown as Record<string, unknown> })
+    // Return optimistic task with temp id
+    return {
+      id: `temp-${Date.now()}`,
+      title: data.title,
+      status: data.status || 'todo',
+      priority: data.priority || 'medium',
+      value_score: data.value_score || 50,
+      order: 0,
+      user_id: 'offline',
+      created_at: new Date().toISOString(),
+      ...data,
+    } as Task
+  }
   return request<Task>(`${API_BASE_URL}/tasks`, {
     method: 'POST',
     body: JSON.stringify(data),
@@ -167,6 +191,10 @@ export async function getTasks(): Promise<Task[]> {
 }
 
 export async function updateTask(taskId: string, data: Partial<Task>): Promise<Task> {
+  if (!getIsOnline()) {
+    await enqueueOfflineMutation({ type: 'updateTask', taskId, payload: data as unknown as Record<string, unknown> })
+    return { id: taskId, ...data } as Task
+  }
   return request<Task>(`${API_BASE_URL}/tasks/${taskId}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
@@ -174,9 +202,37 @@ export async function updateTask(taskId: string, data: Partial<Task>): Promise<T
 }
 
 export async function deleteTask(taskId: string): Promise<void> {
+  if (!getIsOnline()) {
+    await enqueueOfflineMutation({ type: 'deleteTask', taskId, payload: {} })
+    return
+  }
   return request<void>(`${API_BASE_URL}/tasks/${taskId}`, {
     method: 'DELETE',
   });
+}
+
+export async function replayMutation(mutation: QueuedMutation): Promise<void> {
+  const payload = mutation.payload
+  switch (mutation.type) {
+    case 'createTask':
+      await request<Task>(`${API_BASE_URL}/tasks`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      })
+      break
+    case 'updateTask':
+    case 'completeTask':
+      await request<Task>(`${API_BASE_URL}/tasks/${mutation.taskId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      })
+      break
+    case 'deleteTask':
+      await request<void>(`${API_BASE_URL}/tasks/${mutation.taskId}`, {
+        method: 'DELETE',
+      })
+      break
+  }
 }
 
 export async function getDeletedTasks(): Promise<Task[]> {
