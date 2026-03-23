@@ -1,15 +1,50 @@
-/**
- * Hook to monitor network status using @capacitor/network.
- * Updates the Zustand store's isOnline state.
- *
- * NOTE: This is a stub — the full implementation is provided by plan 07-02.
- * This stub enables plan 07-03 (BottomTabBar/layout) to compile and run
- * while 07-02 executes in parallel.
- */
+'use client'
+
 import { useEffect } from 'react'
+import { useAppStore } from '@/lib/store'
+import { flushOfflineQueue } from '@/lib/offlineQueue'
 
 export function useNetworkStatus() {
+  const setIsOnline = useAppStore((s) => s.setIsOnline)
+
   useEffect(() => {
-    // Stub: real implementation wires @capacitor/network events to setIsOnline in store
-  }, [])
+    let cleanup: (() => void) | null = null
+
+    async function init() {
+      try {
+        // Dynamic import to avoid SSR issues — Capacitor plugins are browser-only
+        const { Network } = await import('@capacitor/network')
+
+        const status = await Network.getStatus()
+        setIsOnline(status.connected)
+
+        const handle = await Network.addListener('networkStatusChange', async (status) => {
+          setIsOnline(status.connected)
+
+          // Flush queue on reconnect
+          if (status.connected) {
+            const { replayMutation } = await import('@/lib/api')
+            await flushOfflineQueue(replayMutation)
+          }
+        })
+
+        cleanup = () => { handle.remove() }
+      } catch {
+        // Capacitor not available (running in regular browser) — fall back to browser events
+        const handleOnline = () => setIsOnline(true)
+        const handleOffline = () => setIsOnline(false)
+        window.addEventListener('online', handleOnline)
+        window.addEventListener('offline', handleOffline)
+        setIsOnline(navigator.onLine)
+
+        cleanup = () => {
+          window.removeEventListener('online', handleOnline)
+          window.removeEventListener('offline', handleOffline)
+        }
+      }
+    }
+
+    init()
+    return () => { cleanup?.() }
+  }, [setIsOnline])
 }

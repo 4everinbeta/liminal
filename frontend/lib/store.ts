@@ -72,7 +72,7 @@ interface AppState {
   lastUpdate: number
   triggerUpdate: () => void
 
-  // Network Status (wired by useNetworkStatus hook via plan 07-02)
+  // Network status (offline queue)
   isOnline: boolean
   setIsOnline: (online: boolean) => void
 }
@@ -149,7 +149,7 @@ export const useAppStore = create<AppState>()(
       triggerUpdate: () => set({ lastUpdate: Date.now() }),
 
       isOnline: true,
-      setIsOnline: (online) => set({ isOnline: online }),
+      setIsOnline: (online: boolean) => set({ isOnline: online }),
     }),
     {
       name: 'liminal-app',
