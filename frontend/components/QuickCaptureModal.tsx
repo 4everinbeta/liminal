@@ -116,7 +116,7 @@ export function QuickCaptureModal({ isOpen, onClose, onTaskCreated }: QuickCaptu
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     placeholder="What needs to be done?"
-                    className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                     autoComplete="off"
                   />
 
