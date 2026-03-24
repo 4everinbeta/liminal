@@ -144,12 +144,12 @@ Plans:
   6. Task cards support swipe left to complete, swipe right to edit
   7. Safe area insets prevent content clipping on notched iPhones
   8. All prior ADHD features work at full parity on mobile
-**Plans:** 5 plans
+**Plans:** 3/5 plans executed
 
 Plans:
-- [ ] 07-01-PLAN.md — Build infrastructure (static export, /api/config fix, Capacitor scaffold, package installs)
-- [ ] 07-02-PLAN.md — Offline mutation queue (Dexie.js schema, store isOnline, api.ts wrapping, network hook, OfflineBanner)
-- [ ] 07-03-PLAN.md — Mobile navigation shell (BottomTabBar, safe area CSS, layout restructure, hide sidebar/FAB on mobile)
+- [x] 07-01-PLAN.md — Build infrastructure (static export, /api/config fix, Capacitor scaffold, package installs)
+- [x] 07-02-PLAN.md — Offline mutation queue (Dexie.js schema, store isOnline, api.ts wrapping, network hook, OfflineBanner)
+- [x] 07-03-PLAN.md — Mobile navigation shell (BottomTabBar, safe area CSS, layout restructure, hide sidebar/FAB on mobile)
 - [ ] 07-04-PLAN.md — Swipe gesture task cards (SwipeableTaskCard, haptics, dashboard/board wiring)
 - [ ] 07-05-PLAN.md — Final verification and human checkpoint (test suite, build, mobile UI review)
 
@@ -166,4 +166,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 4. Gamification | 3/3 | Complete | 2026-02-19 |
 | 5. Forgiveness | 1/2 | In Progress|  |
 | 6. AI Prioritization | 2/2 | Complete   | 2026-03-21 |
-| 7. iPhone App | 0/5 | Planned | |
+| 7. iPhone App | 3/5 | In Progress|  |

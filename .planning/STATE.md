@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-stopped_at: Completed 06-02-PLAN.md — Phase 06 ai-prioritization complete
-last_updated: "2026-03-21T19:04:19.262Z"
+status: Ready to execute
+stopped_at: Completed 07-04-PLAN.md — SwipeableTaskCard swipe gestures wired into dashboard and board
+last_updated: "2026-03-24T01:19:20.633Z"
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 6
-  total_plans: 17
-  completed_plans: 17
+  total_plans: 22
+  completed_plans: 20
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-01-31)
 
 **Core value:** ADHD brains respond to NOW/NOT NOW, not IMPORTANT/NOT IMPORTANT
-**Current focus:** Phase 06 — ai-prioritization
+**Current focus:** Phase 07 — make-iphone-compatible-app-version
 
 ## Current Position
 
-Phase: 06 (ai-prioritization) — EXECUTING
-Plan: 2 of 2
+Phase: 07 (make-iphone-compatible-app-version) — EXECUTING
+Plan: 5 of 5
 
 ## Performance Metrics
 
@@ -52,6 +52,10 @@ Plan: 2 of 2
 | Phase 05 P01 | 4.5 | 2 tasks | 4 files |
 | Phase 06-ai-prioritization P01 | 102 | 2 tasks | 2 files |
 | Phase 06-ai-prioritization P02 | 5 | 2 tasks | 1 files |
+| Phase 07 P01 | 277 | 2 tasks | 7 files |
+| Phase 07 P02 | 4 | 3 tasks | 8 files |
+| Phase 07 P03 | 480 | 2 tasks | 11 files |
+| Phase 07 P04 | 20 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -123,6 +127,20 @@ Recent decisions affecting current work:
 - [Phase 06-ai-prioritization]: Find buttons by visible text (getByText) not role+name when aria-label overrides accessible name in RTL tests
 - [Phase 06-ai-prioritization]: Call handleSwitchToFocus after setAiSuggestion(null) for optimistic card clear before mode switch
 - [Phase 06-ai-prioritization]: isVisible guards on both aiSuggestion presence AND task found in tasks array to prevent blank-title card
+- [Phase 07]: webDir set to frontend/.next-clean because custom distDir overrides static export output path (not frontend/out)
+- [Phase 07]: Root-level package.json created with @capacitor/cli and typescript to support npx cap commands from repo root
+- [Phase 07]: Use fake-indexeddb for Dexie unit testing in Vitest/jsdom environment
+- [Phase 07]: registerOnlineChecker pattern avoids circular imports between api.ts and store.ts
+- [Phase 07]: Dynamic import for @capacitor/network inside useEffect avoids SSR errors during next build
+- [Phase 07]: Used LayoutGrid instead of Grid3X3 — Grid3X3 unavailable in installed lucide-react version
+- [Phase 07]: Used metadata.viewport string instead of separate Viewport export — Next.js 13.4.12 does not export Viewport type from next package
+- [Phase 07]: Created stubs for 07-02 dependencies (useNetworkStatus, OfflineBanner, isOnline, registerOnlineChecker) to enable parallel wave 2 execution
+- [Phase 07]: Mobile board swaps @hello-pangea/dnd for SwipeableTaskCard on <=768px — swipe-to-complete beats column reorder on phones
+- [Phase 07]: Dynamic import(@capacitor/haptics) avoids SSR errors in Next.js static export
+
+### Roadmap Evolution
+
+- Phase 7 added: Make iPhone compatible app version
 
 ### Pending Todos
 
@@ -134,8 +152,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T19:04:19.259Z
-Stopped at: Completed 06-02-PLAN.md — Phase 06 ai-prioritization complete
+Last session: 2026-03-24T01:19:20.630Z
+Stopped at: Completed 07-04-PLAN.md — SwipeableTaskCard swipe gestures wired into dashboard and board
 Resume file: None
 
 **Phase 1 Status:** ✅ Complete - Foundation established
