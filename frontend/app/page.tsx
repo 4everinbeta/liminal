@@ -18,6 +18,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { StatsBar } from '@/components/StatsBar'
 import { EodSummaryToast, useEodSummaryScheduler } from '@/components/EodSummaryToast'
 import { useGamificationStats } from '@/lib/hooks/useGamificationStats'
+import { SwipeableTaskCard } from '@/components/SwipeableTaskCard'
 
 // Extracted component so hooks (useUrgencyColor) can be called per-task row
 function PlanningTaskRow({
@@ -670,26 +671,31 @@ export default function Home() {
             ) : (
               <ul className="space-y-3">
                 {activeTasks.map((task) => (
-                  <PlanningTaskRow
+                  <SwipeableTaskCard
                     key={task.id}
-                    task={task}
-                    isActive={task.id === activeTaskId}
-                    isWhereYouLeftOff={
-                      task.id === previouslyActiveTaskId &&
-                      task.id !== activeTaskId &&
-                      task.status !== 'done'
-                    }
-                    isInterrupted={task.id === interruptedTaskId}
-                    onResumeFromInterrupt={() => {
-                      setActiveTaskId(task.id)
-                      setInterruptedTaskId(null)
-                    }}
-                    onTaskClick={() => handleTaskClick(task.id)}
-                    onDelete={() => handleDeleteTask(task.id)}
                     onComplete={() => handleCompleteTask(task.id)}
                     onEdit={() => setEditingTask(task)}
-                    onPause={() => handlePauseTask(task.id)}
-                  />
+                  >
+                    <PlanningTaskRow
+                      task={task}
+                      isActive={task.id === activeTaskId}
+                      isWhereYouLeftOff={
+                        task.id === previouslyActiveTaskId &&
+                        task.id !== activeTaskId &&
+                        task.status !== 'done'
+                      }
+                      isInterrupted={task.id === interruptedTaskId}
+                      onResumeFromInterrupt={() => {
+                        setActiveTaskId(task.id)
+                        setInterruptedTaskId(null)
+                      }}
+                      onTaskClick={() => handleTaskClick(task.id)}
+                      onDelete={() => handleDeleteTask(task.id)}
+                      onComplete={() => handleCompleteTask(task.id)}
+                      onEdit={() => setEditingTask(task)}
+                      onPause={() => handlePauseTask(task.id)}
+                    />
+                  </SwipeableTaskCard>
                 ))}
               </ul>
             )}

@@ -363,22 +363,6 @@ export async function getChatHistory(sessionId: string): Promise<ChatMessage[]> 
   return request<ChatMessage[]>(`${API_BASE_URL}/llm/history/${sessionId}`);
 }
 
-/**
- * Register a checker function that returns whether the app is online.
- * Used by MobileProviders to wire Capacitor network state into API layer.
- *
- * NOTE: Stub — full implementation provided by plan 07-02.
- */
-let _onlineChecker: (() => boolean) | null = null
-
-export function registerOnlineChecker(checker: () => boolean): void {
-  _onlineChecker = checker
-}
-
-export function isAppOnline(): boolean {
-  return _onlineChecker ? _onlineChecker() : true
-}
-
 export async function clearChatHistory(sessionId: string): Promise<void> {
   return request<void>(`${API_BASE_URL}/llm/history/${sessionId}`, {
     method: 'DELETE',

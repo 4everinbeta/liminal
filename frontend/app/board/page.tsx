@@ -6,6 +6,7 @@ import { Plus, MoreHorizontal, AlertTriangle, ArrowRight, ArrowLeft, Trash2, Cir
 import { getTasks, getThemes, updateTask, deleteTask, createTheme, updateTheme, deleteTheme, Task, Theme } from '@/lib/api'
 import TaskActionMenu from '@/components/TaskActionMenu'
 import EditTaskModal from '@/components/EditTaskModal'
+import { SwipeableTaskCard } from '@/components/SwipeableTaskCard'
 import { useAppStore } from '@/lib/store'
 import { triggerTaskComplete } from '@/lib/confetti'
 
@@ -16,6 +17,15 @@ export default function BoardPage() {
   const [enabled, setEnabled] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showCompleted, setShowCompleted] = useState(false)
+  // On mobile viewports, disable DnD column dragging and use SwipeableTaskCard for touch interaction (D-12)
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    setIsMobile(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
   
   // Validation Modal State
   const [editingTask, setEditingTask] = useState<Task | null>(null)
@@ -261,14 +271,15 @@ export default function BoardPage() {
                                     className={`flex-1 bg-gray-50/50 rounded-xl p-3 transition-colors ${snapshot.isDraggingOver ? 'bg-blue-50' : ''}`}
                                 >
                                     {tasks.filter(t => t.status === 'backlog').map((task, index) => (
-                                        <TaskItem 
-                                            key={task.id} 
-                                            task={task} 
-                                            index={index} 
-                                            handleComplete={handleComplete} 
-                                            handleDelete={handleDelete} 
-                                            setEditingTask={setEditingTask} 
+                                        <TaskItem
+                                            key={task.id}
+                                            task={task}
+                                            index={index}
+                                            handleComplete={handleComplete}
+                                            handleDelete={handleDelete}
+                                            setEditingTask={setEditingTask}
                                             isBacklog={true}
+                                            isMobile={isMobile}
                                         />
                                     ))}
                                     {provided.placeholder}
@@ -340,13 +351,14 @@ export default function BoardPage() {
                                                     .filter(t => t.theme_id === theme.id && t.status !== 'backlog')
                                                     .filter(t => showCompleted || t.status !== 'done')
                                                     .map((task, index) => (
-                                                        <TaskItem 
-                                                            key={task.id} 
-                                                            task={task} 
-                                                            index={index} 
-                                                            handleComplete={handleComplete} 
-                                                            handleDelete={handleDelete} 
-                                                            setEditingTask={setEditingTask} 
+                                                        <TaskItem
+                                                            key={task.id}
+                                                            task={task}
+                                                            index={index}
+                                                            handleComplete={handleComplete}
+                                                            handleDelete={handleDelete}
+                                                            setEditingTask={setEditingTask}
+                                                            isMobile={isMobile}
                                                         />
                                                     ))}
                                                 {provided.placeholder}
@@ -403,8 +415,72 @@ export default function BoardPage() {
   )
 }
 
-function TaskItem({ task, index, handleComplete, handleDelete, setEditingTask, isBacklog = false }: any) {
+function TaskItem({ task, index, handleComplete, handleDelete, setEditingTask, isBacklog = false, isMobile = false }: any) {
     const isIncomplete = task.status !== 'done' && (!task.value_score || !(task.effort_score ?? task.estimated_duration))
+
+    const cardContent = (
+        <div
+            onClick={() => !isMobile && setEditingTask(task)}
+            className={`mb-3 bg-white p-4 rounded-lg border shadow-sm hover:shadow-md hover:border-primary transition-all group cursor-pointer flex gap-3 items-start ${
+                task.status === 'done' ? 'opacity-60 bg-gray-50' :
+                isIncomplete && !isBacklog ? 'border-orange-200' : 'border-gray-200'
+            }`}
+        >
+            <button
+                onClick={(e) => handleComplete(e, task)}
+                className="mt-1 text-gray-300 hover:text-secondary transition-colors shrink-0"
+            >
+                {task.status === 'done' ? <CheckCircle2 size={20} className="text-green-500" /> : <Circle size={20} />}
+            </button>
+
+            <div className="flex-1 min-w-0">
+                <h4 className={`font-medium mb-2 ${task.status === 'done' ? 'line-through text-muted' : ''}`}>{task.title}</h4>
+                <div className="flex justify-between items-center text-xs text-muted">
+                    <div className="flex gap-2">
+                        {task.value_score > 0 && <span className="text-green-600 font-mono">v:{task.value_score}</span>}
+                        {(task.effort_score || task.estimated_duration) && (
+                        <span className="text-blue-600 font-mono">e:{task.effort_score ?? task.estimated_duration}</span>
+                        )}
+                    </div>
+                     <span className={`w-2 h-2 rounded-full ${
+                        task.priority_score >= 90 ? 'bg-red-400' :
+                        task.priority_score >= 60 ? 'bg-yellow-400' : 'bg-blue-400'
+                     }`} />
+                </div>
+
+                {/* Missing Data Indicator - always visible, non-blocking */}
+                {task.status !== 'done' && (!task.value_score || !(task.effort_score ?? task.estimated_duration)) && (
+                    <div className="mt-2 text-[10px] text-orange-500 flex items-center gap-1">
+                        <AlertTriangle size={10} />
+                        <span>Missing details</span>
+                    </div>
+                )}
+            </div>
+
+            <div onClick={e => e.stopPropagation()}>
+                <TaskActionMenu
+                    onDelete={() => handleDelete({ stopPropagation: () => {} }, task.id)}
+                    onEdit={() => setEditingTask(task)}
+                    isCompleted={task.status === 'done'}
+                />
+            </div>
+        </div>
+    )
+
+    // On mobile: wrap with SwipeableTaskCard for touch gestures (swipe left = complete, swipe right = edit)
+    // This trades column DnD reorder for the higher-value swipe interactions on phone-sized screens (D-12)
+    if (isMobile) {
+        return (
+            <div key={task.id} className="mb-3">
+                <SwipeableTaskCard
+                    onComplete={() => handleComplete({ stopPropagation: () => {} } as React.MouseEvent, task)}
+                    onEdit={() => setEditingTask(task)}
+                >
+                    {cardContent}
+                </SwipeableTaskCard>
+            </div>
+        )
+    }
 
     return (
         <Draggable draggableId={task.id} index={index}>
@@ -413,51 +489,9 @@ function TaskItem({ task, index, handleComplete, handleDelete, setEditingTask, i
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    onClick={() => setEditingTask(task)}
-                    className={`mb-3 bg-white p-4 rounded-lg border shadow-sm hover:shadow-md hover:border-primary transition-all group cursor-pointer flex gap-3 items-start ${
-                        task.status === 'done' ? 'opacity-60 bg-gray-50' :
-                        isIncomplete && !isBacklog ? 'border-orange-200' : 'border-gray-200'
-                    }`}
                     style={provided.draggableProps.style}
                 >
-                    <button 
-                        onClick={(e) => handleComplete(e, task)}
-                        className="mt-1 text-gray-300 hover:text-secondary transition-colors shrink-0"
-                    >
-                        {task.status === 'done' ? <CheckCircle2 size={20} className="text-green-500" /> : <Circle size={20} />}
-                    </button>
-
-                    <div className="flex-1 min-w-0">
-                        <h4 className={`font-medium mb-2 ${task.status === 'done' ? 'line-through text-muted' : ''}`}>{task.title}</h4>
-                        <div className="flex justify-between items-center text-xs text-muted">
-                            <div className="flex gap-2">
-                                {task.value_score > 0 && <span className="text-green-600 font-mono">v:{task.value_score}</span>}
-                                {(task.effort_score || task.estimated_duration) && (
-                                <span className="text-blue-600 font-mono">e:{task.effort_score ?? task.estimated_duration}</span>
-                                )}
-                            </div>
-                             <span className={`w-2 h-2 rounded-full ${
-                                task.priority_score >= 90 ? 'bg-red-400' :
-                                task.priority_score >= 60 ? 'bg-yellow-400' : 'bg-blue-400'
-                             }`} />
-                        </div>
-
-                        {/* Missing Data Indicator - always visible, non-blocking */}
-                        {task.status !== 'done' && (!task.value_score || !(task.effort_score ?? task.estimated_duration)) && (
-                            <div className="mt-2 text-[10px] text-orange-500 flex items-center gap-1">
-                                <AlertTriangle size={10} />
-                                <span>Missing details</span>
-                            </div>
-                        )}
-                    </div>
-
-                    <div onClick={e => e.stopPropagation()}>
-                        <TaskActionMenu 
-                            onDelete={() => handleDelete({ stopPropagation: () => {} }, task.id)}
-                            onEdit={() => setEditingTask(task)}
-                            isCompleted={task.status === 'done'}
-                        />
-                    </div>
+                    {cardContent}
                 </div>
             )}
         </Draggable>
