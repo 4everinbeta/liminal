@@ -72,7 +72,7 @@ const TaskCard = memo(forwardRef<HTMLDivElement, TaskProps>(({ task, onComplete,
       }}
       transition={{ duration: 0.5 }}
       whileHover={{ scale: 1.01 }}
-      className={`relative group bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex items-center gap-3 ${
+      className={`relative group bg-white p-4 rounded-xl shadow-sm border border-gray-100 md:hover:shadow-md transition-shadow flex items-center gap-3 ${
         task.themeColor || task.due_date ? '' : priorityColorClass
       } ${isWhereYouLeftOff ? 'ring-2 ring-primary/30 ring-offset-2' : ''}`}
       style={cardBorderStyle}
@@ -80,7 +80,7 @@ const TaskCard = memo(forwardRef<HTMLDivElement, TaskProps>(({ task, onComplete,
       <motion.button
         onClick={handleComplete}
         whileTap={{ scale: 0.9 }}
-        className="text-gray-300 hover:text-secondary transition-colors relative"
+        className="text-gray-300 md:hover:text-secondary transition-colors relative"
         disabled={isCompleting}
       >
         {isCompleting ? (

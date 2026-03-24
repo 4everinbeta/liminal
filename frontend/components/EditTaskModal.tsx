@@ -84,7 +84,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                         <label className="block text-xs font-bold uppercase text-muted mb-1">Start Date</label>
                         <input
                             type="date"
-                            className="w-full p-2 border rounded-lg text-sm"
+                            className="w-full p-2 border rounded-lg text-base"
                             value={toDateInputValue(editedTask.start_date)}
                             onChange={handleStartDateChange}
                         />
@@ -93,7 +93,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                         <label className="block text-xs font-bold uppercase text-muted mb-1">Due Date</label>
                         <input
                             type="date"
-                            className="w-full p-2 border rounded-lg text-sm"
+                            className="w-full p-2 border rounded-lg text-base"
                             value={toDateInputValue(editedTask.due_date)}
                             onChange={handleDueDateChange}
                         />
@@ -148,7 +148,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                     <div>
                         <label className="block text-xs font-bold uppercase text-muted mb-1">Theme</label>
                         <select
-                            className="w-full p-2 border rounded-lg text-sm"
+                            className="w-full p-2 border rounded-lg text-base"
                             value={editedTask.theme_id || ''}
                             onChange={e => setEditedTask({...editedTask, theme_id: e.target.value || undefined})}
                         >
@@ -161,7 +161,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                     <div>
                         <label className="block text-xs font-bold uppercase text-muted mb-1">Initiative</label>
                         <select
-                            className="w-full p-2 border rounded-lg text-sm"
+                            className="w-full p-2 border rounded-lg text-base"
                             value={editedTask.initiative_id || ''}
                             onChange={e => setEditedTask({...editedTask, initiative_id: e.target.value || undefined})}
                         >

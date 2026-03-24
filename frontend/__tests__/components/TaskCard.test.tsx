@@ -56,8 +56,8 @@ describe('TaskCard Component', () => {
 
   it('should have hover effects on card', () => {
     const { container } = render(<TaskCard task={mockTask} />);
-    // Check that the card has hover:shadow-md class
-    const card = container.querySelector('.hover\\:shadow-md');
+    // Check that the card has md:hover:shadow-md class (mobile-safe hover guard)
+    const card = container.querySelector('.md\\:hover\\:shadow-md');
     expect(card).toBeInTheDocument();
   });
 

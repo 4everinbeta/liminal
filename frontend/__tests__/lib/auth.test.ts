@@ -24,33 +24,6 @@ vi.mock('oidc-client-ts', () => {
   };
 });
 
-type AuthConfig = {
-  oidcAuthority: string;
-  oidcClientId: string;
-  oidcRedirectUri: string;
-  oidcPostLogoutRedirectUri: string;
-  oidcScope: string;
-  authRequired: boolean;
-  authProviders: { key: string; label: string; idpHint?: string }[];
-};
-
-const baseConfig: AuthConfig = {
-  oidcAuthority: 'https://auth.example.com',
-  oidcClientId: 'liminal-client',
-  oidcRedirectUri: 'http://localhost/auth/callback',
-  oidcPostLogoutRedirectUri: 'http://localhost/login',
-  oidcScope: 'openid profile email',
-  authRequired: true,
-  authProviders: [],
-};
-
-const mockConfigFetch = (config: AuthConfig) => {
-  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-    ok: true,
-    json: async () => config,
-  }));
-};
-
 describe('auth helpers', () => {
   beforeEach(() => {
     vi.resetModules();
@@ -60,14 +33,12 @@ describe('auth helpers', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
   it('throws when login is attempted without OIDC config', async () => {
-    mockConfigFetch({
-      ...baseConfig,
-      oidcAuthority: '',
-      oidcClientId: '',
-    });
+    vi.stubEnv('NEXT_PUBLIC_OIDC_AUTHORITY', '');
+    vi.stubEnv('NEXT_PUBLIC_OIDC_CLIENT_ID', '');
 
     const { login } = await import('@/lib/auth');
 
@@ -75,7 +46,8 @@ describe('auth helpers', () => {
   });
 
   it('passes idp hint into signinRedirect', async () => {
-    mockConfigFetch(baseConfig);
+    vi.stubEnv('NEXT_PUBLIC_OIDC_AUTHORITY', 'https://auth.example.com');
+    vi.stubEnv('NEXT_PUBLIC_OIDC_CLIENT_ID', 'liminal-client');
 
     const { login } = await import('@/lib/auth');
     const { __mock } = await import('oidc-client-ts');
@@ -89,7 +61,8 @@ describe('auth helpers', () => {
   });
 
   it('stores access token after login callback', async () => {
-    mockConfigFetch(baseConfig);
+    vi.stubEnv('NEXT_PUBLIC_OIDC_AUTHORITY', 'https://auth.example.com');
+    vi.stubEnv('NEXT_PUBLIC_OIDC_CLIENT_ID', 'liminal-client');
 
     const { handleLoginCallback } = await import('@/lib/auth');
     const { __mock } = await import('oidc-client-ts');
@@ -102,7 +75,8 @@ describe('auth helpers', () => {
   });
 
   it('clears the token and signs out when logging out', async () => {
-    mockConfigFetch(baseConfig);
+    vi.stubEnv('NEXT_PUBLIC_OIDC_AUTHORITY', 'https://auth.example.com');
+    vi.stubEnv('NEXT_PUBLIC_OIDC_CLIENT_ID', 'liminal-client');
 
     const { logout } = await import('@/lib/auth');
     const { __mock } = await import('oidc-client-ts');

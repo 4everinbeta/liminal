@@ -428,7 +428,7 @@ export default function QuickCapture({ onTaskCreated }: QuickCaptureProps) {
                 setPendingThemeName(e.target.value)
                 setNewThemeName(e.target.value)
               }}
-              className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+              className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-base"
               placeholder="Theme name"
             />
             <button
@@ -452,7 +452,7 @@ export default function QuickCapture({ onTaskCreated }: QuickCaptureProps) {
               value={updateTaskId}
               onChange={(e) => setUpdateTaskId(e.target.value)}
               placeholder="Task ID"
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-base"
             />
             {draft && <EditableFields draft={draft} setDraft={setDraft} />}
             <div className="flex gap-2">
@@ -605,7 +605,7 @@ export default function QuickCapture({ onTaskCreated }: QuickCaptureProps) {
                       value={newThemeName}
                       onChange={(e) => setNewThemeName(e.target.value)}
                       placeholder="New theme name"
-                      className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                      className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-base"
                     />
                     <button
                       type="button"
@@ -661,14 +661,14 @@ function EditableFields({ draft, setDraft }: { draft: TaskDraft; setDraft: (t: T
         <input
           value={draft.title || ''}
           onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-base"
           placeholder="Task title"
         />
         <label className="block text-xs font-semibold text-muted">Description</label>
         <textarea
           value={draft.description || ''}
           onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm min-h-[60px]"
+          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-base min-h-[60px]"
           placeholder="What is the task about?"
         />
       </div>
@@ -677,14 +677,14 @@ function EditableFields({ draft, setDraft }: { draft: TaskDraft; setDraft: (t: T
         <textarea
           value={draft.notes || ''}
           onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
-          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm min-h-[60px]"
+          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-base min-h-[60px]"
           placeholder="Context, blockers, acceptance criteria..."
         />
         <label className="block text-xs font-semibold text-muted">Status</label>
         <select
           value={draft.status}
           onChange={(e) => setDraft({ ...draft, status: e.target.value as TaskDraft['status'] })}
-          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-base"
         >
           <option value="backlog">Backlog</option>
           <option value="in_progress">Prioritized</option>

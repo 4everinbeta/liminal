@@ -282,7 +282,7 @@ export default function ChatInterface({ onTaskCreated }: ChatInterfaceProps) {
           }}
           placeholder="Type 'Add task buy milk'..."
           rows={1}
-          className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm resize-none overflow-y-auto"
+          className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-base resize-none overflow-y-auto"
           style={{ maxHeight: '120px' }}
         />
         <button
