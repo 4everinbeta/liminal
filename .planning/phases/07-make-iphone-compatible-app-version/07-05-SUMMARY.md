@@ -3,7 +3,7 @@ phase: 07-make-iphone-compatible-app-version
 plan: 05
 subsystem: frontend/mobile-qa
 tags: [testing, build, mobile, ios, capacitor]
-status: partial — awaiting human checkpoint (Task 2)
+status: complete
 
 dependency_graph:
   requires: [07-04]
@@ -34,7 +34,7 @@ decisions:
 metrics:
   duration_seconds: 736
   completed_date: "2026-03-24"
-  tasks_completed: 1
+  tasks_completed: 2
   tasks_total: 2
   files_modified: 6
 ---
