@@ -4,158 +4,160 @@
 
 Liminal is a productivity system specifically designed for ADHD and neurodiverse minds. Instead of traditional todo lists that rely on importance/priority (which ADHD brains struggle with), Liminal creates urgency and momentum through time pressure, visual cues, and AI-powered "do this now" suggestions. It replaces decision paralysis with frictionless capture and anxiety with satisfying progress.
 
+The v1.0 MVP shipped a complete ADHD-optimization layer over the existing task manager: progressive disclosure capture, voice input, urgency gradients, gamification streaks, AI suggestions, forgiveness mechanics, and a Capacitor iOS shell.
+
 ## Core Value
 
 **ADHD brains respond to NOW/NOT NOW, not IMPORTANT/NOT IMPORTANT.** Everything in Liminal must create urgency, reduce friction, or provide dopamine rewards. If a feature requires abstract planning, multi-step decisions, or sustained attention without payoff, it doesn't belong.
+
+## Current State
+
+**Version:** v1.0 (shipped 2026-03-28)
+**Stack:** Next.js 13 (static export), FastAPI, PostgreSQL, Capacitor iOS, Dexie.js offline queue
+**LOC:** ~9,600 TypeScript frontend | ~2,000 Python backend
+**Tests:** 89/89 passing (Vitest)
+**CI:** GitHub Actions (lint + build + test on push to main)
 
 ## Requirements
 
 ### Validated
 
-*Features already built and working in the existing codebase:*
+*Shipped and working in v1.0:*
 
-- ✓ **Task Management Foundation** — existing
+- ✓ **Task Management Foundation** — v1.0 existing
   - Create/read/update/delete tasks via REST API
-  - Multi-dimensional task scoring (priority, value, effort)
+  - Multi-dimensional task scoring (auto-calculated from urgency signals)
   - Task status workflow (backlog → in_progress → done)
   - PostgreSQL persistence with SQLModel ORM
 
-- ✓ **Strategic Organization** — existing
-  - Themes for grouping related work
+- ✓ **Strategic Organization** — v1.0 existing
+  - Themes for grouping related work (optional, not required)
   - Initiatives as sub-containers within themes
   - Board view with drag-drop between theme columns
 
-- ✓ **Authentication & Users** — existing
-  - JWT-based authentication
-  - Google OAuth support
-  - Demo user auto-authentication for development
-  - User-scoped data isolation
+- ✓ **Authentication & Users** — v1.0 existing
+  - JWT-based authentication, Google OAuth, demo user auto-auth
 
-- ✓ **LLM-Powered Chat Agent** — existing
-  - Intent classification (task management, Q&A, tracking)
-  - Natural language task creation via chat
-  - JSON command parsing from LLM responses
-  - Support for local (Ollama), Azure AI Foundry, and Groq providers
+- ✓ **Frictionless Capture** — v1.0
+  - Title-only task creation with progressive disclosure
+  - Auto-calculated priority/value/effort from due date + duration
+  - Global quick-capture FAB (bottom-right, z-50)
+  - Cmd/Ctrl+N keyboard shortcut from anywhere
+  - Voice input via Web Speech API with real-time transcription
+  - 2-second auto-save debounce, sessionStorage draft recovery
+  - Optimistic UI creation within 100ms
 
-- ✓ **Focus Mode UI** — existing
-  - Single-task focus view
-  - Pomodoro timer integration
-  - Task completion and pause controls
-  - Dashboard with task list and quick add form
+- ✓ **Immediate Feedback** — v1.0
+  - canvas-confetti celebration on task completion (dashboard + board)
+  - Framer Motion whileTap scale animation on task check-off
+  - All user actions respond within 200ms perceived lag
 
-- ✓ **Infrastructure** — existing
-  - Next.js 13 App Router frontend
-  - FastAPI async backend
-  - Docker Compose orchestration
-  - Ollama integration for local LLM
+- ✓ **Urgency System** — v1.0
+  - chroma-js HSL color gradient on task borders by deadline proximity
+  - Live countdown timers via requestAnimationFrame (no drift)
+  - Warm orange (#f97316) for overdue — avoids shame-inducing red
+  - Task aging after 3 days in backlog (visual fade/style change)
+  - CapacitySummary in Planning mode ("X hours left, Y tasks")
+  - Opt-in browser notifications 1 hour before deadline
+
+- ✓ **Gamification** — v1.0
+  - StatsBar: animated daily count, weekly streak, personal best, impact pill
+  - Flexible streak (no penalty for first-day gaps)
+  - End-of-day wins-only toast (opt-in, no incomplete-task focus)
+  - Framer Motion AnimatedCounter with spring animations
+
+- ✓ **Forgiveness & Recovery** — v1.0
+  - 30-second undo window on task completion
+  - Zustand persist middleware for session state across reloads
+  - sessionStorage draft recovery after browser crash
+  - 24-hour soft delete with restore
+  - "Where you left off" glowing ring on interrupted task
+  - Interrupted task badge with auto-clear on completion
+  - Paused task auto-resumes as active on next session load
+
+- ✓ **AI Prioritization** — v1.0
+  - Inline "Do This Now" card in Planning mode dashboard
+  - 15-minute refresh cycle with dismiss memory
+  - Accept switches to Focus mode on the suggested task
+  - Considers time of day, deadline proximity, estimated duration
+  - Adapts to user patterns (learns ignored vs accepted)
+  - Task list auto-sorts by urgency + AI score
+
+- ✓ **iOS Shell** — v1.0
+  - Capacitor iOS shell with static Next.js export
+  - Dexie.js offline mutation queue (createTask/updateTask/deleteTask)
+  - OfflineBanner with amber color and auto-hide on reconnect
+  - Bottom tab navigation (Today, Board, Capture, More)
+  - SwipeableTaskCard: swipe left to complete, right to edit
+  - Capacitor Haptics on swipe confirmation
+  - Safe area CSS (env(safe-area-inset-*)) for notched iPhones
 
 ### Active
 
-*ADHD-optimization improvements to build:*
+*For next milestone:*
 
-#### Frictionless Capture
-
-- [ ] **CAPTURE-01**: Global quick-add input (always visible, minimal fields)
-- [ ] **CAPTURE-02**: Voice/speech input for task creation
-- [ ] **CAPTURE-03**: Smart defaults for all optional fields
-- [ ] **CAPTURE-04**: "Dump now, refine later" workflow
-- [ ] **CAPTURE-05**: Form autosave to prevent data loss on distraction
-- [ ] **CAPTURE-06**: One-field capture - just title required, everything else inferred or asked later
-
-#### Urgency System
-
-- [ ] **URGENCY-01**: Time-based notifications as deadlines approach
-- [ ] **URGENCY-02**: Scarcity framing ("You have 2 hours left today")
-- [ ] **URGENCY-03**: Gamification streaks ("5 days in a row")
-- [ ] **URGENCY-04**: Visual time pressure (tasks age/fade/change color as they sit)
-- [ ] **URGENCY-05**: "Due soon" vs "due later" visual distinction
-- [ ] **URGENCY-06**: Daily capacity visualization ("You can fit 3 more tasks today")
-
-#### AI-Powered Prioritization
-
-- [ ] **AI-01**: LLM agent suggests "do this now" based on time/energy/context
-- [ ] **AI-02**: Easy manual override of AI suggestions
-- [ ] **AI-03**: Energy-level detection ("You have low energy - here are quick wins")
-- [ ] **AI-04**: Contextual recommendations (time of day, day of week patterns)
-- [ ] **AI-05**: Auto-sort tasks by deadline proximity and estimated duration
-- [ ] **AI-06**: Simplify scoring - replace abstract 1-100 values with natural language or auto-calculation
-
-#### Satisfying Completion
-
-- [ ] **REWARD-01**: Visual celebration on task completion (animations, confetti)
-- [ ] **REWARD-02**: Concrete impact feedback ("You freed up 2 hours today")
-- [ ] **REWARD-03**: Progress momentum tracking ("3 done today, 12 this week")
-- [ ] **REWARD-04**: Satisfying check-off animation
-- [ ] **REWARD-05**: End-of-day summary with wins highlighted
-
-#### Simplified Task Management
-
-- [ ] **SIMPLIFY-01**: Make Themes/Initiatives optional (not required upfront)
-- [ ] **SIMPLIFY-02**: Remove multi-step gating (drag-drop shouldn't block with modals)
-- [ ] **SIMPLIFY-03**: Single primary interface (reduce chat + form + board confusion)
-- [ ] **SIMPLIFY-04**: Progressive disclosure (show complexity only when needed)
-- [ ] **SIMPLIFY-05**: Remove or simplify value_score/effort_score abstract numeric fields
-
-#### Working Memory Support
-
-- [ ] **MEMORY-01**: Visual "where was I?" state indicators
-- [ ] **MEMORY-02**: Breadcrumbs and recovery from interruptions
-- [ ] **MEMORY-03**: Session persistence across page reloads
-- [ ] **MEMORY-04**: "Recently viewed" or "working on" task quick access
+- [ ] **SIMPLIFY-03 (partial)**: EditTaskModal still has 1-100 numeric inputs for value/effort — convert to presets
+- [ ] **SIMPLIFY-02 (partial)**: Natural language score tweaking — current shorthand-only (!high, 30m)
+- [ ] **URGENCY-04 (partial)**: CapacitySummary visible in Focus mode, not just Planning mode
+- [ ] **GAMIFY-03 (partial)**: Impact pill shows "0 hours" for tasks without estimated_duration — improve fallback
+- [ ] **EodSummaryToast discovery**: Default is opt-in false — users don't find it; consider auto-enable or onboarding hint
+- [ ] **Nyquist validation**: Phases 1–4 have no VALIDATION.md — retroactive compliance pass
 
 ### Out of Scope
 
-*Explicitly excluded to maintain focus:*
+*Explicitly excluded:*
 
-- **Complex strategic planning tools** — Themes/Initiatives will become optional, not core workflow. Liminal optimizes for execution, not planning.
-
-- **Abstract numeric scoring as primary interface** — No 1-100 sliders without context. If scores exist, they're auto-calculated or natural language.
-
-- **Multi-field forms as primary capture** — Forms create friction. Primary capture should be one field with smart defaults.
-
-- **Traditional importance-based prioritization** — "High/Medium/Low priority" doesn't work for ADHD. We use urgency instead.
-
-- **Perfectionism features** — No "perfect task descriptions" or extensive metadata requirements. Capture beats perfection.
-
-- **Desktop/mobile apps** — Web-first. Native apps deferred to future.
+| Feature | Reason |
+|---------|--------|
+| Complex strategic planning (Themes required upfront) | ADHD users need execution support, not planning. Themes optional only. |
+| Multi-step workflows with blocking modals | Breaks flow. All validation is non-blocking. |
+| Abstract numeric scoring (1-100 sliders) | Cognitively demanding. Replace with natural language or auto-calc. |
+| Traditional priority (high/medium/low) as primary sort | Doesn't work for ADHD. Use urgency (NOW/NOT NOW) instead. |
+| Perfectionism features (task templates, detailed planning) | Planning becomes procrastination. Capture beats perfection. |
+| Mandatory fields beyond title | Creates capture failure when thought is fleeting. |
+| Shame-inducing failure states (broken streaks) | Emotional dysregulation trigger. Focus on wins, not failures. |
+| Video chat | Use external tools. |
+| Offline mode for AI suggestions | AI requires connectivity; offline queue covers task CRUD only. |
 
 ## Context
 
-**Existing Codebase**: Liminal already has a functional task management system with LLM chat integration. The current design follows traditional productivity patterns (importance-based priority, multi-field forms, strategic planning upfront). This project refactors the UX to optimize for ADHD/neurodivergent users based on the principle that these brains respond to urgency/novelty/momentum rather than abstract importance.
+**Shipped v1.0** with 9,600 LOC TypeScript, 280 commits, 7 phases, 22 plans over ~3.5 months.
 
-**Known Pain Points** (from codebase review):
-- TaskForm requires 4 decisions (title, duration, value score, priority) - causes capture failure
-- Board drag-drop blocks mid-action with validation modals - breaks flow
-- LLM chat capabilities are hidden - users don't know what to ask
-- Multiple competing interfaces (task list, chat, quick add) create choice paralysis
-- Pause button is non-functional
-- No autosave on forms
-- Weak completion feedback
+**Tech stack:** Next.js 13 (static export), React 18, TypeScript, Tailwind CSS, Zustand, Framer Motion, Capacitor, Dexie.js, FastAPI, SQLModel, PostgreSQL 15, Ollama/Azure AI/Groq.
 
-**Technical Environment**:
-- Frontend: Next.js 13 (App Router), React 18, TypeScript, Tailwind CSS, Zustand
-- Backend: FastAPI, SQLModel, PostgreSQL 15
-- LLM: Ollama (local), Azure AI Foundry, Groq (configurable)
-- Infrastructure: Docker Compose for local dev
-
-## Constraints
-
-- **Tech Stack**: Must work within existing Next.js/FastAPI architecture - no framework rewrites
-- **LLM Integration**: Should leverage existing AgentService and LLM providers, not add new dependencies
-- **Data Migration**: Changes to task model (removing/simplifying scores) must migrate existing data
-- **Demo Mode**: Must maintain demo user auto-auth for development/testing
-- **Performance**: Notifications and visual updates must not degrade UI responsiveness
-- **Accessibility**: Voice input and visual urgency cues must have accessible alternatives
+**Known pain points to address in v1.1:**
+- EditTaskModal numeric inputs (SIMPLIFY-03 gap)
+- EodSummaryToast discoverability
+- CapacitySummary only in Planning mode
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Urgency over importance | ADHD brains respond to NOW/NOT NOW, not priority rankings | — Pending |
-| AI suggests, user overrides | Leverage LLM for smart defaults while preserving user agency | — Pending |
-| Capture-first, refine-later | Reduce friction at moment of thought capture | — Pending |
-| Gamification for momentum | Streaks and visual progress create sustained engagement | — Pending |
-| Simplify scoring system | Replace abstract 1-100 scores with natural language or auto-calc | — Pending |
+| Urgency over importance | ADHD brains respond to NOW/NOT NOW, not priority rankings | ✓ Core UX principle — every phase references it |
+| AI suggests, user overrides | Leverage LLM for smart defaults while preserving user agency | ✓ One-click dismiss/accept inline card |
+| Capture-first, refine-later | Reduce friction at moment of thought capture | ✓ Title-only + progressive disclosure shipped |
+| Gamification for momentum | Streaks and visual progress create sustained engagement | ✓ StatsBar + EoD toast |
+| Simplify scoring system | Replace abstract 1-100 scores with natural language or auto-calc | ✓ TaskForm done; EditTaskModal partial |
+| Warm orange for overdue (not red) | Red triggers RSD (rejection sensitive dysphoria) in ADHD users | ✓ Applied throughout urgency system |
+| rAF for countdown timers | requestAnimationFrame suspends cleanly; setInterval drifts in bg tabs | ✓ useCountdown hook |
+| canvas-confetti | GPU-accelerated, zero custom CSS needed | ✓ Used in all completion paths |
+| sessionStorage for drafts | Automatic cleanup on session end vs localStorage persistence | ✓ useDraftPreservation |
+| output: 'export' (static) | Required for Capacitor iOS — no SSR possible in shell | ✓ Build passes, 89 tests green |
+| Dexie.js for offline queue | TypeScript-native IndexedDB, fake-indexeddb for Vitest | ✓ Offline mutations queue and replay |
+| Dynamic import(@capacitor/*) | Avoids SSR errors during next build static export | ✓ Pattern used for all Capacitor imports |
+| webDir: frontend/.next-clean | Custom distDir overrides default output path | ✓ Capacitor sync works |
+| SwipeableTaskCard on mobile | @hello-pangea/dnd replaced on ≤768px — swipe beats column drag on phones | ✓ Haptics + gesture confirm |
+
+## Constraints
+
+- **Tech Stack**: Must work within existing Next.js/FastAPI architecture — no framework rewrites
+- **LLM Integration**: Leverage existing AgentService and LLM providers, don't add new dependencies
+- **Data Migration**: Changes to task model must migrate existing data
+- **Demo Mode**: Must maintain demo user auto-auth for development/testing
+- **Performance**: Notifications and visual updates must not degrade UI responsiveness
+- **Accessibility**: Voice input and visual urgency cues must have accessible alternatives
+- **Static Export**: `output: 'export'` required for Capacitor — no `getServerSideProps`, no Next.js API routes
 
 ---
-*Last updated: 2026-03-21 — Phase 5 complete (forgiveness: interruption tracking, recovery ring, pause badge)*
+*Last updated: 2026-03-28 after v1.0 milestone — ADHD Optimization MVP shipped*
