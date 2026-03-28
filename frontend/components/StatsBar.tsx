@@ -70,7 +70,7 @@ export function StatsBar({ stats }: { stats: GamificationStats }) {
         onClick={() => setExpanded(v => !v)}
         aria-expanded={expanded}
       >
-        Today's progress {expanded ? '▲' : '▼'}
+        Today&apos;s progress {expanded ? '▲' : '▼'}
       </button>
 
       {/* Desktop: always visible */}

@@ -562,7 +562,7 @@ export default function Home() {
                       className="text-sm font-medium text-gray-900 hover:text-primary transition-colors text-left flex items-center gap-2"
                     >
                       <RotateCcw size={14} />
-                      Resume "{previousTask.title}"
+                      Resume &ldquo;{previousTask.title}&rdquo;
                     </button>
                   </div>
                 )}
