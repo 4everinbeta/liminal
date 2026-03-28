@@ -19,6 +19,7 @@ import { StatsBar } from '@/components/StatsBar'
 import { EodSummaryToast, useEodSummaryScheduler } from '@/components/EodSummaryToast'
 import { useGamificationStats } from '@/lib/hooks/useGamificationStats'
 import { SwipeableTaskCard } from '@/components/SwipeableTaskCard'
+import { triggerTaskComplete } from '@/lib/confetti'
 
 // Extracted component so hooks (useUrgencyColor) can be called per-task row
 function PlanningTaskRow({
@@ -127,6 +128,7 @@ export default function Home() {
     setSortingMode
   } = useAppStore()
 
+  const hasAutoResumedRef = useRef(false)
   // Interruption tracking: ref to avoid cleanup firing on re-renders (Pitfall 3)
   const activeTaskIdRef = useRef(activeTaskId)
   useEffect(() => {
@@ -230,6 +232,19 @@ export default function Home() {
       setDeletedTasks(fetchedDeleted)
       setAiSuggestion(suggestion)
 
+      // Auto-resume paused task from previous session (MEMORY-02)
+      if (!hasAutoResumedRef.current) {
+        hasAutoResumedRef.current = true
+        const currentActiveId = activeTaskIdRef.current
+        if (currentActiveId) {
+          const activeTask = sorted.find(t => t.id === currentActiveId)
+          if (activeTask?.status === 'paused') {
+            await updateTask(currentActiveId, { status: 'in_progress' })
+            setTasks(prev => prev.map(t => t.id === currentActiveId ? { ...t, status: 'in_progress' } : t))
+          }
+        }
+      }
+
       // Set active task to first non-done task if none is set
       if (!activeTaskId) {
         const firstActive = sorted.find(t => t.status !== 'done')
@@ -324,6 +339,7 @@ export default function Home() {
 
   const handleCompleteTask = async (taskId: string) => {
     const taskToComplete = tasks.find(t => t.id === taskId)
+    triggerTaskComplete()
     try {
       await updateTask(taskId, { status: 'done' })
       if (taskToComplete) {

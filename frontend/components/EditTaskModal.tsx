@@ -99,26 +99,32 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                         />
                     </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-xs font-bold uppercase text-muted mb-1">Value (1-100)</label>
-                        <input
-                            type="number" min="0" max="100"
-                            className="w-full p-2 border rounded-lg"
-                            value={editedTask.value_score || ''}
-                            onChange={e => setEditedTask({...editedTask, value_score: parseInt(e.target.value) || 0})}
-                            placeholder="Optional"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold uppercase text-muted mb-1">Effort (1-100)</label>
-                        <input
-                            type="number" min="0" max="100"
-                            className="w-full p-2 border rounded-lg"
-                            value={editedTask.effort_score || ''}
-                            onChange={e => setEditedTask({...editedTask, effort_score: parseInt(e.target.value) || 0, estimated_duration: parseInt(e.target.value) || 0})}
-                            placeholder="Optional"
-                        />
+                <div>
+                    <label className="block text-xs font-bold uppercase text-muted mb-1">Duration</label>
+                    <div className="flex gap-2">
+                        {([
+                            { label: 'Quick', minutes: 15 },
+                            { label: 'Medium', minutes: 30 },
+                            { label: 'Long', minutes: 60 },
+                        ] as const).map(({ label, minutes }) => (
+                            <button
+                                key={minutes}
+                                type="button"
+                                onClick={() => setEditedTask({
+                                    ...editedTask,
+                                    estimated_duration: minutes,
+                                    value_score: minutes <= 15 ? 30 : minutes <= 30 ? 50 : 70,
+                                    effort_score: minutes <= 15 ? 30 : minutes <= 30 ? 50 : 70,
+                                })}
+                                className={`flex-1 py-2 rounded-lg border text-sm ${
+                                    editedTask.estimated_duration === minutes
+                                        ? 'bg-primary text-white border-primary'
+                                        : 'bg-white text-gray-600 border-gray-200 md:hover:bg-gray-50'
+                                }`}
+                            >
+                                {label} <span className="opacity-70">{minutes}m</span>
+                            </button>
+                        ))}
                     </div>
                 </div>
                 <div>
