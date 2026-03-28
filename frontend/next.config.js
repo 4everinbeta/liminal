@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
+const isStaticExport = process.env.NEXT_STATIC_EXPORT === 'true'
+
 const nextConfig = {
-  output: 'export',
-  distDir: process.env.NEXT_DIST_DIR || '.next-clean',
+  ...(isStaticExport && { output: 'export' }),
+  distDir: process.env.NEXT_DIST_DIR || (isStaticExport ? '.next-clean' : '.next'),
   images: {
     unoptimized: true,
   },
