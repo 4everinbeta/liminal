@@ -1,32 +1,43 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.1
-milestone_name: next
-status: v1.0 complete — planning next milestone
-stopped_at: Milestone v1.0 archived, git tag v1.0 created
-last_updated: "2026-03-28T11:10:00.000Z"
+milestone_name: Polish & Ship
+status: roadmap defined — ready to plan Phase 8
+stopped_at: Roadmap created for v1.1 (Phases 8–11)
+last_updated: "2026-04-02T00:00:00.000Z"
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 22
-  completed_plans: 22
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-28 after v1.0 milestone)
+See: .planning/PROJECT.md (updated 2026-04-02 — v1.1 milestone started)
 
 **Core value:** ADHD brains respond to NOW/NOT NOW, not IMPORTANT/NOT IMPORTANT
-**Current focus:** Planning next milestone (v1.1)
+**Current focus:** v1.1 Polish & Ship — Phase 8: UI Polish
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 8 — UI Polish (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-02 — Milestone v1.1 started (Polish & Ship)
+Status: Roadmap defined, ready to plan
+Last activity: 2026-04-02 — v1.1 roadmap created (4 phases, 11 requirements)
+
+### Progress Bar
+
+```
+v1.1: [░░░░░░░░░░░░░░░░░░░░] 0/4 phases complete
+```
+
+## Performance Metrics
+
+- v1.0 delivered: 7 phases, 22 plans, 53 requirements, 280 commits
+- v1.1 target: 4 phases, 11 requirements
 
 ## Accumulated Context
 
@@ -42,19 +53,20 @@ Key patterns established in v1.0:
 - Dexie.js + fake-indexeddb for offline queue testing
 - sessionStorage for drafts (not localStorage — auto-cleanup)
 
-### Open Tech Debt (carry to v1.1)
+### Open Tech Debt (targeted by v1.1)
 
-- EditTaskModal numeric score inputs (SIMPLIFY-03 partial)
-- CapacitySummary not in Focus mode (URGENCY-04 partial)
-- EodSummaryToast opt-in default=false (discoverability)
-- GAMIFY-03 impact zero for tasks without estimated_duration
-- Phases 1–4 missing Nyquist VALIDATION.md files
-- restoreTask not offline-guarded in api.ts (RECOVERY-04 edge case)
+- EditTaskModal numeric score inputs → Phase 8 (POLISH-01)
+- CapacitySummary not in Focus mode → Phase 8 (POLISH-02)
+- GAMIFY-03 impact zero for tasks without estimated_duration → Phase 8 (POLISH-03)
+- restoreTask not offline-guarded in api.ts → Phase 8 (POLISH-04)
+- iOS TestFlight pipeline missing → Phase 9 (MOBILE-01, MOBILE-02, MOBILE-03)
+- Production secrets not hardened → Phase 10 (BACKEND-01, BACKEND-02, BACKEND-03)
+- Phases 1–4 missing Nyquist VALIDATION.md files → Phase 11 (DOCS-01)
 
 ### Roadmap Evolution
 
-- v1.0 complete: 7 phases, 22 plans
-- v1.1 to be defined with /gsd:new-milestone
+- v1.0 complete: 7 phases, 22 plans (archived)
+- v1.1 roadmap defined: 4 phases (8–11), 11 requirements
 
 ### Pending Todos
 
@@ -67,5 +79,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-02
-Stopped at: Milestone v1.1 started — defining requirements
-Resume with: Continue requirements definition or /gsd:plan-phase 8
+Stopped at: v1.1 roadmap created — Phases 8–11 defined
+Resume with: `/gsd:plan-phase 8`

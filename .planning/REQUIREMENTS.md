@@ -54,18 +54,16 @@ Milestone: v1.1
 
 ## Traceability
 
-*Filled by roadmapper.*
-
 | REQ-ID | Phase | Plan |
 |--------|-------|------|
-| POLISH-01 | — | — |
-| POLISH-02 | — | — |
-| POLISH-03 | — | — |
-| POLISH-04 | — | — |
-| MOBILE-01 | — | — |
-| MOBILE-02 | — | — |
-| MOBILE-03 | — | — |
-| BACKEND-01 | — | — |
-| BACKEND-02 | — | — |
-| BACKEND-03 | — | — |
-| DOCS-01 | — | — |
+| POLISH-01 | Phase 8 | — |
+| POLISH-02 | Phase 8 | — |
+| POLISH-03 | Phase 8 | — |
+| POLISH-04 | Phase 8 | — |
+| MOBILE-01 | Phase 9 | — |
+| MOBILE-02 | Phase 9 | — |
+| MOBILE-03 | Phase 9 | — |
+| BACKEND-01 | Phase 10 | — |
+| BACKEND-02 | Phase 10 | — |
+| BACKEND-03 | Phase 10 | — |
+| DOCS-01 | Phase 11 | — |
