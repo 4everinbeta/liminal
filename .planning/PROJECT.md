@@ -159,5 +159,39 @@ The v1.0 MVP shipped a complete ADHD-optimization layer over the existing task m
 - **Accessibility**: Voice input and visual urgency cues must have accessible alternatives
 - **Static Export**: `output: 'export'` required for Capacitor — no `getServerSideProps`, no Next.js API routes
 
+## Current Milestone: v1.1 Polish & Ship
+
+**Goal:** Clear v1.0 tech debt and deliver a production-ready iOS app on TestFlight with a hardened backend.
+
+**Target features:**
+- EditTaskModal preset inputs replacing numeric 1-100 (SIMPLIFY-03)
+- CapacitySummary visible in Focus mode (URGENCY-04)
+- EodSummaryToast discoverability improvement (auto-enable or onboarding hint)
+- Impact pill duration fallback for tasks without estimated_duration (GAMIFY-03)
+- Retroactive Nyquist VALIDATION.md for Phases 1–4
+- restoreTask offline guard in api.ts (RECOVERY-04)
+- GitHub Actions + Fastlane CI/CD pipeline → TestFlight IPA
+- Railway env vars & secrets management for production
+- CORS lockdown + remove demo-user auto-auth in prod
+- Sentry error monitoring (backend)
+- API rate limiting & input validation hardening
+
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd:transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-03-28 after v1.0 milestone — ADHD Optimization MVP shipped*
+*Last updated: 2026-04-02 — v1.1 milestone started (Polish & Ship)*

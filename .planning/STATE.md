@@ -23,7 +23,10 @@ See: .planning/PROJECT.md (updated 2026-03-28 after v1.0 milestone)
 
 ## Current Position
 
-Milestone v1.0 complete. All 7 phases shipped and archived.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-02 — Milestone v1.1 started (Polish & Ship)
 
 ## Accumulated Context
 
@@ -63,6 +66,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-28
-Stopped at: Milestone v1.0 archived and tagged
-Resume with: /gsd:new-milestone to start v1.1 planning
+Last session: 2026-04-02
+Stopped at: Milestone v1.1 started — defining requirements
+Resume with: Continue requirements definition or /gsd:plan-phase 8
