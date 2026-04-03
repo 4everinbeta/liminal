@@ -68,7 +68,7 @@ function PlanningTaskRow({
           </div>
           <div className="text-xs text-gray-500 mt-1 flex items-center gap-3">
             <span className="uppercase tracking-wide">{task.priority} priority</span>
-            {task.estimated_duration && <span>{task.estimated_duration}m</span>}
+            <span>{task.estimated_duration != null ? `${task.estimated_duration}m` : 'short task'}</span>
             <UrgencyIndicator dueDate={task.due_date} size="sm" />
           </div>
         </button>
@@ -523,7 +523,7 @@ export default function Home() {
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">{activeTask.title}</h2>
                 <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
                   <span className="uppercase tracking-wide">{activeTask.priority} priority</span>
-                  {activeTask.estimated_duration && <span>{activeTask.estimated_duration}m</span>}
+                  <span>{activeTask.estimated_duration != null ? `${activeTask.estimated_duration}m` : 'short task'}</span>
                 </div>
               </div>
 

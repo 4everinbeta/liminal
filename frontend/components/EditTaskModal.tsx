@@ -9,6 +9,8 @@ interface EditTaskModalProps {
   onSave: (task: Task) => void
 }
 
+const PRIORITY_LABELS: Record<number, string> = { 30: 'Low', 60: 'Medium', 90: 'High' }
+
 export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalProps) {
   const [editedTask, setEditedTask] = useState<Task>(task)
   const [themes, setThemes] = useState<Theme[]>([])
@@ -145,7 +147,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                                         : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
                                 }`}
                             >
-                                {p}
+                                {PRIORITY_LABELS[p]}
                             </button>
                         ))}
                     </div>
