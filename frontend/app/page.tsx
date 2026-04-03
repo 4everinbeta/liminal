@@ -7,6 +7,7 @@ import TaskActionMenu from '@/components/TaskActionMenu'
 import EditTaskModal from '@/components/EditTaskModal'
 import ChatInterface from '@/components/ChatInterface'
 import CapacitySummary from '@/components/CapacitySummary'
+import CapacitySummaryStrip from '@/components/CapacitySummaryStrip'
 import UrgencyIndicator from '@/components/UrgencyIndicator'
 import { getTasks, updateTask, deleteTask, getDeletedTasks, restoreTask, getAiSuggestion, sendAiFeedback, Task, type AISuggestion as AISuggestionType } from '@/lib/api'
 import { AISuggestion } from '@/components/AISuggestion'
@@ -596,6 +597,8 @@ export default function Home() {
               </button>
             </div>
           )}
+          {/* Capacity Strip — always visible in Focus mode (D-07) */}
+          <CapacitySummaryStrip tasks={tasks} />
         </div>
       )}
 

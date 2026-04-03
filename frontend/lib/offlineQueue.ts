@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 
-export type MutationType = 'createTask' | 'updateTask' | 'deleteTask' | 'completeTask'
+export type MutationType = 'createTask' | 'updateTask' | 'deleteTask' | 'completeTask' | 'restoreTask'
 
 export interface QueuedMutation {
   id?: number

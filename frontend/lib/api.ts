@@ -232,6 +232,11 @@ export async function replayMutation(mutation: QueuedMutation): Promise<void> {
         method: 'DELETE',
       })
       break
+    case 'restoreTask':
+      await request<Task>(`${API_BASE_URL}/tasks/${mutation.taskId}/restore`, {
+        method: 'POST',
+      })
+      break
   }
 }
 
@@ -240,6 +245,10 @@ export async function getDeletedTasks(): Promise<Task[]> {
 }
 
 export async function restoreTask(taskId: string): Promise<Task> {
+  if (!getIsOnline()) {
+    await enqueueOfflineMutation({ type: 'restoreTask', taskId, payload: {} })
+    return { id: taskId } as Task
+  }
   return request<Task>(`${API_BASE_URL}/tasks/${taskId}/restore`, {
     method: 'POST',
   });

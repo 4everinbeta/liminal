@@ -135,6 +135,8 @@ describe('restoreTask offline', () => {
 
 describe('replayMutation restoreTask', () => {
   beforeEach(() => {
+    // Set a fake token so fetchWithAuth doesn't block the request
+    localStorage.setItem('liminal_token', 'test-token')
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -143,6 +145,7 @@ describe('replayMutation restoreTask', () => {
   })
 
   afterEach(() => {
+    localStorage.removeItem('liminal_token')
     vi.restoreAllMocks()
     vi.unstubAllGlobals()
   })

@@ -29,7 +29,8 @@ describe('CapacitySummaryStrip', () => {
     mockDate.setHours(9, 0, 0, 0)
     vi.setSystemTime(mockDate)
 
-    const todayStr = mockDate.toISOString().split('T')[0]
+    // Use full ISO string with local time so new Date(due_date).toDateString() matches
+    const todayStr = mockDate.toISOString()
     const tasks: Task[] = [
       makeTask({ id: 'task-1', due_date: todayStr, estimated_duration: 60 }),
       makeTask({ id: 'task-2', due_date: todayStr, estimated_duration: 60 }),
