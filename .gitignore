@@ -28,6 +28,9 @@ frontend/playwright-report/
 private/
 labenv/
 
+# Local secrets — never commit
+secure/*.env
+
 # Local artifacts (screenshots, downloaded files)
 Liminal-screen1.jpg
 board-error.png
