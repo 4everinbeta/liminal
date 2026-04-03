@@ -25,7 +25,7 @@ export function SwipeableTaskCard({ children, onComplete, onEdit }: SwipeableTas
     if (Math.abs(info.offset.x) >= SWIPE_THRESHOLD && !hasTriggeredHaptic.current) {
       hasTriggeredHaptic.current = true
       try {
-        const { Haptics, ImpactStyle } = await import('@capacitor/haptics')
+        const { Haptics, ImpactStyle } = await import(/* webpackIgnore: true */ '@capacitor/haptics')
         if (info.offset.x < 0) {
           await Haptics.impact({ style: ImpactStyle.Medium })
         } else {

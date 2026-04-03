@@ -13,7 +13,7 @@ export function useNetworkStatus() {
     async function init() {
       try {
         // Dynamic import to avoid SSR issues — Capacitor plugins are browser-only
-        const { Network } = await import('@capacitor/network')
+        const { Network } = await import(/* webpackIgnore: true */ '@capacitor/network')
 
         const status = await Network.getStatus()
         setIsOnline(status.connected)
