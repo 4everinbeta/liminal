@@ -147,11 +147,40 @@ export default function SpotifyPlayer() {
       {/* Connected — playlist picker + embed */}
       {connectionState === 'connected' && (
         <>
-          {/* TODO: implement your playlist selector here */}
-          {/*
-            The `playlists` array and `selectedPlaylistId` / `setSelectedPlaylistId`
-            are ready to use. See the contribution request below.
-          */}
+          {/* Album-art playlist selector */}
+          {playlists.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto px-3 py-2 scrollbar-hide">
+              {playlists.map((playlist) => {
+                const cover = playlist.images[0]?.url
+                const isSelected = playlist.id === selectedPlaylistId
+                return (
+                  <button
+                    key={playlist.id}
+                    onClick={() => setSelectedPlaylistId(playlist.id)}
+                    title={playlist.name}
+                    className={`relative shrink-0 w-14 h-14 rounded-lg overflow-hidden transition-all focus:outline-none ${
+                      isSelected
+                        ? 'ring-2 ring-[#1DB954] ring-offset-1 scale-105'
+                        : 'opacity-60 hover:opacity-90'
+                    }`}
+                  >
+                    {cover ? (
+                      <img src={cover} alt={playlist.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-lg">
+                        ♪
+                      </div>
+                    )}
+                    {isSelected && (
+                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                        <span className="text-white text-xs">▶</span>
+                      </div>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          )}
 
           {/* Currently playing strip */}
           {currentTrack?.is_playing && currentTrack.item && (
