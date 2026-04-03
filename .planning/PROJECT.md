@@ -12,10 +12,10 @@ The v1.0 MVP shipped a complete ADHD-optimization layer over the existing task m
 
 ## Current State
 
-**Version:** v1.0 (shipped 2026-03-28)
+**Version:** v1.1 in progress (Phase 8 complete 2026-04-03)
 **Stack:** Next.js 13 (static export), FastAPI, PostgreSQL, Capacitor iOS, Dexie.js offline queue
 **LOC:** ~9,600 TypeScript frontend | ~2,000 Python backend
-**Tests:** 89/89 passing (Vitest)
+**Tests:** 106/106 passing (Vitest)
 **CI:** GitHub Actions (lint + build + test on push to main)
 
 ## Requirements
@@ -96,10 +96,11 @@ The v1.0 MVP shipped a complete ADHD-optimization layer over the existing task m
 
 *For next milestone:*
 
-- [ ] **SIMPLIFY-03 (partial)**: EditTaskModal still has 1-100 numeric inputs for value/effort — convert to presets
+- [x] **SIMPLIFY-03 (POLISH-01)**: EditTaskModal priority buttons now show Low/Medium/High presets — Validated in Phase 8: UI Polish
+- [x] **URGENCY-04 (POLISH-02)**: CapacitySummaryStrip visible in Focus mode (both active-task and empty states) — Validated in Phase 8: UI Polish
+- [x] **GAMIFY-03 (POLISH-03)**: Impact pill shows "short task" fallback for tasks without estimated_duration — Validated in Phase 8: UI Polish
+- [x] **RECOVERY-04 (POLISH-04)**: restoreTask offline guard — soft-deleted task restores queue correctly when offline — Validated in Phase 8: UI Polish
 - [ ] **SIMPLIFY-02 (partial)**: Natural language score tweaking — current shorthand-only (!high, 30m)
-- [ ] **URGENCY-04 (partial)**: CapacitySummary visible in Focus mode, not just Planning mode
-- [ ] **GAMIFY-03 (partial)**: Impact pill shows "0 hours" for tasks without estimated_duration — improve fallback
 - [ ] **EodSummaryToast discovery**: Default is opt-in false — users don't find it; consider auto-enable or onboarding hint
 - [ ] **Nyquist validation**: Phases 1–4 have no VALIDATION.md — retroactive compliance pass
 
@@ -194,4 +195,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 — v1.1 milestone started (Polish & Ship)*
+*Last updated: 2026-04-03 — Phase 8 complete (UI Polish — all 4 POLISH requirements validated)*
