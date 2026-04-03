@@ -45,7 +45,7 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 **Plans**: 2 plans
 Plans:
 - [x] 08-01-PLAN.md — Relabel priority buttons + duration fallback
-- [ ] 08-02-PLAN.md — Capacity strip in Focus mode + offline restore guard
+- [x] 08-02-PLAN.md — Capacity strip in Focus mode + offline restore guard
 **UI hint**: yes
 
 ### Phase 9: Mobile CI/CD

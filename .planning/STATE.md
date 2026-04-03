@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish & Ship
 status: planning
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-04-03T19:18:26.917Z"
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-04-03T19:25:13.936Z"
 last_activity: 2026-04-02 — v1.1 roadmap created (4 phases, 11 requirements)
 progress:
   total_phases: 4
@@ -55,6 +55,8 @@ Key patterns established in v1.0:
 - Dexie.js + fake-indexeddb for offline queue testing
 - sessionStorage for drafts (not localStorage — auto-cleanup)
 - [Phase 08-ui-polish]: Use != null check for estimated_duration to safely handle 0 as a valid duration value (POLISH-03)
+- [Phase 08-ui-polish]: Extracted useCapacity hook as single source of truth for capacity calculation shared by CapacitySummary and CapacitySummaryStrip
+- [Phase 08-ui-polish]: CapacitySummaryStrip placed outside activeTask ternary in Focus mode to show in both active-task and empty states (D-07)
 
 ### Open Tech Debt (targeted by v1.1)
 
@@ -81,6 +83,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-03T19:18:26.914Z
-Stopped at: Completed 08-01-PLAN.md
+Last session: 2026-04-03T19:25:13.932Z
+Stopped at: Completed 08-02-PLAN.md
 Resume with: `/gsd:plan-phase 8`

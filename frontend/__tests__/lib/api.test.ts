@@ -1,5 +1,8 @@
-import { describe, it, expect } from 'vitest';
-import { parseQuickCapture } from '@/lib/api';
+import 'fake-indexeddb/auto'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { parseQuickCapture, restoreTask, replayMutation } from '@/lib/api';
+import * as offlineQueue from '@/lib/offlineQueue'
+import * as apiModule from '@/lib/api'
 
 describe('API Library', () => {
   describe('parseQuickCapture', () => {
@@ -91,3 +94,75 @@ describe('API Library', () => {
     });
   });
 });
+
+describe('restoreTask offline', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn())
+    vi.spyOn(offlineQueue, 'enqueueOfflineMutation').mockResolvedValue()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
+  })
+
+  it('enqueues mutation when offline', async () => {
+    // Mock navigator.onLine = false via registerOnlineChecker
+    apiModule.registerOnlineChecker(() => false)
+
+    await restoreTask('task-1')
+
+    expect(offlineQueue.enqueueOfflineMutation).toHaveBeenCalledWith({
+      type: 'restoreTask',
+      taskId: 'task-1',
+      payload: {},
+    })
+
+    // Reset online checker to default
+    apiModule.registerOnlineChecker(() => true)
+  })
+
+  it('returns optimistic stub when offline', async () => {
+    apiModule.registerOnlineChecker(() => false)
+
+    const result = await restoreTask('task-1')
+
+    expect(result).toMatchObject({ id: 'task-1' })
+
+    apiModule.registerOnlineChecker(() => true)
+  })
+})
+
+describe('replayMutation restoreTask', () => {
+  beforeEach(() => {
+    // Set a fake token so fetchWithAuth doesn't block the request
+    localStorage.setItem('liminal_token', 'test-token')
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ id: 'task-1', title: 'Test', status: 'todo', priority: 'medium', value_score: 50, order: 0, user_id: 'user-1', created_at: '' }),
+    }))
+  })
+
+  afterEach(() => {
+    localStorage.removeItem('liminal_token')
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
+  })
+
+  it('replays restoreTask by POSTing to restore endpoint', async () => {
+    await replayMutation({
+      type: 'restoreTask',
+      taskId: 'task-1',
+      payload: {},
+      timestamp: 0,
+      retries: 0,
+    })
+
+    const fetchMock = vi.mocked(fetch)
+    expect(fetchMock).toHaveBeenCalledOnce()
+    const [url, options] = fetchMock.mock.calls[0]
+    expect(String(url)).toContain('/tasks/task-1/restore')
+    expect((options as RequestInit).method).toBe('POST')
+  })
+})
