@@ -55,7 +55,11 @@ async def init_db():
             await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS oidc_issuer TEXT'))
             await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS google_sub TEXT'))
             await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))
-            
+            await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS spotify_access_token TEXT'))
+            await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS spotify_refresh_token TEXT'))
+            await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS spotify_token_expiry TIMESTAMP WITHOUT TIME ZONE'))
+            await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS spotify_display_name TEXT'))
+
             # Ensure 'theme' table has 'order', 'created_at', 'updated_at'
             await conn.execute(text('ALTER TABLE theme ADD COLUMN IF NOT EXISTS "order" INTEGER DEFAULT 0'))
             await conn.execute(text('ALTER TABLE theme ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()'))

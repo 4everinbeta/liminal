@@ -43,6 +43,12 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow, sa_column_kwargs={"onupdate": datetime.utcnow})
     
+    # Spotify OAuth
+    spotify_access_token: Optional[str] = Field(default=None, nullable=True)
+    spotify_refresh_token: Optional[str] = Field(default=None, nullable=True)
+    spotify_token_expiry: Optional[datetime] = Field(default=None, nullable=True)
+    spotify_display_name: Optional[str] = Field(default=None, nullable=True)
+
     tasks: List["Task"] = Relationship(back_populates="user")
     themes: List["Theme"] = Relationship(back_populates="user")
     initiatives: List["Initiative"] = Relationship(back_populates="user")

@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     oidc_email_claim: str = "email"
     oidc_name_claim: str = "name"
 
+    # Spotify OAuth
+    spotify_client_id: Optional[str] = None
+    spotify_client_secret: Optional[str] = None
+    spotify_redirect_uri: str = "https://liminal-frontend-production.up.railway.app/auth/spotify/callback"
+
     # Legacy Google token-login
     google_client_id: Optional[str] = None
 

@@ -6,7 +6,7 @@ import asyncio
 import traceback
 
 from .database import init_db, async_session
-from .routers import auth, users, tasks, themes, llm, ws
+from .routers import auth, users, tasks, themes, llm, ws, spotify
 from .agents.monitor import TaskMonitor
 
 app = FastAPI(
@@ -101,3 +101,4 @@ app.include_router(tasks.router)
 app.include_router(themes.router)
 app.include_router(llm.router)
 app.include_router(ws.router)
+app.include_router(spotify.router)
