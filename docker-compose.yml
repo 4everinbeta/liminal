@@ -40,6 +40,10 @@ services:
       LLM_BASE_URL: "http://llm:11434/v1/chat/completions"
       LLM_MODEL: "llama3.2:3b-instruct-q4_0"
       LLM_PROVIDER: "local"
+      # Spotify OAuth
+      SPOTIFY_CLIENT_ID: "be8f33ef46d94fec878141bbb1c16bea"
+      SPOTIFY_CLIENT_SECRET: "${SPOTIFY_CLIENT_SECRET}"
+      SPOTIFY_REDIRECT_URI: "${SPOTIFY_REDIRECT_URI:-http://localhost:3000/auth/spotify/callback}"
     ports:
       - "8000:8000"
     depends_on:
@@ -68,6 +72,9 @@ services:
       NEXT_PUBLIC_OIDC_REDIRECT_URI: "http://localhost:3000/auth/callback"
       NEXT_PUBLIC_OIDC_POST_LOGOUT_REDIRECT_URI: "http://localhost:3000"
       NEXT_PUBLIC_OIDC_SCOPE: "openid profile email"
+      # Spotify OAuth (client_id is public — safe to inline)
+      NEXT_PUBLIC_SPOTIFY_CLIENT_ID: "be8f33ef46d94fec878141bbb1c16bea"
+      NEXT_PUBLIC_SPOTIFY_REDIRECT_URI: "${SPOTIFY_REDIRECT_URI:-http://localhost:3000/auth/spotify/callback}"
     ports:
       - "3000:3000"
     depends_on:
