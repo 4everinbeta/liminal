@@ -42,7 +42,10 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
   2. User can see the CapacitySummary (hours remaining, task count) while in Focus mode, not just Planning mode
   3. User sees a non-empty fallback label (e.g., "short task") in the impact pill when a task has no estimated_duration
   4. User who restores a soft-deleted task while offline sees the restore enqueued in the mutation queue and synced on reconnect
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 08-01-PLAN.md — Relabel priority buttons + duration fallback
+- [ ] 08-02-PLAN.md — Capacity strip in Focus mode + offline restore guard
 **UI hint**: yes
 
 ### Phase 9: Mobile CI/CD
@@ -85,7 +88,7 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 | 5. Forgiveness | v1.0 | 2/2 | Complete | 2026-03-21 |
 | 6. AI Prioritization | v1.0 | 2/2 | Complete | 2026-03-21 |
 | 7. iPhone App | v1.0 | 5/5 | Complete | 2026-03-27 |
-| 8. UI Polish | v1.1 | 0/TBD | Not started | - |
+| 8. UI Polish | v1.1 | 0/2 | Planned | - |
 | 9. Mobile CI/CD | v1.1 | 0/TBD | Not started | - |
 | 10. Backend Hardening | v1.1 | 0/TBD | Not started | - |
 | 11. Compliance | v1.1 | 0/TBD | Not started | - |
