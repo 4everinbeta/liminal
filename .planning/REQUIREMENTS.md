@@ -9,9 +9,9 @@ Milestone: v1.1
 
 ### UI Polish
 
-- [ ] **POLISH-01**: User can select Low/Medium/High presets for value and effort in EditTaskModal instead of typing a number (1-100)
+- [x] **POLISH-01**: User can select Low/Medium/High presets for value and effort in EditTaskModal instead of typing a number (1-100)
 - [ ] **POLISH-02**: User can see CapacitySummary (hours remaining, task count) while in Focus mode, not just Planning mode
-- [ ] **POLISH-03**: User sees meaningful fallback text in the impact pill (e.g., "short task") when a task has no estimated_duration set
+- [x] **POLISH-03**: User sees meaningful fallback text in the impact pill (e.g., "short task") when a task has no estimated_duration set
 - [ ] **POLISH-04**: User's restored (soft-deleted) tasks are enqueued in the offline mutation queue when offline and synced on reconnect
 
 ### Mobile CI/CD

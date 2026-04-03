@@ -2,14 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish & Ship
-status: roadmap defined — ready to plan Phase 8
-stopped_at: Roadmap created for v1.1 (Phases 8–11)
-last_updated: "2026-04-02T00:00:00.000Z"
+status: planning
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-04-03T19:18:26.917Z"
+last_activity: 2026-04-02 — v1.1 roadmap created (4 phases, 11 requirements)
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
 ---
 
 # Project State
@@ -46,12 +47,14 @@ v1.1: [░░░░░░░░░░░░░░░░░░░░] 0/4 phases 
 See `.planning/PROJECT.md` Key Decisions table for full log.
 
 Key patterns established in v1.0:
+
 - rAF over setInterval for countdown timers
 - Warm orange (#f97316) for overdue, never red (RSD risk)
 - Dynamic import for all Capacitor imports (SSR guard)
 - canvas-confetti over custom CSS for GPU acceleration
 - Dexie.js + fake-indexeddb for offline queue testing
 - sessionStorage for drafts (not localStorage — auto-cleanup)
+- [Phase 08-ui-polish]: Use != null check for estimated_duration to safely handle 0 as a valid duration value (POLISH-03)
 
 ### Open Tech Debt (targeted by v1.1)
 
@@ -78,6 +81,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-02
-Stopped at: v1.1 roadmap created — Phases 8–11 defined
+Last session: 2026-04-03T19:18:26.914Z
+Stopped at: Completed 08-01-PLAN.md
 Resume with: `/gsd:plan-phase 8`
