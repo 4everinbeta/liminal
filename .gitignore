@@ -45,8 +45,9 @@ CLAUDE.md
 GEMINI.md
 .claude/
 
-# iOS Xcode project (regenerated with `npx cap add ios`)
-ios/
+# iOS Xcode project — committed per Capacitor best practice (D-10)
+# Only Pods/ is excluded (reinstalled via pod install in CI)
+ios/App/Pods/
 
 # User Suggested Exclusions
 node_modules/
