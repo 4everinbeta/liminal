@@ -1,0 +1,11 @@
+git_url(ENV['MATCH_GIT_URL'])
+
+storage_mode('git')
+type('appstore')
+app_identifier('com.liminal.adhd')
+
+# HTTPS auth for CI — uses MATCH_GIT_USERNAME + MATCH_GIT_TOKEN secrets
+# Avoids embedding token in URL (keeps it out of logs)
+git_basic_authorization(
+  Base64.strict_encode64("#{ENV['MATCH_GIT_USERNAME']}:#{ENV['MATCH_GIT_TOKEN']}")
+)

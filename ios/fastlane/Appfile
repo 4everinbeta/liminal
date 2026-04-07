@@ -1,0 +1,4 @@
+app_identifier('com.liminal.adhd')
+
+# Apple ID not needed — all auth via App Store Connect API key
+# apple_id(ENV['FASTLANE_APPLE_ID'])
