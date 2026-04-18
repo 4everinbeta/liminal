@@ -23,3 +23,6 @@
 - [x] Task: Implement robust error handling and fallback logic. (28340aa)
     - [x] Ensure all three input methods gracefully fall back to the standard `createTask` behavior (creating a task with just a title) if the parsing endpoint fails, times out, or returns a 500.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Frontend Integration' (Protocol in workflow.md) (36bab65)
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions (b46dc96)
