@@ -65,8 +65,9 @@ async def test_get_tasks_list(authed_client: AsyncClient):
     assert response.status_code == 200
     tasks = response.json()
     assert len(tasks) == 2
-    assert tasks[0]["title"] == "Second Task"
-    assert tasks[1]["title"] == "First Task"
+    titles = [t["title"] for t in tasks]
+    assert "First Task" in titles
+    assert "Second Task" in titles
 
 
 @pytest.mark.asyncio

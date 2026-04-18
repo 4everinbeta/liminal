@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import SpotifyPlayer from '@/components/SpotifyPlayer';
 import NoisePlayer from '@/components/NoisePlayer';
 import { useAppStore } from '@/lib/store';
@@ -31,13 +31,22 @@ const mockAudioContext = {
 
 global.AudioContext = vi.fn().mockImplementation(() => mockAudioContext);
 
+vi.mock('@/lib/spotify', () => ({
+  getSpotifyStatus: vi.fn().mockResolvedValue({ connected: true, display_name: 'Test User' }),
+  getSpotifyAccessToken: vi.fn().mockResolvedValue('fake-token'),
+  getMyPlaylists: vi.fn().mockResolvedValue([]),
+  getCurrentlyPlaying: vi.fn().mockResolvedValue({ is_playing: false }),
+  disconnectSpotify: vi.fn().mockResolvedValue(undefined),
+  getSpotifyAuthUrl: vi.fn().mockResolvedValue({ url: 'http://fake-auth', state: 'fake-state' }),
+}));
+
 describe('Smart Audio Interaction', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useAppStore.setState({ isNoisePlaying: false });
   });
 
-  it('should pause noise when user interacts with Spotify iframe', () => {
+  it('should pause noise when user interacts with Spotify iframe', async () => {
     // 1. Start noise
     useAppStore.setState({ isNoisePlaying: true });
     
@@ -51,7 +60,7 @@ describe('Smart Audio Interaction', () => {
     expect(useAppStore.getState().isNoisePlaying).toBe(true);
 
     // 2. Simulate user clicking into Spotify iframe (blur event)
-    const iframe = screen.getByTitle(/Spotify Player/i);
+    const iframe = await screen.findByTitle(/Spotify Player/i);
     
     // We need to mock document.activeElement
     Object.defineProperty(document, 'activeElement', {

@@ -47,14 +47,12 @@ export default function SpotifyPlayer() {
       setPlaylists(lists)
       setCurrentTrack(track)
       // Default to first playlist if nothing selected
-      if (!selectedPlaylistId && lists.length > 0) {
-        setSelectedPlaylistId(lists[0].id)
-      }
+      setSelectedPlaylistId(prev => !prev && lists.length > 0 ? lists[0].id : prev)
     } catch {
       // Token fetch failed — treat as disconnected
       setConnectionState('disconnected')
     }
-  }, [selectedPlaylistId])
+  }, [])
 
   useEffect(() => {
     if (connectionState === 'connected') {
