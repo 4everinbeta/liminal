@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, ChevronDown, ChevronUp, Calendar, FileText } from 'lucide-react'
-import { createTask, TaskCreate } from '@/lib/api'
+import { Plus, ChevronDown, ChevronUp, Calendar, FileText, Sparkles, Loader2 } from 'lucide-react'
+import { createTask, TaskCreate, parseTaskWithLlm } from '@/lib/api'
 import { calculateSmartDefaults } from '@/lib/smartDefaults'
 
 interface TaskFormProps {
@@ -21,9 +21,34 @@ export default function TaskForm({ onTaskCreated }: TaskFormProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [isParsing, setIsParsing] = useState(false)
 
   // Only track user-provided fields
   const [title, setTitle] = useState('')
+
+  const handleMagicParse = async () => {
+    if (!title.trim() || isParsing) return
+    setIsParsing(true)
+    try {
+      const parsed = await parseTaskWithLlm(title)
+      setTitle(parsed.title || title)
+      if (parsed.estimated_duration) {
+        setDuration(parsed.estimated_duration)
+        if (parsed.estimated_duration <= 15) setDurationPreset('quick')
+        else if (parsed.estimated_duration <= 30) setDurationPreset('medium')
+        else if (parsed.estimated_duration <= 60) setDurationPreset('long')
+        else setDurationPreset('custom')
+      }
+      if (parsed.estimated_duration || parsed.priority || parsed.due_date_natural) {
+        setShowAdvanced(true)
+      }
+    } catch (err) {
+      console.error('Magic parse failed', err)
+    } finally {
+      setIsParsing(false)
+    }
+  }
+
   const [dueDate, setDueDate] = useState('')
   const [duration, setDuration] = useState<number>(30)
   const [description, setDescription] = useState('')
@@ -137,15 +162,32 @@ export default function TaskForm({ onTaskCreated }: TaskFormProps) {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Task Title
           </label>
-          <input
-            type="text"
-            required
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            placeholder="What needs to be done?"
-            autoFocus
-          />
+          <div className="relative group">
+            <input
+              type="text"
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full pl-4 pr-10 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              placeholder="What needs to be done?"
+              autoFocus
+            />
+            <button
+              type="button"
+              onClick={handleMagicParse}
+              disabled={!title.trim() || isParsing}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-all ${
+                isParsing ? 'text-primary' : 'text-gray-400 hover:text-primary hover:bg-primary/5'
+              }`}
+              title="Magic parse (extract metadata)"
+            >
+              {isParsing ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Sparkles size={16} className={title.trim() ? 'animate-pulse' : ''} />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Progressive disclosure toggle */}

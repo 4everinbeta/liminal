@@ -254,6 +254,23 @@ export async function restoreTask(taskId: string): Promise<Task> {
   });
 }
 
+export interface TaskParseResponse {
+  title: string;
+  due_date_natural?: string;
+  estimated_duration?: number;
+  priority?: 'high' | 'medium' | 'low';
+  priority_score?: number;
+  effort_score?: number;
+  value_score?: number;
+}
+
+export async function parseTaskWithLlm(inputText: string): Promise<TaskParseResponse> {
+  return request<TaskParseResponse>(`${API_BASE_URL}/tasks/parse`, {
+    method: 'POST',
+    body: JSON.stringify({ input_text: inputText }),
+  });
+}
+
 export interface AISuggestion {
   suggested_task_id: string;
   reasoning: string;

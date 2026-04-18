@@ -6,6 +6,7 @@ import {
   createTask,
   updateTask,
   parseQuickCapture,
+  parseTaskWithLlm,
   getThemes,
   createTheme,
   chatWithLlm,
@@ -170,17 +171,25 @@ export default function QuickCapture({ onTaskCreated }: QuickCaptureProps) {
     const themeHint = userText.match(/theme\s*:\s*([^,]+)/i)
     const hintedThemeName = themeHint ? themeHint[1].trim() : undefined
 
-    // Build initial draft from quick syntax
+    // Build initial draft from quick syntax and LLM
+    let llmParsed = null
+    try {
+      llmParsed = await parseTaskWithLlm(userText)
+    } catch (err) {
+      console.error('LLM parse failed', err)
+    }
+
     const parsed = parseQuickCapture(userText)
     const prioritizeHint = /prioriti[sz]e|do now|today|queue|start|focus/i.test(userText)
     const baseDraft: TaskDraft = {
-      priority: parsed.priority || draft?.priority || 'medium',
-      priority_score: parsed.priority_score ?? draft?.priority_score ?? 50,
+      priority: llmParsed?.priority || parsed.priority || draft?.priority || 'medium',
+      priority_score: llmParsed?.priority_score ?? parsed.priority_score ?? draft?.priority_score ?? 50,
       status: prioritizeHint ? 'in_progress' : parsed.status || draft?.status || 'backlog',
-      value_score: parsed.value_score ?? draft?.value_score ?? 50,
-      estimated_duration: parsed.estimated_duration ?? draft?.estimated_duration ?? parsed.effort_score,
-      effort_score: parsed.effort_score ?? draft?.effort_score,
-      title: parsed.title || draft?.title || userText,
+      value_score: llmParsed?.value_score ?? parsed.value_score ?? draft?.value_score ?? 50,
+      estimated_duration: llmParsed?.estimated_duration ?? parsed.estimated_duration ?? draft?.estimated_duration ?? parsed.effort_score,
+      effort_score: llmParsed?.effort_score ?? parsed.effort_score ?? draft?.effort_score,
+      title: llmParsed?.title || parsed.title || draft?.title || userText,
+      due_date_natural: llmParsed?.due_date_natural,
       description: draft?.description,
       notes: draft?.notes,
       theme_id: draft?.theme_id,
@@ -255,6 +264,7 @@ export default function QuickCapture({ onTaskCreated }: QuickCaptureProps) {
         value_score: draft.value_score,
         theme_id: draft.theme_id,
         initiative_id: draft.initiative_id,
+        due_date_natural: draft.due_date_natural,
       })
       setStatusMessage('Task created')
       appendMessage({ role: 'assistant', content: `Created "${created.title}". Need another change?` })

@@ -25,6 +25,7 @@ vi.mock('@/lib/api', async () => {
     getThemes: vi.fn().mockResolvedValue([]),
     createTheme: vi.fn(),
     chatWithLlm: vi.fn().mockResolvedValue('{"title":"Draft investor update","value_score":90,"estimated_duration":60,"priority":"high"}'),
+    parseTaskWithLlm: vi.fn(),
   }
 })
 
@@ -34,6 +35,7 @@ describe('QuickCapture chat intake', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(api.createTask).mockResolvedValue(mockTask)
+    vi.mocked(api.parseTaskWithLlm).mockResolvedValue({ title: "Mocked Task" })
     if (typeof sessionStorage !== 'undefined') {
       sessionStorage.clear()
     }
@@ -50,6 +52,9 @@ describe('QuickCapture chat intake', () => {
 
   it('prepares a draft and creates a task on confirm', async () => {
     const user = userEvent.setup()
+    // Mock for this specific test to NOT return a different title
+    vi.mocked(api.parseTaskWithLlm).mockResolvedValue({ title: 'Update roadmap', value_score: 90, estimated_duration: 60, priority: 'high' })
+    
     render(<QuickCapture />)
     const input = screen.getByPlaceholderText(/ask liminal/i)
 
@@ -87,5 +92,36 @@ describe('QuickCapture chat intake', () => {
     const payload = vi.mocked(api.createTask).mock.calls[0][0]
     expect(payload.value_score).toBe(80)
     expect(payload.effort_score).toBe(50)
+  })
+
+  it('uses LLM parsing for initial intake', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.parseTaskWithLlm).mockResolvedValue({
+      title: "Call Mom",
+      priority: "high",
+      estimated_duration: 15,
+      due_date_natural: "tomorrow"
+    })
+
+    render(<QuickCapture />)
+    const input = screen.getByPlaceholderText(/ask liminal/i)
+    await user.type(input, 'Call Mom tomorrow 15m !high{Enter}')
+
+    await waitFor(() => {
+      expect(api.parseTaskWithLlm).toHaveBeenCalledWith('Call Mom tomorrow 15m !high')
+    })
+
+    const confirmButton = await screen.findByRole('button', { name: /create task/i })
+    await user.click(confirmButton)
+
+    await waitFor(() => {
+      expect(api.createTask).toHaveBeenCalled()
+    })
+
+    const payload = vi.mocked(api.createTask).mock.calls[0][0]
+    expect(payload.title).toBe('Call Mom')
+    expect(payload.priority).toBe('high')
+    expect(payload.estimated_duration).toBe(15)
+    expect(payload.due_date_natural).toBe('tomorrow')
   })
 })

@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
-import { Plus, MoreHorizontal, AlertTriangle, ArrowRight, ArrowLeft, Trash2, Circle, CheckCircle2, Eye, EyeOff, Edit2, X } from 'lucide-react'
-import { getTasks, getThemes, updateTask, deleteTask, createTheme, updateTheme, deleteTheme, Task, Theme } from '@/lib/api'
+import { Plus, MoreHorizontal, AlertTriangle, ArrowRight, ArrowLeft, Trash2, Circle, CheckCircle2, Eye, EyeOff, Edit2, X, Sparkles, Loader2 } from 'lucide-react'
+import { getTasks, getThemes, updateTask, deleteTask, createTheme, updateTheme, deleteTheme, createTask, parseTaskWithLlm, Task, Theme } from '@/lib/api'
 import TaskActionMenu from '@/components/TaskActionMenu'
 import EditTaskModal from '@/components/EditTaskModal'
 import { SwipeableTaskCard } from '@/components/SwipeableTaskCard'
@@ -283,6 +283,10 @@ export default function BoardPage() {
                                         />
                                     ))}
                                     {provided.placeholder}
+                                    <InlineAddTask 
+                                        status="backlog" 
+                                        onTaskCreated={fetchData} 
+                                    />
                                 </div>
                             )}
                         </Droppable>
@@ -362,6 +366,11 @@ export default function BoardPage() {
                                                         />
                                                     ))}
                                                 {provided.placeholder}
+                                                <InlineAddTask 
+                                                    themeId={theme.id}
+                                                    status="in_progress" 
+                                                    onTaskCreated={fetchData} 
+                                                />
                                             </div>
                                         )}
                                     </Droppable>
@@ -496,4 +505,103 @@ function TaskItem({ task, index, handleComplete, handleDelete, setEditingTask, i
             )}
         </Draggable>
     )
+}
+
+function InlineAddTask({ themeId, status, onTaskCreated }: { themeId?: string, status: Task['status'], onTaskCreated: () => void }) {
+  const [isAdding, setIsAdding] = useState(false)
+  const [title, setTitle] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!title.trim() || loading) return
+    setLoading(true)
+    try {
+      // 1. Attempt LLM parse
+      let parsed = null
+      try {
+        parsed = await parseTaskWithLlm(title.trim())
+      } catch (err) {
+        console.error('LLM parse failed', err)
+      }
+
+      // 2. Create task
+      await createTask({
+        title: parsed?.title || title.trim(),
+        theme_id: themeId,
+        status: status,
+        priority: (parsed?.priority as any) || 'medium',
+        priority_score: parsed?.priority_score,
+        estimated_duration: parsed?.estimated_duration,
+        effort_score: parsed?.effort_score,
+        value_score: parsed?.value_score,
+        due_date_natural: parsed?.due_date_natural,
+      })
+      setTitle('')
+      setIsAdding(false)
+      onTaskCreated()
+    } catch (err) {
+      console.error('Failed to create task', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!isAdding) {
+    return (
+      <button
+        onClick={() => setIsAdding(true)}
+        className="w-full py-2 flex items-center justify-center gap-2 text-muted hover:text-primary hover:bg-white rounded-lg transition-all border border-transparent hover:border-gray-200 mt-2"
+      >
+        <Plus size={16} />
+        <span className="text-xs font-medium">Add Task</span>
+      </button>
+    )
+  }
+
+  return (
+    <div className="mt-2 bg-white p-2 rounded-lg border border-gray-200 shadow-sm">
+      <form onSubmit={handleSubmit} className="space-y-2">
+        <div className="relative group">
+            <input
+                autoFocus
+                placeholder="Task title (try 'Call Mom 15m !high')"
+                className="w-full px-2 py-1.5 text-sm border rounded focus:ring-1 focus:ring-primary outline-none pr-8"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                onKeyDown={e => {
+                    if (e.key === 'Escape') {
+                        setIsAdding(false)
+                        setTitle('')
+                    }
+                }}
+            />
+            {loading && (
+                <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                    <Loader2 size={14} className="animate-spin text-primary" />
+                </div>
+            )}
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            disabled={!title.trim() || loading}
+            className="flex-1 bg-primary text-white py-1 rounded text-[10px] font-bold uppercase tracking-wider disabled:opacity-50"
+          >
+            {loading ? 'Adding...' : 'Add'}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setIsAdding(false)
+              setTitle('')
+            }}
+            className="flex-1 bg-gray-100 text-gray-600 py-1 rounded text-[10px] font-bold uppercase tracking-wider"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  )
 }

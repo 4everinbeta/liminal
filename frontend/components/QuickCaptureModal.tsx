@@ -8,7 +8,7 @@ import { useVoiceInput } from '@/lib/hooks/useVoiceInput'
 import { useAutoSave } from '@/lib/hooks/useAutoSave'
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut'
 import { triggerQuickCapture } from '@/lib/confetti'
-import { createTask } from '@/lib/api'
+import { createTask, parseTaskWithLlm } from '@/lib/api'
 import { calculateSmartDefaults } from '@/lib/smartDefaults'
 import { useAppStore } from '@/lib/store'
 
@@ -48,11 +48,30 @@ export function QuickCaptureModal({ isOpen, onClose, onTaskCreated }: QuickCaptu
 
     setIsSubmitting(true)
     try {
-      const defaults = calculateSmartDefaults({ title: draft })
+      // 1. Attempt LLM parse for natural language
+      let parsedData = null
+      try {
+        parsedData = await parseTaskWithLlm(draft.trim())
+      } catch (err) {
+        console.error('LLM parse failed, falling back to basic defaults', err)
+      }
+
+      // 2. Combine with smart defaults
+      const defaults = calculateSmartDefaults({ 
+        title: parsedData?.title || draft.trim(),
+        estimated_duration: parsedData?.estimated_duration 
+      })
+
+      // 3. Create task with enriched metadata
       await createTask({
-        title: draft.trim(),
+        title: (parsedData?.title || draft).trim(),
         status: 'backlog',
-        priority: 'medium',
+        priority: parsedData?.priority || 'medium',
+        priority_score: parsedData?.priority_score,
+        estimated_duration: parsedData?.estimated_duration,
+        effort_score: parsedData?.effort_score,
+        value_score: parsedData?.value_score,
+        due_date_natural: parsedData?.due_date_natural,
         ...defaults
       })
       triggerQuickCapture()
