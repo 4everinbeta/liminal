@@ -10,16 +10,16 @@
     - [x] Implement the endpoint logic, invoking the LLM parser function.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Backend Parsing Service' (Protocol in workflow.md) (3b6b31d)
 
-## Phase 2: Frontend Integration
-- [ ] Task: Integrate natural language parsing in Global Quick Capture FAB.
-    - [ ] Update `QuickCaptureModal.tsx` to add a parsing loading state.
-    - [ ] Invoke the `POST /tasks/parse` endpoint when the user submits.
-    - [ ] Pre-populate the progressive disclosure fields with parsed data or immediately create the task if fully parsed and confirmed.
-    - [ ] Write/update failing test in `frontend/__tests__/components/` for the new parsing flow.
-- [ ] Task: Integrate natural language parsing in Capture Tab.
-    - [ ] Update `QuickCapture.tsx` to utilize the new parsing logic and visually reflect the extracted fields to the user.
-- [ ] Task: Integrate natural language parsing in Inline Board Add.
-    - [ ] Update the inline task addition component in `frontend/app/board/page.tsx` to route input through the parsing endpoint before task creation.
-- [ ] Task: Implement robust error handling and fallback logic.
-    - [ ] Ensure all three input methods gracefully fall back to the standard `createTask` behavior (creating a task with just a title) if the parsing endpoint fails, times out, or returns a 500.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Frontend Integration' (Protocol in workflow.md)
+## Phase 2: Frontend Integration [checkpoint: 36bab65]
+- [x] Task: Integrate natural language parsing in Global Quick Capture FAB. (28340aa)
+    - [x] Update `QuickCaptureModal.tsx` to add a parsing loading state.
+    - [x] Invoke the `POST /tasks/parse` endpoint when the user submits.
+    - [x] Pre-populate the progressive disclosure fields with parsed data or immediately create the task if fully parsed and confirmed.
+    - [x] Write/update failing test in `frontend/__tests__/components/` for the new parsing flow.
+- [x] Task: Integrate natural language parsing in Capture Tab. (28340aa)
+    - [x] Update `QuickCapture.tsx` to utilize the new parsing logic and visually reflect the extracted fields to the user.
+- [x] Task: Integrate natural language parsing in Inline Board Add. (28340aa)
+    - [x] Update the inline task addition component in `frontend/app/board/page.tsx` to route input through the parsing endpoint before task creation.
+- [x] Task: Implement robust error handling and fallback logic. (28340aa)
+    - [x] Ensure all three input methods gracefully fall back to the standard `createTask` behavior (creating a task with just a title) if the parsing endpoint fails, times out, or returns a 500.
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Frontend Integration' (Protocol in workflow.md) (36bab65)
