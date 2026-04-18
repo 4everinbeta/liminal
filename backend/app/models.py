@@ -240,3 +240,15 @@ class ChatResponse(SQLModel):
     pending_confirmation: Optional[dict] = None
     confirmation_options: Optional[List[str]] = None
 
+class TaskParseRequest(SQLModel):
+    input_text: str
+
+class TaskParseResponse(SQLModel):
+    title: str
+    due_date_natural: Optional[str] = None
+    estimated_duration: Optional[int] = None
+    priority: Optional[Priority] = None
+    priority_score: Optional[int] = None
+    effort_score: Optional[int] = None
+    value_score: Optional[int] = None
+

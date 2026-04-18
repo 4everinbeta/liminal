@@ -3,13 +3,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from ..database import get_session
-from ..models import Task, TaskCreate, User, AISuggestionStatus
+from ..models import Task, TaskCreate, User, AISuggestionStatus, TaskParseRequest, TaskParseResponse
 from ..auth import get_current_user
 from .. import crud
 from ..websockets import manager
 from ..agents.prioritization import AIPrioritizationService
+from ..agents.parsing import TaskParsingService
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
+
+@router.post("/parse", response_model=TaskParseResponse)
+async def parse_task(
+    request: TaskParseRequest,
+    current_user: User = Depends(get_current_user),
+):
+    parsing_service = TaskParsingService()
+    return await parsing_service.parse_task(request.input_text)
 
 @router.post("", response_model=Task, status_code=status.HTTP_201_CREATED)
 async def create_task(
