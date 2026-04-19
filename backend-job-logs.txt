@@ -1,0 +1,998 @@
+﻿2026-04-18T16:15:12.9548932Z Current runner version: '2.333.1'
+2026-04-18T16:15:12.9573068Z ##[group]Runner Image Provisioner
+2026-04-18T16:15:12.9573833Z Hosted Compute Agent
+2026-04-18T16:15:12.9574837Z Version: 20260213.493
+2026-04-18T16:15:12.9575411Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+2026-04-18T16:15:12.9576339Z Build Date: 2026-02-13T00:28:41Z
+2026-04-18T16:15:12.9577062Z Worker ID: {50cafa61-aa9c-44ab-9cf9-4f73a9c46e10}
+2026-04-18T16:15:12.9577749Z Azure Region: westus3
+2026-04-18T16:15:12.9578288Z ##[endgroup]
+2026-04-18T16:15:12.9579740Z ##[group]Operating System
+2026-04-18T16:15:12.9580356Z Ubuntu
+2026-04-18T16:15:12.9580776Z 24.04.4
+2026-04-18T16:15:12.9581261Z LTS
+2026-04-18T16:15:12.9581723Z ##[endgroup]
+2026-04-18T16:15:12.9582219Z ##[group]Runner Image
+2026-04-18T16:15:12.9582803Z Image: ubuntu-24.04
+2026-04-18T16:15:12.9583282Z Version: 20260413.86.1
+2026-04-18T16:15:12.9584409Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260413.86/images/ubuntu/Ubuntu2404-Readme.md
+2026-04-18T16:15:12.9585896Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260413.86
+2026-04-18T16:15:12.9587140Z ##[endgroup]
+2026-04-18T16:15:12.9588281Z ##[group]GITHUB_TOKEN Permissions
+2026-04-18T16:15:12.9590098Z Contents: read
+2026-04-18T16:15:12.9590635Z Metadata: read
+2026-04-18T16:15:12.9591239Z Packages: read
+2026-04-18T16:15:12.9591738Z ##[endgroup]
+2026-04-18T16:15:12.9594164Z Secret source: Actions
+2026-04-18T16:15:12.9594962Z Prepare workflow directory
+2026-04-18T16:15:13.0000221Z Prepare all required actions
+2026-04-18T16:15:13.0041794Z Getting action download info
+2026-04-18T16:15:13.4571577Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-04-18T16:15:13.5658221Z Download action repository 'actions/setup-python@v4' (SHA:7f4fc3e22c37d6ff65e88745f38bd3157c663f7c)
+2026-04-18T16:15:13.7372432Z Complete job name: Backend (Test)
+2026-04-18T16:15:13.8070215Z ##[group]Run actions/checkout@v4
+2026-04-18T16:15:13.8071056Z with:
+2026-04-18T16:15:13.8071468Z   repository: 4everinbeta/liminal
+2026-04-18T16:15:13.8072113Z   token: ***
+2026-04-18T16:15:13.8072490Z   ssh-strict: true
+2026-04-18T16:15:13.8072883Z   ssh-user: git
+2026-04-18T16:15:13.8073273Z   persist-credentials: true
+2026-04-18T16:15:13.8073724Z   clean: true
+2026-04-18T16:15:13.8074119Z   sparse-checkout-cone-mode: true
+2026-04-18T16:15:13.8074583Z   fetch-depth: 1
+2026-04-18T16:15:13.8075069Z   fetch-tags: false
+2026-04-18T16:15:13.8075614Z   show-progress: true
+2026-04-18T16:15:13.8076276Z   lfs: false
+2026-04-18T16:15:13.8076640Z   submodules: false
+2026-04-18T16:15:13.8077046Z   set-safe-directory: true
+2026-04-18T16:15:13.8077754Z ##[endgroup]
+2026-04-18T16:15:13.9177520Z Syncing repository: 4everinbeta/liminal
+2026-04-18T16:15:13.9179277Z ##[group]Getting Git version info
+2026-04-18T16:15:13.9179952Z Working directory is '/home/runner/work/liminal/liminal'
+2026-04-18T16:15:13.9180959Z [command]/usr/bin/git version
+2026-04-18T16:15:13.9223782Z git version 2.53.0
+2026-04-18T16:15:13.9253994Z ##[endgroup]
+2026-04-18T16:15:13.9281321Z Temporarily overriding HOME='/home/runner/work/_temp/2a234192-93be-4f21-a783-76bcdfb40fbc' before making global git config changes
+2026-04-18T16:15:13.9283798Z Adding repository directory to the temporary git global config as a safe directory
+2026-04-18T16:15:13.9288404Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/liminal/liminal
+2026-04-18T16:15:13.9324178Z Deleting the contents of '/home/runner/work/liminal/liminal'
+2026-04-18T16:15:13.9328283Z ##[group]Initializing the repository
+2026-04-18T16:15:13.9333376Z [command]/usr/bin/git init /home/runner/work/liminal/liminal
+2026-04-18T16:15:13.9420623Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-04-18T16:15:13.9422198Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-04-18T16:15:13.9423581Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-04-18T16:15:13.9424563Z hint: call:
+2026-04-18T16:15:13.9424913Z hint:
+2026-04-18T16:15:13.9425523Z hint: 	git config --global init.defaultBranch <name>
+2026-04-18T16:15:13.9426352Z hint:
+2026-04-18T16:15:13.9426927Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-04-18T16:15:13.9428284Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-04-18T16:15:13.9429105Z hint:
+2026-04-18T16:15:13.9429480Z hint: 	git branch -m <name>
+2026-04-18T16:15:13.9429896Z hint:
+2026-04-18T16:15:13.9430464Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-04-18T16:15:13.9431396Z Initialized empty Git repository in /home/runner/work/liminal/liminal/.git/
+2026-04-18T16:15:13.9433479Z [command]/usr/bin/git remote add origin https://github.com/4everinbeta/liminal
+2026-04-18T16:15:13.9462571Z ##[endgroup]
+2026-04-18T16:15:13.9463303Z ##[group]Disabling automatic garbage collection
+2026-04-18T16:15:13.9466579Z [command]/usr/bin/git config --local gc.auto 0
+2026-04-18T16:15:13.9494262Z ##[endgroup]
+2026-04-18T16:15:13.9494935Z ##[group]Setting up auth
+2026-04-18T16:15:13.9502047Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-04-18T16:15:13.9530710Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-04-18T16:15:13.9803806Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-04-18T16:15:13.9834104Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-04-18T16:15:14.0057018Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-04-18T16:15:14.0094236Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-04-18T16:15:14.0330399Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-04-18T16:15:14.0367797Z ##[endgroup]
+2026-04-18T16:15:14.0376036Z ##[group]Fetching the repository
+2026-04-18T16:15:14.0378623Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +376b29bfd11f6497850541d04d62450d6903f42a:refs/remotes/origin/main
+2026-04-18T16:15:15.0510605Z From https://github.com/4everinbeta/liminal
+2026-04-18T16:15:15.0512746Z  * [new ref]         376b29bfd11f6497850541d04d62450d6903f42a -> origin/main
+2026-04-18T16:15:15.0537751Z ##[endgroup]
+2026-04-18T16:15:15.0539392Z ##[group]Determining the checkout info
+2026-04-18T16:15:15.0541271Z ##[endgroup]
+2026-04-18T16:15:15.0543923Z [command]/usr/bin/git sparse-checkout disable
+2026-04-18T16:15:15.0578500Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-04-18T16:15:15.0606459Z ##[group]Checking out the ref
+2026-04-18T16:15:15.0607773Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-04-18T16:15:15.0875533Z Switched to a new branch 'main'
+2026-04-18T16:15:15.0877724Z branch 'main' set up to track 'origin/main'.
+2026-04-18T16:15:15.0885553Z ##[endgroup]
+2026-04-18T16:15:15.0919742Z [command]/usr/bin/git log -1 --format=%H
+2026-04-18T16:15:15.0941004Z 376b29bfd11f6497850541d04d62450d6903f42a
+2026-04-18T16:15:15.1256826Z ##[group]Run actions/setup-python@v4
+2026-04-18T16:15:15.1258046Z with:
+2026-04-18T16:15:15.1258842Z   python-version: 3.11
+2026-04-18T16:15:15.1259772Z   cache: pip
+2026-04-18T16:15:15.1260595Z   check-latest: false
+2026-04-18T16:15:15.1261838Z   token: ***
+2026-04-18T16:15:15.1262706Z   update-environment: true
+2026-04-18T16:15:15.1263737Z   allow-prereleases: false
+2026-04-18T16:15:15.1264725Z ##[endgroup]
+2026-04-18T16:15:15.2954153Z ##[group]Installed versions
+2026-04-18T16:15:15.3058944Z Successfully set up CPython (3.11.15)
+2026-04-18T16:15:15.3060312Z ##[endgroup]
+2026-04-18T16:15:15.3791708Z [command]/opt/hostedtoolcache/Python/3.11.15/x64/bin/pip cache dir
+2026-04-18T16:15:15.6802467Z /home/runner/.cache/pip
+2026-04-18T16:15:15.9609462Z Cache hit for: setup-python-Linux-24.04-Ubuntu-python-3.11.15-pip-9d491a1c9e9543544e5f828bfdffb988b1fb8bc114bd3279eb47e8e886c7a6e2
+2026-04-18T16:15:17.1938453Z Received 16777216 of 151611415 (11.1%), 16.0 MBs/sec
+2026-04-18T16:15:18.1967891Z Received 134834199 of 151611415 (88.9%), 64.3 MBs/sec
+2026-04-18T16:15:18.2863796Z Received 151611415 of 151611415 (100.0%), 69.1 MBs/sec
+2026-04-18T16:15:18.2864725Z Cache Size: ~145 MB (151611415 B)
+2026-04-18T16:15:18.2982077Z [command]/usr/bin/tar -xf /home/runner/work/_temp/dc9f5197-4fb3-432d-b358-63f14b2059f3/cache.tzst -P -C /home/runner/work/liminal/liminal --use-compress-program unzstd
+2026-04-18T16:15:18.5294724Z Cache restored successfully
+2026-04-18T16:15:18.5365446Z Cache restored from key: setup-python-Linux-24.04-Ubuntu-python-3.11.15-pip-9d491a1c9e9543544e5f828bfdffb988b1fb8bc114bd3279eb47e8e886c7a6e2
+2026-04-18T16:15:18.5519050Z ##[group]Run python -m pip install --upgrade pip
+2026-04-18T16:15:18.5519515Z [36;1mpython -m pip install --upgrade pip[0m
+2026-04-18T16:15:18.5519835Z [36;1mpip install -r requirements.txt[0m
+2026-04-18T16:15:18.5547833Z shell: /usr/bin/bash -e {0}
+2026-04-18T16:15:18.5548101Z env:
+2026-04-18T16:15:18.5548366Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-18T16:15:18.5548813Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+2026-04-18T16:15:18.5549302Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-18T16:15:18.5549705Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-18T16:15:18.5550073Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-18T16:15:18.5550433Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+2026-04-18T16:15:18.5550742Z ##[endgroup]
+2026-04-18T16:15:19.0143248Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages (26.0.1)
+2026-04-18T16:15:19.6878400Z Collecting fastapi>=0.100.0 (from -r requirements.txt (line 1))
+2026-04-18T16:15:19.7677441Z   Downloading fastapi-0.136.0-py3-none-any.whl.metadata (28 kB)
+2026-04-18T16:15:19.8161948Z Collecting uvicorn>=0.23.0 (from uvicorn[standard]>=0.23.0->-r requirements.txt (line 2))
+2026-04-18T16:15:19.8281537Z   Downloading uvicorn-0.44.0-py3-none-any.whl.metadata (6.7 kB)
+2026-04-18T16:15:19.8651940Z Collecting sqlmodel>=0.0.14 (from -r requirements.txt (line 3))
+2026-04-18T16:15:19.8783068Z   Downloading sqlmodel-0.0.38-py3-none-any.whl.metadata (10 kB)
+2026-04-18T16:15:19.9493716Z Collecting psycopg2-binary>=2.9.6 (from -r requirements.txt (line 4))
+2026-04-18T16:15:19.9518363Z   Using cached psycopg2_binary-2.9.11-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (4.9 kB)
+2026-04-18T16:15:20.0037215Z Collecting asyncpg>=0.28.0 (from -r requirements.txt (line 5))
+2026-04-18T16:15:20.0053260Z   Using cached asyncpg-0.31.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (4.4 kB)
+2026-04-18T16:15:20.0256480Z Collecting python-multipart>=0.0.6 (from -r requirements.txt (line 6))
+2026-04-18T16:15:20.0364824Z   Downloading python_multipart-0.0.26-py3-none-any.whl.metadata (2.1 kB)
+2026-04-18T16:15:20.0580946Z Collecting email-validator>=2.0.0 (from -r requirements.txt (line 7))
+2026-04-18T16:15:20.0594148Z   Using cached email_validator-2.3.0-py3-none-any.whl.metadata (26 kB)
+2026-04-18T16:15:20.0777835Z Collecting passlib>=1.7.4 (from passlib[argon2]>=1.7.4->-r requirements.txt (line 8))
+2026-04-18T16:15:20.0790827Z   Using cached passlib-1.7.4-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-04-18T16:15:20.0959423Z Collecting python-jose>=3.3.0 (from python-jose[cryptography]>=3.3.0->-r requirements.txt (line 9))
+2026-04-18T16:15:20.0971995Z   Using cached python_jose-3.5.0-py2.py3-none-any.whl.metadata (5.5 kB)
+2026-04-18T16:15:20.1372421Z Collecting google-auth>=2.23.0 (from -r requirements.txt (line 10))
+2026-04-18T16:15:20.1507407Z   Downloading google_auth-2.49.2-py3-none-any.whl.metadata (6.2 kB)
+2026-04-18T16:15:20.1753964Z Collecting pydantic-settings>=2.0.0 (from -r requirements.txt (line 11))
+2026-04-18T16:15:20.1767021Z   Using cached pydantic_settings-2.13.1-py3-none-any.whl.metadata (3.4 kB)
+2026-04-18T16:15:20.1968651Z Collecting dateparser>=1.2.0 (from -r requirements.txt (line 14))
+2026-04-18T16:15:20.2077046Z   Downloading dateparser-1.4.0-py3-none-any.whl.metadata (31 kB)
+2026-04-18T16:15:20.7750894Z Collecting rapidfuzz>=3.0.0 (from -r requirements.txt (line 17))
+2026-04-18T16:15:20.7893975Z   Downloading rapidfuzz-3.14.5-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (12 kB)
+2026-04-18T16:15:20.8805191Z Collecting semantic-kernel>=1.0.0 (from -r requirements.txt (line 20))
+2026-04-18T16:15:20.8935126Z   Downloading semantic_kernel-1.41.2-py3-none-any.whl.metadata (13 kB)
+2026-04-18T16:15:20.9354263Z Collecting pytest>=7.4.0 (from -r requirements.txt (line 23))
+2026-04-18T16:15:20.9469124Z   Downloading pytest-9.0.3-py3-none-any.whl.metadata (7.6 kB)
+2026-04-18T16:15:20.9727557Z Collecting pytest-asyncio>=0.21.0 (from -r requirements.txt (line 24))
+2026-04-18T16:15:20.9740397Z   Using cached pytest_asyncio-1.3.0-py3-none-any.whl.metadata (4.1 kB)
+2026-04-18T16:15:20.9952085Z Collecting httpx>=0.24.0 (from -r requirements.txt (line 25))
+2026-04-18T16:15:20.9964860Z   Using cached httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+2026-04-18T16:15:21.0152071Z Collecting aiosqlite>=0.19.0 (from -r requirements.txt (line 26))
+2026-04-18T16:15:21.0164813Z   Using cached aiosqlite-0.22.1-py3-none-any.whl.metadata (4.3 kB)
+2026-04-18T16:15:21.0413522Z Collecting alembic>=1.12.0 (from -r requirements.txt (line 27))
+2026-04-18T16:15:21.0426523Z   Using cached alembic-1.18.4-py3-none-any.whl.metadata (7.2 kB)
+2026-04-18T16:15:21.0628418Z Collecting freezegun>=1.2.0 (from -r requirements.txt (line 28))
+2026-04-18T16:15:21.0641635Z   Using cached freezegun-1.5.5-py3-none-any.whl.metadata (13 kB)
+2026-04-18T16:15:21.0913872Z Collecting starlette>=0.46.0 (from fastapi>=0.100.0->-r requirements.txt (line 1))
+2026-04-18T16:15:21.0927533Z   Using cached starlette-1.0.0-py3-none-any.whl.metadata (6.3 kB)
+2026-04-18T16:15:21.2357044Z Collecting pydantic>=2.9.0 (from fastapi>=0.100.0->-r requirements.txt (line 1))
+2026-04-18T16:15:21.2474604Z   Downloading pydantic-2.13.2-py3-none-any.whl.metadata (108 kB)
+2026-04-18T16:15:21.2858757Z Collecting typing-extensions>=4.8.0 (from fastapi>=0.100.0->-r requirements.txt (line 1))
+2026-04-18T16:15:21.2871766Z   Using cached typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+2026-04-18T16:15:21.3027050Z Collecting typing-inspection>=0.4.2 (from fastapi>=0.100.0->-r requirements.txt (line 1))
+2026-04-18T16:15:21.3040307Z   Using cached typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+2026-04-18T16:15:21.3188871Z Collecting annotated-doc>=0.0.2 (from fastapi>=0.100.0->-r requirements.txt (line 1))
+2026-04-18T16:15:21.3201290Z   Using cached annotated_doc-0.0.4-py3-none-any.whl.metadata (6.6 kB)
+2026-04-18T16:15:21.3426922Z Collecting click>=7.0 (from uvicorn>=0.23.0->uvicorn[standard]>=0.23.0->-r requirements.txt (line 2))
+2026-04-18T16:15:21.3536570Z   Downloading click-8.3.2-py3-none-any.whl.metadata (2.6 kB)
+2026-04-18T16:15:21.3717373Z Collecting h11>=0.8 (from uvicorn>=0.23.0->uvicorn[standard]>=0.23.0->-r requirements.txt (line 2))
+2026-04-18T16:15:21.3730108Z   Using cached h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+2026-04-18T16:15:21.6502028Z Collecting SQLAlchemy<2.1.0,>=2.0.14 (from sqlmodel>=0.0.14->-r requirements.txt (line 3))
+2026-04-18T16:15:21.6624617Z   Downloading sqlalchemy-2.0.49-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (9.5 kB)
+2026-04-18T16:15:21.8517467Z Collecting greenlet>=1 (from SQLAlchemy<2.1.0,>=2.0.14->sqlmodel>=0.0.14->-r requirements.txt (line 3))
+2026-04-18T16:15:21.8633382Z   Downloading greenlet-3.4.0-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.7 kB)
+2026-04-18T16:15:21.8894493Z Collecting dnspython>=2.0.0 (from email-validator>=2.0.0->-r requirements.txt (line 7))
+2026-04-18T16:15:21.8907256Z   Using cached dnspython-2.8.0-py3-none-any.whl.metadata (5.7 kB)
+2026-04-18T16:15:21.9104107Z Collecting idna>=2.0.0 (from email-validator>=2.0.0->-r requirements.txt (line 7))
+2026-04-18T16:15:21.9116698Z   Using cached idna-3.11-py3-none-any.whl.metadata (8.4 kB)
+2026-04-18T16:15:21.9320125Z Collecting ecdsa!=0.15 (from python-jose>=3.3.0->python-jose[cryptography]>=3.3.0->-r requirements.txt (line 9))
+2026-04-18T16:15:21.9428724Z   Downloading ecdsa-0.19.2-py2.py3-none-any.whl.metadata (29 kB)
+2026-04-18T16:15:21.9653354Z Collecting rsa!=4.1.1,!=4.4,<5.0,>=4.0 (from python-jose>=3.3.0->python-jose[cryptography]>=3.3.0->-r requirements.txt (line 9))
+2026-04-18T16:15:21.9665779Z   Using cached rsa-4.9.1-py3-none-any.whl.metadata (5.6 kB)
+2026-04-18T16:15:21.9914546Z Collecting pyasn1>=0.5.0 (from python-jose>=3.3.0->python-jose[cryptography]>=3.3.0->-r requirements.txt (line 9))
+2026-04-18T16:15:21.9928361Z   Using cached pyasn1-0.6.3-py3-none-any.whl.metadata (8.4 kB)
+2026-04-18T16:15:22.0176836Z Collecting pyasn1-modules>=0.2.1 (from google-auth>=2.23.0->-r requirements.txt (line 10))
+2026-04-18T16:15:22.0190114Z   Using cached pyasn1_modules-0.4.2-py3-none-any.whl.metadata (3.5 kB)
+2026-04-18T16:15:22.2074664Z Collecting cryptography>=38.0.3 (from google-auth>=2.23.0->-r requirements.txt (line 10))
+2026-04-18T16:15:22.2189830Z   Downloading cryptography-46.0.7-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (5.7 kB)
+2026-04-18T16:15:22.2487436Z Collecting python-dotenv>=0.21.0 (from pydantic-settings>=2.0.0->-r requirements.txt (line 11))
+2026-04-18T16:15:22.2501532Z   Using cached python_dotenv-1.2.2-py3-none-any.whl.metadata (27 kB)
+2026-04-18T16:15:22.2700787Z Collecting python-dateutil>=2.7.0 (from dateparser>=1.2.0->-r requirements.txt (line 14))
+2026-04-18T16:15:22.2713199Z   Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-04-18T16:15:22.3057363Z Collecting pytz>=2024.2 (from dateparser>=1.2.0->-r requirements.txt (line 14))
+2026-04-18T16:15:22.3070540Z   Using cached pytz-2026.1.post1-py2.py3-none-any.whl.metadata (22 kB)
+2026-04-18T16:15:22.7199543Z Collecting regex>=2024.9.11 (from dateparser>=1.2.0->-r requirements.txt (line 14))
+2026-04-18T16:15:22.7316256Z   Downloading regex-2026.4.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (40 kB)
+2026-04-18T16:15:22.7547526Z Collecting tzlocal>=0.2 (from dateparser>=1.2.0->-r requirements.txt (line 14))
+2026-04-18T16:15:22.7560621Z   Using cached tzlocal-5.3.1-py3-none-any.whl.metadata (7.6 kB)
+2026-04-18T16:15:22.7770859Z Collecting azure-ai-projects~=1.0.0b12 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:22.7783806Z   Using cached azure_ai_projects-1.0.0-py3-none-any.whl.metadata (21 kB)
+2026-04-18T16:15:22.7960640Z Collecting azure-ai-agents>=1.2.0b3 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:22.7973300Z   Using cached azure_ai_agents-1.2.0b6-py3-none-any.whl.metadata (74 kB)
+2026-04-18T16:15:23.3383014Z Collecting aiohttp~=3.8 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:23.3497588Z   Downloading aiohttp-3.13.5-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.1 kB)
+2026-04-18T16:15:23.3735643Z Collecting cloudevents~=1.0 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:23.3748825Z   Using cached cloudevents-1.12.1-py3-none-any.whl.metadata (7.2 kB)
+2026-04-18T16:15:23.3802030Z Collecting pydantic>=2.9.0 (from fastapi>=0.100.0->-r requirements.txt (line 1))
+2026-04-18T16:15:23.3814765Z   Using cached pydantic-2.12.5-py3-none-any.whl.metadata (90 kB)
+2026-04-18T16:15:23.4040484Z Collecting defusedxml~=0.7 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:23.4053150Z   Using cached defusedxml-0.7.1-py2.py3-none-any.whl.metadata (32 kB)
+2026-04-18T16:15:23.4289404Z Collecting azure-identity>=1.13 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:23.4302073Z   Using cached azure_identity-1.25.3-py3-none-any.whl.metadata (91 kB)
+2026-04-18T16:15:23.6130264Z Collecting numpy>=1.25.0 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:23.6245428Z   Downloading numpy-2.4.4-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
+2026-04-18T16:15:23.6738707Z Collecting openai>=2.0.0 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:23.6850458Z   Downloading openai-2.32.0-py3-none-any.whl.metadata (31 kB)
+2026-04-18T16:15:23.7133157Z Collecting openapi_core<0.20,>=0.18 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:23.7146972Z   Using cached openapi_core-0.19.5-py3-none-any.whl.metadata (6.6 kB)
+2026-04-18T16:15:23.8866432Z Collecting websockets<16,>=13 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:23.8881169Z   Using cached websockets-15.0.1-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.8 kB)
+2026-04-18T16:15:23.9299350Z Collecting aiortc>=1.9.0 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:23.9312280Z   Using cached aiortc-1.14.0-py3-none-any.whl.metadata (4.9 kB)
+2026-04-18T16:15:23.9568892Z Collecting opentelemetry-api~=1.24 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:23.9682833Z   Downloading opentelemetry_api-1.41.0-py3-none-any.whl.metadata (1.5 kB)
+2026-04-18T16:15:23.9943071Z Collecting opentelemetry-sdk~=1.24 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:24.0053486Z   Downloading opentelemetry_sdk-1.41.0-py3-none-any.whl.metadata (1.7 kB)
+2026-04-18T16:15:24.0268903Z Collecting prance<25.4.9,>=23.6.21 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:24.0281454Z   Using cached prance-25.4.8.0-py3-none-any.whl.metadata (13 kB)
+2026-04-18T16:15:24.1000619Z Collecting pybars4~=0.9 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:24.1001430Z   Using cached pybars4-0.9.13-py3-none-any.whl
+2026-04-18T16:15:24.1243165Z Collecting jinja2~=3.1 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:24.1256304Z   Using cached jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+2026-04-18T16:15:24.1442720Z Collecting nest-asyncio~=1.6 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:24.1455393Z   Using cached nest_asyncio-1.6.0-py3-none-any.whl.metadata (2.8 kB)
+2026-04-18T16:15:24.2587655Z Collecting scipy>=1.15.1 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:24.2603040Z   Using cached scipy-1.17.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+2026-04-18T16:15:24.2929486Z Collecting mcp>=1.26.0 (from semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:24.3044609Z   Downloading mcp-1.27.0-py3-none-any.whl.metadata (8.2 kB)
+2026-04-18T16:15:24.3266365Z Collecting aiohappyeyeballs>=2.5.0 (from aiohttp~=3.8->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:24.3279528Z   Using cached aiohappyeyeballs-2.6.1-py3-none-any.whl.metadata (5.9 kB)
+2026-04-18T16:15:24.3438503Z Collecting aiosignal>=1.4.0 (from aiohttp~=3.8->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:24.3451071Z   Using cached aiosignal-1.4.0-py3-none-any.whl.metadata (3.7 kB)
+2026-04-18T16:15:24.3641538Z Collecting attrs>=17.3.0 (from aiohttp~=3.8->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:24.3654164Z   Using cached attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+2026-04-18T16:15:24.4308036Z Collecting frozenlist>=1.1.1 (from aiohttp~=3.8->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:24.4322538Z   Using cached frozenlist-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (20 kB)
+2026-04-18T16:15:24.6410941Z Collecting multidict<7.0,>=4.5 (from aiohttp~=3.8->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:24.6426202Z   Using cached multidict-6.7.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.3 kB)
+2026-04-18T16:15:24.6953416Z Collecting propcache>=0.2.0 (from aiohttp~=3.8->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:24.6966688Z   Using cached propcache-0.4.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (13 kB)
+2026-04-18T16:15:25.0397340Z Collecting yarl<2.0,>=1.17.0 (from aiohttp~=3.8->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.0412231Z   Using cached yarl-1.23.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (79 kB)
+2026-04-18T16:15:25.0642031Z Collecting isodate>=0.6.1 (from azure-ai-projects~=1.0.0b12->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.0654349Z   Using cached isodate-0.7.2-py3-none-any.whl.metadata (11 kB)
+2026-04-18T16:15:25.0884209Z Collecting azure-core>=1.30.0 (from azure-ai-projects~=1.0.0b12->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.0896931Z   Using cached azure_core-1.39.0-py3-none-any.whl.metadata (48 kB)
+2026-04-18T16:15:25.1172531Z Collecting azure-storage-blob>=12.15.0 (from azure-ai-projects~=1.0.0b12->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.1184962Z   Using cached azure_storage_blob-12.28.0-py3-none-any.whl.metadata (26 kB)
+2026-04-18T16:15:25.1374867Z Collecting deprecation<3.0,>=2.0 (from cloudevents~=1.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.1388090Z   Using cached deprecation-2.1.0-py2.py3-none-any.whl.metadata (4.6 kB)
+2026-04-18T16:15:25.1625972Z Collecting packaging (from deprecation<3.0,>=2.0->cloudevents~=1.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.1736063Z   Downloading packaging-26.1-py3-none-any.whl.metadata (3.5 kB)
+2026-04-18T16:15:25.2262353Z Collecting MarkupSafe>=2.0 (from jinja2~=3.1->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.2276995Z   Using cached markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+2026-04-18T16:15:25.2549369Z Collecting jsonschema<5.0.0,>=4.18.0 (from openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.2562664Z   Using cached jsonschema-4.26.0-py3-none-any.whl.metadata (7.6 kB)
+2026-04-18T16:15:25.2752034Z Collecting jsonschema-path<0.4.0,>=0.3.1 (from openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.2765109Z   Using cached jsonschema_path-0.3.4-py3-none-any.whl.metadata (4.3 kB)
+2026-04-18T16:15:25.2984191Z Collecting more-itertools (from openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.3095192Z   Downloading more_itertools-11.0.2-py3-none-any.whl.metadata (41 kB)
+2026-04-18T16:15:25.3326431Z Collecting openapi-schema-validator<0.7.0,>=0.6.0 (from openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.3338891Z   Using cached openapi_schema_validator-0.6.3-py3-none-any.whl.metadata (5.4 kB)
+2026-04-18T16:15:25.3560968Z Collecting openapi-spec-validator<0.8.0,>=0.7.1 (from openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.3574279Z   Using cached openapi_spec_validator-0.7.2-py3-none-any.whl.metadata (5.7 kB)
+2026-04-18T16:15:25.3757583Z Collecting parse (from openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.3770690Z   Using cached parse-1.21.1-py2.py3-none-any.whl.metadata (21 kB)
+2026-04-18T16:15:25.4090899Z Collecting werkzeug<3.1.2 (from openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.4104122Z   Using cached werkzeug-3.1.1-py3-none-any.whl.metadata (3.7 kB)
+2026-04-18T16:15:25.4293229Z Collecting jsonschema-specifications>=2023.03.6 (from jsonschema<5.0.0,>=4.18.0->openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.4306331Z   Using cached jsonschema_specifications-2025.9.1-py3-none-any.whl.metadata (2.9 kB)
+2026-04-18T16:15:25.4544907Z Collecting referencing>=0.28.4 (from jsonschema<5.0.0,>=4.18.0->openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.4558327Z   Using cached referencing-0.37.0-py3-none-any.whl.metadata (2.8 kB)
+2026-04-18T16:15:25.6867067Z Collecting rpds-py>=0.25.0 (from jsonschema<5.0.0,>=4.18.0->openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.6882271Z   Using cached rpds_py-0.30.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.1 kB)
+2026-04-18T16:15:25.7282262Z Collecting PyYAML>=5.1 (from jsonschema-path<0.4.0,>=0.3.1->openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.7295888Z   Using cached pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+2026-04-18T16:15:25.7480995Z Collecting pathable<0.5.0,>=0.4.1 (from jsonschema-path<0.4.0,>=0.3.1->openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.7494062Z   Using cached pathable-0.4.4-py3-none-any.whl.metadata (1.8 kB)
+2026-04-18T16:15:25.7529342Z Collecting referencing>=0.28.4 (from jsonschema<5.0.0,>=4.18.0->openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.7542459Z   Using cached referencing-0.36.2-py3-none-any.whl.metadata (2.8 kB)
+2026-04-18T16:15:25.7790442Z Collecting requests<3.0.0,>=2.31.0 (from jsonschema-path<0.4.0,>=0.3.1->openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.7901129Z   Downloading requests-2.33.1-py3-none-any.whl.metadata (4.8 kB)
+2026-04-18T16:15:25.8132930Z Collecting rfc3339-validator (from openapi-schema-validator<0.7.0,>=0.6.0->openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.8146412Z   Using cached rfc3339_validator-0.1.4-py2.py3-none-any.whl.metadata (1.5 kB)
+2026-04-18T16:15:25.8532785Z Collecting lazy-object-proxy<2.0.0,>=1.7.1 (from openapi-spec-validator<0.8.0,>=0.7.1->openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.8546939Z   Using cached lazy_object_proxy-1.12.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (5.1 kB)
+2026-04-18T16:15:25.8833933Z Collecting importlib-metadata<8.8.0,>=6.0 (from opentelemetry-api~=1.24->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.8846609Z   Using cached importlib_metadata-8.7.1-py3-none-any.whl.metadata (4.7 kB)
+2026-04-18T16:15:25.9082678Z Collecting zipp>=3.20 (from importlib-metadata<8.8.0,>=6.0->opentelemetry-api~=1.24->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.9192185Z   Downloading zipp-3.23.1-py3-none-any.whl.metadata (3.6 kB)
+2026-04-18T16:15:25.9434163Z Collecting opentelemetry-semantic-conventions==0.62b0 (from opentelemetry-sdk~=1.24->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:25.9547976Z   Downloading opentelemetry_semantic_conventions-0.62b0-py3-none-any.whl.metadata (2.5 kB)
+2026-04-18T16:15:25.9909326Z Collecting chardet>=5.2 (from prance<25.4.9,>=23.6.21->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:26.0021835Z   Downloading chardet-7.4.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (9.4 kB)
+2026-04-18T16:15:26.1181620Z Collecting ruamel.yaml>=0.18.10 (from prance<25.4.9,>=23.6.21->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:26.1195516Z   Using cached ruamel_yaml-0.19.1-py3-none-any.whl.metadata (16 kB)
+2026-04-18T16:15:26.2025233Z Collecting PyMeta3>=0.5.1 (from pybars4~=0.9->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:26.2026395Z   Using cached pymeta3-0.5.1-py3-none-any.whl
+2026-04-18T16:15:26.2190263Z Collecting annotated-types>=0.6.0 (from pydantic>=2.9.0->fastapi>=0.100.0->-r requirements.txt (line 1))
+2026-04-18T16:15:26.2202982Z   Using cached annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+2026-04-18T16:15:26.9550715Z Collecting pydantic-core==2.41.5 (from pydantic>=2.9.0->fastapi>=0.100.0->-r requirements.txt (line 1))
+2026-04-18T16:15:26.9676548Z   Downloading pydantic_core-2.41.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.3 kB)
+2026-04-18T16:15:27.0680806Z Collecting charset_normalizer<4,>=2 (from requests<3.0.0,>=2.31.0->jsonschema-path<0.4.0,>=0.3.1->openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:27.0794488Z   Downloading charset_normalizer-3.4.7-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (40 kB)
+2026-04-18T16:15:27.1105910Z Collecting urllib3<3,>=1.26 (from requests<3.0.0,>=2.31.0->jsonschema-path<0.4.0,>=0.3.1->openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:27.1118581Z   Using cached urllib3-2.6.3-py3-none-any.whl.metadata (6.9 kB)
+2026-04-18T16:15:27.1343579Z Collecting certifi>=2023.5.7 (from requests<3.0.0,>=2.31.0->jsonschema-path<0.4.0,>=0.3.1->openapi_core<0.20,>=0.18->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:27.1355864Z   Using cached certifi-2026.2.25-py3-none-any.whl.metadata (2.5 kB)
+2026-04-18T16:15:27.1636701Z Collecting iniconfig>=1.0.1 (from pytest>=7.4.0->-r requirements.txt (line 23))
+2026-04-18T16:15:27.1649738Z   Using cached iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+2026-04-18T16:15:27.1829072Z Collecting pluggy<2,>=1.5 (from pytest>=7.4.0->-r requirements.txt (line 23))
+2026-04-18T16:15:27.1841609Z   Using cached pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+2026-04-18T16:15:27.2076212Z Collecting pygments>=2.7.2 (from pytest>=7.4.0->-r requirements.txt (line 23))
+2026-04-18T16:15:27.2206781Z   Downloading pygments-2.20.0-py3-none-any.whl.metadata (2.5 kB)
+2026-04-18T16:15:27.2522732Z Collecting anyio (from httpx>=0.24.0->-r requirements.txt (line 25))
+2026-04-18T16:15:27.2631899Z   Downloading anyio-4.13.0-py3-none-any.whl.metadata (4.5 kB)
+2026-04-18T16:15:27.2992239Z Collecting httpcore==1.* (from httpx>=0.24.0->-r requirements.txt (line 25))
+2026-04-18T16:15:27.3004975Z   Using cached httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+2026-04-18T16:15:27.3318877Z Collecting Mako (from alembic>=1.12.0->-r requirements.txt (line 27))
+2026-04-18T16:15:27.3433116Z   Downloading mako-1.3.11-py3-none-any.whl.metadata (2.9 kB)
+2026-04-18T16:15:27.3715312Z Collecting aioice<1.0.0,>=0.10.1 (from aiortc>=1.9.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:27.3729335Z   Using cached aioice-0.10.2-py3-none-any.whl.metadata (4.1 kB)
+2026-04-18T16:15:27.4205323Z Collecting av<17.0.0,>=14.0.0 (from aiortc>=1.9.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:27.4220329Z   Using cached av-16.1.0-cp311-cp311-manylinux_2_28_x86_64.whl.metadata (4.6 kB)
+2026-04-18T16:15:27.4792662Z Collecting google-crc32c>=1.1 (from aiortc>=1.9.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:27.4808449Z   Using cached google_crc32c-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_5_x86_64.whl.metadata (1.7 kB)
+2026-04-18T16:15:27.4997258Z Collecting pyee>=13.0.0 (from aiortc>=1.9.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:27.5010743Z   Using cached pyee-13.0.1-py3-none-any.whl.metadata (3.0 kB)
+2026-04-18T16:15:27.5904575Z Collecting pylibsrtp>=0.10.0 (from aiortc>=1.9.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:27.5919557Z   Using cached pylibsrtp-1.0.0-cp310-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl.metadata (4.0 kB)
+2026-04-18T16:15:27.6124140Z Collecting pyopenssl>=25.0.0 (from aiortc>=1.9.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:27.6137481Z   Using cached pyopenssl-26.0.0-py3-none-any.whl.metadata (18 kB)
+2026-04-18T16:15:27.6333551Z Collecting ifaddr>=0.2.0 (from aioice<1.0.0,>=0.10.1->aiortc>=1.9.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:27.6346089Z   Using cached ifaddr-0.2.0-py3-none-any.whl.metadata (4.9 kB)
+2026-04-18T16:15:27.6760759Z Collecting msal>=1.35.1 (from azure-identity>=1.13->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:27.6874654Z   Downloading msal-1.36.0-py3-none-any.whl.metadata (11 kB)
+2026-04-18T16:15:27.7063728Z Collecting msal-extensions>=1.2.0 (from azure-identity>=1.13->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:27.7076379Z   Using cached msal_extensions-1.3.1-py3-none-any.whl.metadata (7.8 kB)
+2026-04-18T16:15:27.8153571Z Collecting cffi>=2.0.0 (from cryptography>=38.0.3->google-auth>=2.23.0->-r requirements.txt (line 10))
+2026-04-18T16:15:27.8167761Z   Using cached cffi-2.0.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.6 kB)
+2026-04-18T16:15:27.8345502Z Collecting pycparser (from cffi>=2.0.0->cryptography>=38.0.3->google-auth>=2.23.0->-r requirements.txt (line 10))
+2026-04-18T16:15:27.8358305Z   Using cached pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+2026-04-18T16:15:27.8550467Z Collecting six>=1.9.0 (from ecdsa!=0.15->python-jose>=3.3.0->python-jose[cryptography]>=3.3.0->-r requirements.txt (line 9))
+2026-04-18T16:15:27.8562943Z   Using cached six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-04-18T16:15:27.8837208Z Collecting httpx-sse>=0.4 (from mcp>=1.26.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:27.8849877Z   Using cached httpx_sse-0.4.3-py3-none-any.whl.metadata (9.7 kB)
+2026-04-18T16:15:27.9124109Z Collecting pyjwt>=2.10.1 (from pyjwt[crypto]>=2.10.1->mcp>=1.26.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:27.9136379Z   Using cached pyjwt-2.12.1-py3-none-any.whl.metadata (4.1 kB)
+2026-04-18T16:15:27.9377212Z Collecting sse-starlette>=1.6.1 (from mcp>=1.26.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:27.9490051Z   Downloading sse_starlette-3.3.4-py3-none-any.whl.metadata (14 kB)
+2026-04-18T16:15:28.0024431Z Collecting distro<2,>=1.7.0 (from openai>=2.0.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:28.0036908Z   Using cached distro-1.9.0-py3-none-any.whl.metadata (6.8 kB)
+2026-04-18T16:15:28.2538526Z Collecting jiter<1,>=0.10.0 (from openai>=2.0.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:28.2653875Z   Downloading jiter-0.14.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.2 kB)
+2026-04-18T16:15:28.2865194Z Collecting sniffio (from openai>=2.0.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:28.2878469Z   Using cached sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+2026-04-18T16:15:28.3222655Z Collecting tqdm>4 (from openai>=2.0.0->semantic-kernel>=1.0.0->-r requirements.txt (line 20))
+2026-04-18T16:15:28.3236504Z   Using cached tqdm-4.67.3-py3-none-any.whl.metadata (57 kB)
+2026-04-18T16:15:28.3587225Z Collecting argon2-cffi>=18.2.0 (from passlib[argon2]>=1.7.4->-r requirements.txt (line 8))
+2026-04-18T16:15:28.3601126Z   Using cached argon2_cffi-25.1.0-py3-none-any.whl.metadata (4.1 kB)
+2026-04-18T16:15:28.3794506Z Collecting argon2-cffi-bindings (from argon2-cffi>=18.2.0->passlib[argon2]>=1.7.4->-r requirements.txt (line 8))
+2026-04-18T16:15:28.3808648Z   Using cached argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl.metadata (7.4 kB)
+2026-04-18T16:15:28.4515758Z Collecting httptools>=0.6.3 (from uvicorn[standard]>=0.23.0->-r requirements.txt (line 2))
+2026-04-18T16:15:28.4530073Z   Using cached httptools-0.7.1-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (3.5 kB)
+2026-04-18T16:15:28.4938275Z Collecting uvloop>=0.15.1 (from uvicorn[standard]>=0.23.0->-r requirements.txt (line 2))
+2026-04-18T16:15:28.4952592Z   Using cached uvloop-0.22.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (4.9 kB)
+2026-04-18T16:15:28.5655172Z Collecting watchfiles>=0.20 (from uvicorn[standard]>=0.23.0->-r requirements.txt (line 2))
+2026-04-18T16:15:28.5669751Z   Using cached watchfiles-1.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.9 kB)
+2026-04-18T16:15:28.5970007Z Downloading fastapi-0.136.0-py3-none-any.whl (117 kB)
+2026-04-18T16:15:28.6125059Z Downloading uvicorn-0.44.0-py3-none-any.whl (69 kB)
+2026-04-18T16:15:28.6264931Z Downloading sqlmodel-0.0.38-py3-none-any.whl (27 kB)
+2026-04-18T16:15:28.6423558Z Downloading sqlalchemy-2.0.49-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.3 MB)
+2026-04-18T16:15:28.7053168Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 60.5 MB/s  0:00:00
+2026-04-18T16:15:28.7068016Z Using cached psycopg2_binary-2.9.11-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.2 MB)
+2026-04-18T16:15:28.7096145Z Using cached asyncpg-0.31.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.0 MB)
+2026-04-18T16:15:28.7221171Z Downloading python_multipart-0.0.26-py3-none-any.whl (28 kB)
+2026-04-18T16:15:28.7261192Z Using cached email_validator-2.3.0-py3-none-any.whl (35 kB)
+2026-04-18T16:15:28.7273854Z Using cached passlib-1.7.4-py2.py3-none-any.whl (525 kB)
+2026-04-18T16:15:28.7288513Z Using cached python_jose-3.5.0-py2.py3-none-any.whl (34 kB)
+2026-04-18T16:15:28.7301041Z Using cached rsa-4.9.1-py3-none-any.whl (34 kB)
+2026-04-18T16:15:28.7459370Z Downloading google_auth-2.49.2-py3-none-any.whl (240 kB)
+2026-04-18T16:15:28.7502150Z Using cached pydantic_settings-2.13.1-py3-none-any.whl (58 kB)
+2026-04-18T16:15:28.7620119Z Downloading dateparser-1.4.0-py3-none-any.whl (300 kB)
+2026-04-18T16:15:28.7797751Z Downloading rapidfuzz-3.14.5-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (3.2 MB)
+2026-04-18T16:15:28.8028828Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.2/3.2 MB 140.7 MB/s  0:00:00
+2026-04-18T16:15:28.8174310Z Downloading semantic_kernel-1.41.2-py3-none-any.whl (924 kB)
+2026-04-18T16:15:28.8244368Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 924.0/924.0 kB 163.8 MB/s  0:00:00
+2026-04-18T16:15:28.8360376Z Downloading aiohttp-3.13.5-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.8 MB)
+2026-04-18T16:15:28.8443461Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 262.2 MB/s  0:00:00
+2026-04-18T16:15:28.8456523Z Using cached azure_ai_projects-1.0.0-py3-none-any.whl (115 kB)
+2026-04-18T16:15:28.8469607Z Using cached cloudevents-1.12.1-py3-none-any.whl (55 kB)
+2026-04-18T16:15:28.8482386Z Using cached defusedxml-0.7.1-py2.py3-none-any.whl (25 kB)
+2026-04-18T16:15:28.8495393Z Using cached deprecation-2.1.0-py2.py3-none-any.whl (11 kB)
+2026-04-18T16:15:28.8508486Z Using cached jinja2-3.1.6-py3-none-any.whl (134 kB)
+2026-04-18T16:15:28.8522084Z Using cached multidict-6.7.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (246 kB)
+2026-04-18T16:15:28.8534788Z Using cached nest_asyncio-1.6.0-py3-none-any.whl (5.2 kB)
+2026-04-18T16:15:28.8547880Z Using cached openapi_core-0.19.5-py3-none-any.whl (106 kB)
+2026-04-18T16:15:28.8560761Z Using cached jsonschema-4.26.0-py3-none-any.whl (90 kB)
+2026-04-18T16:15:28.8573457Z Using cached jsonschema_path-0.3.4-py3-none-any.whl (14 kB)
+2026-04-18T16:15:28.8586430Z Using cached openapi_schema_validator-0.6.3-py3-none-any.whl (8.8 kB)
+2026-04-18T16:15:28.8599128Z Using cached openapi_spec_validator-0.7.2-py3-none-any.whl (39 kB)
+2026-04-18T16:15:28.8612223Z Using cached lazy_object_proxy-1.12.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (68 kB)
+2026-04-18T16:15:28.8780469Z Downloading opentelemetry_api-1.41.0-py3-none-any.whl (69 kB)
+2026-04-18T16:15:28.8817856Z Using cached importlib_metadata-8.7.1-py3-none-any.whl (27 kB)
+2026-04-18T16:15:28.8961725Z Downloading opentelemetry_sdk-1.41.0-py3-none-any.whl (180 kB)
+2026-04-18T16:15:28.9104143Z Downloading opentelemetry_semantic_conventions-0.62b0-py3-none-any.whl (231 kB)
+2026-04-18T16:15:28.9144308Z Using cached pathable-0.4.4-py3-none-any.whl (9.6 kB)
+2026-04-18T16:15:28.9157226Z Using cached prance-25.4.8.0-py3-none-any.whl (36 kB)
+2026-04-18T16:15:28.9287586Z Downloading pydantic-2.12.5-py3-none-any.whl (463 kB)
+2026-04-18T16:15:28.9430615Z Downloading pydantic_core-2.41.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+2026-04-18T16:15:28.9516494Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 282.6 MB/s  0:00:00
+2026-04-18T16:15:28.9529319Z Using cached referencing-0.36.2-py3-none-any.whl (26 kB)
+2026-04-18T16:15:28.9639423Z Downloading requests-2.33.1-py3-none-any.whl (64 kB)
+2026-04-18T16:15:28.9773615Z Downloading charset_normalizer-3.4.7-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (214 kB)
+2026-04-18T16:15:28.9817479Z Using cached idna-3.11-py3-none-any.whl (71 kB)
+2026-04-18T16:15:28.9831072Z Using cached typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+2026-04-18T16:15:28.9844265Z Using cached urllib3-2.6.3-py3-none-any.whl (131 kB)
+2026-04-18T16:15:28.9858359Z Using cached websockets-15.0.1-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (182 kB)
+2026-04-18T16:15:28.9872614Z Using cached werkzeug-3.1.1-py3-none-any.whl (224 kB)
+2026-04-18T16:15:28.9886758Z Using cached yarl-1.23.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (102 kB)
+2026-04-18T16:15:28.9998659Z Downloading pytest-9.0.3-py3-none-any.whl (375 kB)
+2026-04-18T16:15:29.0039619Z Using cached pluggy-1.6.0-py3-none-any.whl (20 kB)
+2026-04-18T16:15:29.0052864Z Using cached pytest_asyncio-1.3.0-py3-none-any.whl (15 kB)
+2026-04-18T16:15:29.0066005Z Using cached httpx-0.28.1-py3-none-any.whl (73 kB)
+2026-04-18T16:15:29.0079569Z Using cached httpcore-1.0.9-py3-none-any.whl (78 kB)
+2026-04-18T16:15:29.0092851Z Using cached aiosqlite-0.22.1-py3-none-any.whl (17 kB)
+2026-04-18T16:15:29.0105990Z Using cached alembic-1.18.4-py3-none-any.whl (263 kB)
+2026-04-18T16:15:29.0120106Z Using cached freezegun-1.5.5-py3-none-any.whl (19 kB)
+2026-04-18T16:15:29.0133340Z Using cached aiohappyeyeballs-2.6.1-py3-none-any.whl (15 kB)
+2026-04-18T16:15:29.0146349Z Using cached aiortc-1.14.0-py3-none-any.whl (93 kB)
+2026-04-18T16:15:29.0159822Z Using cached aioice-0.10.2-py3-none-any.whl (24 kB)
+2026-04-18T16:15:29.0172918Z Using cached av-16.1.0-cp311-cp311-manylinux_2_28_x86_64.whl (40.8 MB)
+2026-04-18T16:15:29.0327299Z Using cached aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+2026-04-18T16:15:29.0339907Z Using cached annotated_doc-0.0.4-py3-none-any.whl (5.3 kB)
+2026-04-18T16:15:29.0353111Z Using cached annotated_types-0.7.0-py3-none-any.whl (13 kB)
+2026-04-18T16:15:29.0366033Z Using cached attrs-26.1.0-py3-none-any.whl (67 kB)
+2026-04-18T16:15:29.0379723Z Using cached azure_ai_agents-1.2.0b6-py3-none-any.whl (217 kB)
+2026-04-18T16:15:29.0393246Z Using cached azure_core-1.39.0-py3-none-any.whl (218 kB)
+2026-04-18T16:15:29.0406845Z Using cached azure_identity-1.25.3-py3-none-any.whl (192 kB)
+2026-04-18T16:15:29.0420648Z Using cached azure_storage_blob-12.28.0-py3-none-any.whl (431 kB)
+2026-04-18T16:15:29.0435087Z Using cached certifi-2026.2.25-py3-none-any.whl (153 kB)
+2026-04-18T16:15:29.0549215Z Downloading chardet-7.4.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (883 kB)
+2026-04-18T16:15:29.0659305Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 883.4/883.4 kB 150.6 MB/s  0:00:00
+2026-04-18T16:15:29.0814562Z Downloading click-8.3.2-py3-none-any.whl (108 kB)
+2026-04-18T16:15:29.0968274Z Downloading cryptography-46.0.7-cp311-abi3-manylinux_2_34_x86_64.whl (4.5 MB)
+2026-04-18T16:15:29.1148693Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 267.0 MB/s  0:00:00
+2026-04-18T16:15:29.1163324Z Using cached cffi-2.0.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (215 kB)
+2026-04-18T16:15:29.1176594Z Using cached dnspython-2.8.0-py3-none-any.whl (331 kB)
+2026-04-18T16:15:29.1294710Z Downloading ecdsa-0.19.2-py2.py3-none-any.whl (150 kB)
+2026-04-18T16:15:29.1334939Z Using cached frozenlist-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (231 kB)
+2026-04-18T16:15:29.1349437Z Using cached google_crc32c-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_5_x86_64.whl (33 kB)
+2026-04-18T16:15:29.1461298Z Downloading greenlet-3.4.0-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (613 kB)
+2026-04-18T16:15:29.1535419Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 613.5/613.5 kB 104.1 MB/s  0:00:00
+2026-04-18T16:15:29.1548228Z Using cached h11-0.16.0-py3-none-any.whl (37 kB)
+2026-04-18T16:15:29.1561109Z Using cached ifaddr-0.2.0-py3-none-any.whl (12 kB)
+2026-04-18T16:15:29.1574074Z Using cached iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+2026-04-18T16:15:29.1586490Z Using cached isodate-0.7.2-py3-none-any.whl (22 kB)
+2026-04-18T16:15:29.1599637Z Using cached jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+2026-04-18T16:15:29.1612706Z Using cached markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+2026-04-18T16:15:29.1723354Z Downloading mcp-1.27.0-py3-none-any.whl (215 kB)
+2026-04-18T16:15:29.1857666Z Downloading anyio-4.13.0-py3-none-any.whl (114 kB)
+2026-04-18T16:15:29.1892536Z Using cached httpx_sse-0.4.3-py3-none-any.whl (9.0 kB)
+2026-04-18T16:15:29.2054991Z Downloading msal-1.36.0-py3-none-any.whl (121 kB)
+2026-04-18T16:15:29.2091084Z Using cached pyjwt-2.12.1-py3-none-any.whl (29 kB)
+2026-04-18T16:15:29.2104039Z Using cached msal_extensions-1.3.1-py3-none-any.whl (20 kB)
+2026-04-18T16:15:29.2215409Z Downloading numpy-2.4.4-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.9 MB)
+2026-04-18T16:15:29.2790613Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.9/16.9 MB 303.6 MB/s  0:00:00
+2026-04-18T16:15:29.2914000Z Downloading openai-2.32.0-py3-none-any.whl (1.2 MB)
+2026-04-18T16:15:29.2990054Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 163.6 MB/s  0:00:00
+2026-04-18T16:15:29.3004360Z Using cached distro-1.9.0-py3-none-any.whl (20 kB)
+2026-04-18T16:15:29.3115620Z Downloading jiter-0.14.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (358 kB)
+2026-04-18T16:15:29.3266162Z Downloading packaging-26.1-py3-none-any.whl (95 kB)
+2026-04-18T16:15:29.3303197Z Using cached argon2_cffi-25.1.0-py3-none-any.whl (14 kB)
+2026-04-18T16:15:29.3317525Z Using cached propcache-0.4.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (210 kB)
+2026-04-18T16:15:29.3331328Z Using cached pyasn1-0.6.3-py3-none-any.whl (83 kB)
+2026-04-18T16:15:29.3344735Z Using cached pyasn1_modules-0.4.2-py3-none-any.whl (181 kB)
+2026-04-18T16:15:29.3358574Z Using cached pyee-13.0.1-py3-none-any.whl (15 kB)
+2026-04-18T16:15:29.3472968Z Downloading pygments-2.20.0-py3-none-any.whl (1.2 MB)
+2026-04-18T16:15:29.3535632Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 232.8 MB/s  0:00:00
+2026-04-18T16:15:29.3548679Z Using cached pylibsrtp-1.0.0-cp310-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (2.4 MB)
+2026-04-18T16:15:29.3570011Z Using cached pyopenssl-26.0.0-py3-none-any.whl (57 kB)
+2026-04-18T16:15:29.3583415Z Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-04-18T16:15:29.3596722Z Using cached python_dotenv-1.2.2-py3-none-any.whl (22 kB)
+2026-04-18T16:15:29.3609649Z Using cached pytz-2026.1.post1-py2.py3-none-any.whl (510 kB)
+2026-04-18T16:15:29.3624729Z Using cached pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (806 kB)
+2026-04-18T16:15:29.3739953Z Downloading regex-2026.4.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (799 kB)
+2026-04-18T16:15:29.3821618Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 799.8/799.8 kB 136.0 MB/s  0:00:00
+2026-04-18T16:15:29.3835011Z Using cached rpds_py-0.30.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (390 kB)
+2026-04-18T16:15:29.3849228Z Using cached ruamel_yaml-0.19.1-py3-none-any.whl (118 kB)
+2026-04-18T16:15:29.3862727Z Using cached scipy-1.17.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (35.3 MB)
+2026-04-18T16:15:29.4003692Z Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-04-18T16:15:29.4118856Z Downloading sse_starlette-3.3.4-py3-none-any.whl (14 kB)
+2026-04-18T16:15:29.4159969Z Using cached starlette-1.0.0-py3-none-any.whl (72 kB)
+2026-04-18T16:15:29.4173209Z Using cached tqdm-4.67.3-py3-none-any.whl (78 kB)
+2026-04-18T16:15:29.4187244Z Using cached typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+2026-04-18T16:15:29.4199893Z Using cached tzlocal-5.3.1-py3-none-any.whl (18 kB)
+2026-04-18T16:15:29.4214081Z Using cached httptools-0.7.1-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (456 kB)
+2026-04-18T16:15:29.4229447Z Using cached uvloop-0.22.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.8 MB)
+2026-04-18T16:15:29.4256236Z Using cached watchfiles-1.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (456 kB)
+2026-04-18T16:15:29.4371489Z Downloading zipp-3.23.1-py3-none-any.whl (10 kB)
+2026-04-18T16:15:29.4408688Z Using cached argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (87 kB)
+2026-04-18T16:15:29.4537814Z Downloading mako-1.3.11-py3-none-any.whl (78 kB)
+2026-04-18T16:15:29.4680928Z Downloading more_itertools-11.0.2-py3-none-any.whl (71 kB)
+2026-04-18T16:15:29.4719730Z Using cached parse-1.21.1-py2.py3-none-any.whl (19 kB)
+2026-04-18T16:15:29.4733544Z Using cached pycparser-3.0-py3-none-any.whl (48 kB)
+2026-04-18T16:15:29.4747343Z Using cached rfc3339_validator-0.1.4-py2.py3-none-any.whl (3.5 kB)
+2026-04-18T16:15:29.4760533Z Using cached sniffio-1.3.1-py3-none-any.whl (10 kB)
+2026-04-18T16:15:29.8767543Z Installing collected packages: pytz, PyMeta3, passlib, parse, ifaddr, zipp, websockets, uvloop, urllib3, tzlocal, typing-extensions, tqdm, sniffio, six, ruamel.yaml, rpds-py, regex, rapidfuzz, PyYAML, python-multipart, python-dotenv, pyjwt, pygments, pycparser, pybars4, pyasn1, psycopg2-binary, propcache, pluggy, pathable, packaging, numpy, nest-asyncio, multidict, more-itertools, MarkupSafe, lazy-object-proxy, jiter, isodate, iniconfig, idna, httpx-sse, httptools, h11, greenlet, google-crc32c, frozenlist, dnspython, distro, defusedxml, click, charset_normalizer, chardet, certifi, av, attrs, asyncpg, annotated-types, annotated-doc, aiosqlite, aiohappyeyeballs, yarl, werkzeug, uvicorn, typing-inspection, SQLAlchemy, scipy, rsa, rfc3339-validator, requests, referencing, python-dateutil, pytest, pyee, pydantic-core, pyasn1-modules, Mako, jinja2, importlib-metadata, httpcore, email-validator, ecdsa, deprecation, cffi, anyio, aiosignal, aioice, watchfiles, starlette, python-jose, pytest-asyncio, pylibsrtp, pydantic, prance, opentelemetry-api, jsonschema-specifications, jsonschema-path, httpx, freezegun, dateparser, cryptography, cloudevents, azure-core, argon2-cffi-bindings, alembic, aiohttp, sse-starlette, sqlmodel, pyopenssl, pydantic-settings, opentelemetry-semantic-conventions, openai, jsonschema, google-auth, fastapi, azure-storage-blob, azure-ai-agents, argon2-cffi, opentelemetry-sdk, openapi-schema-validator, msal, mcp, azure-ai-projects, aiortc, openapi-spec-validator, msal-extensions, openapi_core, azure-identity, semantic-kernel
+2026-04-18T16:15:44.6896138Z 
+2026-04-18T16:15:44.6959486Z Successfully installed Mako-1.3.11 MarkupSafe-3.0.3 PyMeta3-0.5.1 PyYAML-6.0.3 SQLAlchemy-2.0.49 aiohappyeyeballs-2.6.1 aiohttp-3.13.5 aioice-0.10.2 aiortc-1.14.0 aiosignal-1.4.0 aiosqlite-0.22.1 alembic-1.18.4 annotated-doc-0.0.4 annotated-types-0.7.0 anyio-4.13.0 argon2-cffi-25.1.0 argon2-cffi-bindings-25.1.0 asyncpg-0.31.0 attrs-26.1.0 av-16.1.0 azure-ai-agents-1.2.0b6 azure-ai-projects-1.0.0 azure-core-1.39.0 azure-identity-1.25.3 azure-storage-blob-12.28.0 certifi-2026.2.25 cffi-2.0.0 chardet-7.4.3 charset_normalizer-3.4.7 click-8.3.2 cloudevents-1.12.1 cryptography-46.0.7 dateparser-1.4.0 defusedxml-0.7.1 deprecation-2.1.0 distro-1.9.0 dnspython-2.8.0 ecdsa-0.19.2 email-validator-2.3.0 fastapi-0.136.0 freezegun-1.5.5 frozenlist-1.8.0 google-auth-2.49.2 google-crc32c-1.8.0 greenlet-3.4.0 h11-0.16.0 httpcore-1.0.9 httptools-0.7.1 httpx-0.28.1 httpx-sse-0.4.3 idna-3.11 ifaddr-0.2.0 importlib-metadata-8.7.1 iniconfig-2.3.0 isodate-0.7.2 jinja2-3.1.6 jiter-0.14.0 jsonschema-4.26.0 jsonschema-path-0.3.4 jsonschema-specifications-2025.9.1 lazy-object-proxy-1.12.0 mcp-1.27.0 more-itertools-11.0.2 msal-1.36.0 msal-extensions-1.3.1 multidict-6.7.1 nest-asyncio-1.6.0 numpy-2.4.4 openai-2.32.0 openapi-schema-validator-0.6.3 openapi-spec-validator-0.7.2 openapi_core-0.19.5 opentelemetry-api-1.41.0 opentelemetry-sdk-1.41.0 opentelemetry-semantic-conventions-0.62b0 packaging-26.1 parse-1.21.1 passlib-1.7.4 pathable-0.4.4 pluggy-1.6.0 prance-25.4.8.0 propcache-0.4.1 psycopg2-binary-2.9.11 pyasn1-0.6.3 pyasn1-modules-0.4.2 pybars4-0.9.13 pycparser-3.0 pydantic-2.12.5 pydantic-core-2.41.5 pydantic-settings-2.13.1 pyee-13.0.1 pygments-2.20.0 pyjwt-2.12.1 pylibsrtp-1.0.0 pyopenssl-26.0.0 pytest-9.0.3 pytest-asyncio-1.3.0 python-dateutil-2.9.0.post0 python-dotenv-1.2.2 python-jose-3.5.0 python-multipart-0.0.26 pytz-2026.1.post1 rapidfuzz-3.14.5 referencing-0.36.2 regex-2026.4.4 requests-2.33.1 rfc3339-validator-0.1.4 rpds-py-0.30.0 rsa-4.9.1 ruamel.yaml-0.19.1 scipy-1.17.1 semantic-kernel-1.41.2 six-1.17.0 sniffio-1.3.1 sqlmodel-0.0.38 sse-starlette-3.3.4 starlette-1.0.0 tqdm-4.67.3 typing-extensions-4.15.0 typing-inspection-0.4.2 tzlocal-5.3.1 urllib3-2.6.3 uvicorn-0.44.0 uvloop-0.22.1 watchfiles-1.1.1 websockets-15.0.1 werkzeug-3.1.1 yarl-1.23.0 zipp-3.23.1
+2026-04-18T16:15:45.9157841Z ##[group]Run pytest
+2026-04-18T16:15:45.9158083Z [36;1mpytest[0m
+2026-04-18T16:15:45.9180659Z shell: /usr/bin/bash -e {0}
+2026-04-18T16:15:45.9180892Z env:
+2026-04-18T16:15:45.9181142Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-18T16:15:45.9181554Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+2026-04-18T16:15:45.9181957Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-18T16:15:45.9182338Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-18T16:15:45.9182709Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-18T16:15:45.9183074Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+2026-04-18T16:15:45.9183376Z ##[endgroup]
+2026-04-18T16:15:49.7081493Z ============================= test session starts ==============================
+2026-04-18T16:15:49.7082927Z platform linux -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0 -- /opt/hostedtoolcache/Python/3.11.15/x64/bin/python
+2026-04-18T16:15:49.7083769Z cachedir: .pytest_cache
+2026-04-18T16:15:49.7084212Z rootdir: /home/runner/work/liminal/liminal/backend
+2026-04-18T16:15:49.7084726Z configfile: pytest.ini
+2026-04-18T16:15:49.7084949Z testpaths: tests
+2026-04-18T16:15:49.7085171Z plugins: asyncio-1.3.0, anyio-4.13.0
+2026-04-18T16:15:49.7085753Z asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+2026-04-18T16:15:50.2730883Z collecting ... collected 101 items
+2026-04-18T16:15:50.2731348Z 
+2026-04-18T16:15:50.3333854Z tests/test_agent_core.py::test_agent_task_creation_flow PASSED           [  0%]
+2026-04-18T16:15:50.3360253Z tests/test_agent_core.py::test_agent_json_parsing_failure_recovery PASSED [  1%]
+2026-04-18T16:15:50.3822100Z tests/test_ai_prioritization.py::test_initialization PASSED              [  2%]
+2026-04-18T16:15:50.5110718Z tests/test_ai_prioritization.py::test_prompt_generation PASSED           [  3%]
+2026-04-18T16:15:50.5397875Z tests/test_ai_prioritization.py::test_get_ai_suggestion_flow PASSED      [  4%]
+2026-04-18T16:15:50.5683647Z tests/test_ai_prioritization.py::test_update_task_scores PASSED          [  5%]
+2026-04-18T16:15:50.5927398Z tests/test_ai_prioritization_feedback.py::test_prompt_includes_feedback PASSED [  6%]
+2026-04-18T16:15:50.7650696Z tests/test_auth_flow.py::test_password_reset_flow PASSED                 [  7%]
+2026-04-18T16:15:51.2862151Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_relative_tomorrow PASSED [  8%]
+2026-04-18T16:15:51.3118589Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_relative_in_days PASSED [  9%]
+2026-04-18T16:15:51.3322354Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_relative_next_week PASSED [ 10%]
+2026-04-18T16:15:51.3539599Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_weekday_monday PASSED [ 11%]
+2026-04-18T16:15:51.3747236Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_weekday_friday PASSED [ 12%]
+2026-04-18T16:15:51.3964421Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_absolute_date_monthday PASSED [ 13%]
+2026-04-18T16:15:51.4177334Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_absolute_date_full PASSED [ 14%]
+2026-04-18T16:15:51.4383184Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_iso_date PASSED [ 15%]
+2026-04-18T16:15:51.4590348Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_iso_datetime PASSED [ 16%]
+2026-04-18T16:15:51.4788559Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_with_time_afternoon PASSED [ 17%]
+2026-04-18T16:15:51.4990468Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_with_time_morning PASSED [ 18%]
+2026-04-18T16:15:53.1152179Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_invalid_string PASSED [ 19%]
+2026-04-18T16:15:53.1443766Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_invalid_garbage PASSED [ 20%]
+2026-04-18T16:15:53.1758232Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_empty_string PASSED [ 21%]
+2026-04-18T16:15:53.1982439Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_whitespace_only PASSED [ 22%]
+2026-04-18T16:15:53.2214441Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_prefer_future_default PASSED [ 23%]
+2026-04-18T16:15:53.2418604Z tests/test_date_parser.py::TestParseNaturalDate::test_parse_returns_naive_datetime PASSED [ 24%]
+2026-04-18T16:15:53.2598286Z tests/test_date_parser.py::TestValidateDateNotPast::test_validate_future_date_valid PASSED [ 25%]
+2026-04-18T16:15:53.2795020Z tests/test_date_parser.py::TestValidateDateNotPast::test_validate_past_date_requires_confirmation PASSED [ 26%]
+2026-04-18T16:15:53.2982362Z tests/test_date_parser.py::TestValidateDateNotPast::test_validate_past_date_no_confirmation_required PASSED [ 27%]
+2026-04-18T16:15:53.3169975Z tests/test_date_parser.py::TestValidateDateNotPast::test_validate_today_allowed_by_default PASSED [ 28%]
+2026-04-18T16:15:53.3356487Z tests/test_date_parser.py::TestValidateDateNotPast::test_validate_today_rejected_when_disallowed PASSED [ 29%]
+2026-04-18T16:15:53.3541487Z tests/test_date_parser.py::TestValidateDateNotPast::test_validate_exact_now PASSED [ 30%]
+2026-04-18T16:15:53.3728667Z tests/test_date_parser.py::TestFormatDateForUser::test_format_today_with_time PASSED [ 31%]
+2026-04-18T16:15:53.3917622Z tests/test_date_parser.py::TestFormatDateForUser::test_format_today_midnight PASSED [ 32%]
+2026-04-18T16:15:53.4106391Z tests/test_date_parser.py::TestFormatDateForUser::test_format_tomorrow_with_time PASSED [ 33%]
+2026-04-18T16:15:53.4289178Z tests/test_date_parser.py::TestFormatDateForUser::test_format_yesterday PASSED [ 34%]
+2026-04-18T16:15:53.4472062Z tests/test_date_parser.py::TestFormatDateForUser::test_format_this_week_monday PASSED [ 35%]
+2026-04-18T16:15:53.4656061Z tests/test_date_parser.py::TestFormatDateForUser::test_format_last_week PASSED [ 36%]
+2026-04-18T16:15:53.4840974Z tests/test_date_parser.py::TestFormatDateForUser::test_format_same_year_far_future PASSED [ 37%]
+2026-04-18T16:15:53.5025939Z tests/test_date_parser.py::TestFormatDateForUser::test_format_different_year PASSED [ 38%]
+2026-04-18T16:15:53.6674398Z tests/test_date_parser.py::TestFormatDateForUser::test_format_no_leading_zero_in_hour PASSED [ 39%]
+2026-04-18T16:15:53.6682792Z tests/test_date_parser.py::TestGetWeekdayName::test_get_monday PASSED    [ 40%]
+2026-04-18T16:15:53.6690406Z tests/test_date_parser.py::TestGetWeekdayName::test_get_friday PASSED    [ 41%]
+2026-04-18T16:15:53.6697616Z tests/test_date_parser.py::TestGetWeekdayName::test_get_sunday PASSED    [ 42%]
+2026-04-18T16:15:53.6921151Z tests/test_date_parser.py::TestEdgeCases::test_parse_end_of_february PASSED [ 43%]
+2026-04-18T16:15:53.7137938Z tests/test_date_parser.py::TestEdgeCases::test_parse_at_year_boundary PASSED [ 44%]
+2026-04-18T16:15:53.7399316Z tests/test_date_parser.py::TestEdgeCases::test_parse_case_insensitive PASSED [ 45%]
+2026-04-18T16:15:53.7621888Z tests/test_date_parser.py::TestEdgeCases::test_parse_with_extra_whitespace PASSED [ 46%]
+2026-04-18T16:15:53.7883426Z tests/test_fuzzy_search.py::test_fuzzy_search_exact_match PASSED         [ 47%]
+2026-04-18T16:15:53.8124032Z tests/test_fuzzy_search.py::test_fuzzy_search_partial_match PASSED       [ 48%]
+2026-04-18T16:15:53.8375036Z tests/test_fuzzy_search.py::test_fuzzy_search_multiple_matches PASSED    [ 49%]
+2026-04-18T16:15:53.8613420Z tests/test_fuzzy_search.py::test_fuzzy_search_ignores_completed_tasks PASSED [ 50%]
+2026-04-18T16:15:53.8889085Z tests/test_fuzzy_search.py::test_fuzzy_search_below_threshold PASSED     [ 51%]
+2026-04-18T16:15:53.9135327Z tests/test_fuzzy_search.py::test_fuzzy_search_case_insensitive PASSED    [ 52%]
+2026-04-18T16:15:54.0373162Z tests/test_initiatives.py::test_create_initiative PASSED                 [ 53%]
+2026-04-18T16:15:54.1559675Z tests/test_initiatives.py::test_create_initiative_with_theme PASSED      [ 54%]
+2026-04-18T16:15:54.2752255Z tests/test_initiatives.py::test_get_initiatives_list PASSED              [ 55%]
+2026-04-18T16:15:54.2772830Z tests/test_sanitizer.py::test_sanitize_response PASSED                   [ 56%]
+2026-04-18T16:15:54.3204038Z tests/test_sk_confirmation_flow.py::test_no_double_task_creation_on_initial_request PASSED [ 57%]
+2026-04-18T16:15:54.3680666Z tests/test_sk_confirmation_flow.py::test_task_created_only_after_confirmation PASSED [ 58%]
+2026-04-18T16:15:54.4169399Z tests/test_sk_confirmation_flow.py::test_no_duplicate_on_repeated_confirmation PASSED [ 59%]
+2026-04-18T16:15:54.4613756Z tests/test_sk_confirmation_flow.py::test_cancellation_prevents_task_creation PASSED [ 60%]
+2026-04-18T16:15:54.5336516Z tests/test_sk_confirmation_flow.py::test_multiple_confirmation_keywords PASSED [ 61%]
+2026-04-18T16:15:54.5851810Z tests/test_sk_confirmation_flow.py::test_complete_task_confirmation_flow PASSED [ 62%]
+2026-04-18T16:15:54.6360136Z tests/test_sk_confirmation_flow.py::test_update_task_confirmation_flow PASSED [ 63%]
+2026-04-18T16:15:54.6894842Z tests/test_sk_confirmation_flow.py::test_confirmation_state_isolation PASSED [ 64%]
+2026-04-18T16:15:54.7297771Z tests/test_sk_confirmation_flow.py::test_nested_pending_confirmation_not_allowed PASSED [ 65%]
+2026-04-18T16:15:54.7931127Z tests/test_sk_integration.py::test_full_task_creation_conversation PASSED [ 66%]
+2026-04-18T16:15:54.8595654Z tests/test_sk_integration.py::test_task_completion_conversation PASSED   [ 67%]
+2026-04-18T16:15:54.9203357Z tests/test_sk_integration.py::test_task_cancellation_conversation PASSED [ 68%]
+2026-04-18T16:15:54.9932026Z tests/test_sk_integration.py::test_multiple_tasks_same_session PASSED    [ 69%]
+2026-04-18T16:15:55.0591083Z tests/test_sk_integration.py::test_fuzzy_match_confirmation PASSED       [ 70%]
+2026-04-18T16:15:55.1196356Z tests/test_sk_integration.py::test_context_preserved_across_messages PASSED [ 71%]
+2026-04-18T16:15:55.1590341Z tests/test_sk_orchestrator.py::test_orchestrator_initialization PASSED   [ 72%]
+2026-04-18T16:15:55.1986672Z tests/test_sk_orchestrator.py::test_register_agent PASSED                [ 73%]
+2026-04-18T16:15:55.2368130Z tests/test_sk_orchestrator.py::test_pending_confirmation_storage PASSED  [ 74%]
+2026-04-18T16:15:55.2776722Z tests/test_sk_orchestrator.py::test_pending_confirmation_invalid_json PASSED [ 75%]
+2026-04-18T16:15:55.3268091Z tests/test_sk_orchestrator.py::test_execute_action_create_task PASSED    [ 76%]
+2026-04-18T16:15:55.3746036Z tests/test_sk_orchestrator.py::test_execute_action_complete_task PASSED  [ 77%]
+2026-04-18T16:15:55.4168210Z tests/test_sk_orchestrator.py::test_execute_action_task_not_found PASSED [ 78%]
+2026-04-18T16:15:55.4626735Z tests/test_sk_orchestrator.py::test_handle_pending_confirmation_yes PASSED [ 79%]
+2026-04-18T16:15:55.5007191Z tests/test_sk_orchestrator.py::test_handle_pending_confirmation_no PASSED [ 80%]
+2026-04-18T16:15:55.5589959Z tests/test_sk_orchestrator.py::test_handle_pending_confirmation_variants PASSED [ 81%]
+2026-04-18T16:15:55.6061871Z tests/test_sk_orchestrator.py::test_get_active_tasks_context PASSED      [ 82%]
+2026-04-18T16:15:55.6460419Z tests/test_sk_orchestrator.py::test_get_active_tasks_context_empty PASSED [ 83%]
+2026-04-18T16:15:55.6838401Z tests/test_sk_orchestrator.py::test_termination_strategy PASSED          [ 84%]
+2026-04-18T16:15:55.7996960Z tests/test_tasks.py::test_create_task PASSED                             [ 85%]
+2026-04-18T16:15:55.9155363Z tests/test_tasks.py::test_create_task_with_initiative PASSED             [ 86%]
+2026-04-18T16:15:56.0305060Z tests/test_tasks.py::test_get_tasks_empty PASSED                         [ 87%]
+2026-04-18T16:15:56.1495848Z tests/test_tasks.py::test_get_tasks_list PASSED                          [ 88%]
+2026-04-18T16:15:56.2673933Z tests/test_tasks.py::test_update_task PASSED                             [ 89%]
+2026-04-18T16:15:56.3838860Z tests/test_tasks.py::test_update_task_value_score_and_notes PASSED       [ 90%]
+2026-04-18T16:15:56.4955176Z tests/test_tasks.py::test_update_task_not_found PASSED                   [ 91%]
+2026-04-18T16:15:56.6192870Z tests/test_tasks.py::test_task_priority_levels PASSED                    [ 92%]
+2026-04-18T16:15:56.7452648Z tests/test_tasks.py::test_ai_feedback PASSED                             [ 93%]
+2026-04-18T16:15:56.8708164Z tests/test_tasks.py::test_update_task_ai_fields PASSED                   [ 94%]
+2026-04-18T16:15:58.5380005Z tests/test_tasks_parse.py::test_parse_task_basic FAILED                  [ 95%]
+2026-04-18T16:15:59.8540927Z tests/test_tasks_parse.py::test_parse_task_title_only FAILED             [ 96%]
+2026-04-18T16:15:59.9703859Z tests/test_themes.py::test_create_theme PASSED                           [ 97%]
+2026-04-18T16:16:00.0930661Z tests/test_themes.py::test_get_themes_list PASSED                        [ 98%]
+2026-04-18T16:16:00.1607113Z tests/test_users.py::test_create_user PASSED                             [ 99%]
+2026-04-18T16:16:00.2293235Z tests/test_users.py::test_create_user_duplicate_email PASSED             [100%]
+2026-04-18T16:16:00.2293786Z 
+2026-04-18T16:16:00.2294048Z =================================== FAILURES ===================================
+2026-04-18T16:16:00.2294870Z ____________________________ test_parse_task_basic _____________________________
+2026-04-18T16:16:00.2295690Z tests/test_tasks_parse.py:14: in test_parse_task_basic
+2026-04-18T16:16:00.2296681Z     assert response.status_code == 200
+2026-04-18T16:16:00.2297182Z E   assert 500 == 200
+2026-04-18T16:16:00.2297725Z E    +  where 500 = <Response [500 Internal Server Error]>.status_code
+2026-04-18T16:16:00.2298653Z ----------------------------- Captured stdout call -----------------------------
+2026-04-18T16:16:00.2300912Z CRITICAL ERROR: POST /tasks/parse - ("<class 'semantic_kernel.connectors.ai.open_ai.services.open_ai_chat_completion.OpenAIChatCompletion'> service failed to complete the prompt", APIConnectionError('Connection error.'))
+2026-04-18T16:16:00.2303109Z ----------------------------- Captured stderr call -----------------------------
+2026-04-18T16:16:00.2303885Z Traceback (most recent call last):
+2026-04-18T16:16:00.2311035Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_transports/default.py", line 101, in map_httpcore_exceptions
+2026-04-18T16:16:00.2311957Z     yield
+2026-04-18T16:16:00.2312580Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_transports/default.py", line 394, in handle_async_request
+2026-04-18T16:16:00.2313250Z     resp = await self._pool.handle_async_request(req)
+2026-04-18T16:16:00.2313560Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2314227Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_async/connection_pool.py", line 256, in handle_async_request
+2026-04-18T16:16:00.2314863Z     raise exc from None
+2026-04-18T16:16:00.2315454Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_async/connection_pool.py", line 236, in handle_async_request
+2026-04-18T16:16:00.2316458Z     response = await connection.handle_async_request(
+2026-04-18T16:16:00.2316769Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2317410Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_async/connection.py", line 101, in handle_async_request
+2026-04-18T16:16:00.2318009Z     raise exc
+2026-04-18T16:16:00.2318544Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_async/connection.py", line 78, in handle_async_request
+2026-04-18T16:16:00.2319143Z     stream = await self._connect(request)
+2026-04-18T16:16:00.2319394Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2319938Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_async/connection.py", line 124, in _connect
+2026-04-18T16:16:00.2320551Z     stream = await self._network_backend.connect_tcp(**kwargs)
+2026-04-18T16:16:00.2320889Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2321638Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_backends/auto.py", line 31, in connect_tcp
+2026-04-18T16:16:00.2322239Z     return await self._backend.connect_tcp(
+2026-04-18T16:16:00.2322498Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2323094Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_backends/anyio.py", line 113, in connect_tcp
+2026-04-18T16:16:00.2323657Z     with map_exceptions(exc_map):
+2026-04-18T16:16:00.2324113Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/contextlib.py", line 158, in __exit__
+2026-04-18T16:16:00.2324585Z     self.gen.throw(typ, value, traceback)
+2026-04-18T16:16:00.2325167Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_exceptions.py", line 14, in map_exceptions
+2026-04-18T16:16:00.2325734Z     raise to_exc(exc) from exc
+2026-04-18T16:16:00.2326019Z httpcore.ConnectError: All connection attempts failed
+2026-04-18T16:16:00.2326464Z 
+2026-04-18T16:16:00.2326647Z The above exception was the direct cause of the following exception:
+2026-04-18T16:16:00.2326918Z 
+2026-04-18T16:16:00.2327012Z Traceback (most recent call last):
+2026-04-18T16:16:00.2327568Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1630, in request
+2026-04-18T16:16:00.2328108Z     response = await self._send_request(
+2026-04-18T16:16:00.2328353Z                ^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2328874Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_client.py", line 829, in _send_request
+2026-04-18T16:16:00.2329498Z     return await self._send_with_auth_retry(request, stream=stream, **kwargs)
+2026-04-18T16:16:00.2329888Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2330514Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_client.py", line 807, in _send_with_auth_retry
+2026-04-18T16:16:00.2331169Z     response = await super()._send_request(request, stream=stream, **kwargs)
+2026-04-18T16:16:00.2331552Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2332282Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1553, in _send_request
+2026-04-18T16:16:00.2332951Z     return await self._client.send(request, stream=stream, **kwargs)
+2026-04-18T16:16:00.2333300Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2333826Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_client.py", line 1629, in send
+2026-04-18T16:16:00.2334352Z     response = await self._send_handling_auth(
+2026-04-18T16:16:00.2334617Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2335168Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_client.py", line 1657, in _send_handling_auth
+2026-04-18T16:16:00.2335749Z     response = await self._send_handling_redirects(
+2026-04-18T16:16:00.2336229Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2336854Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_client.py", line 1694, in _send_handling_redirects
+2026-04-18T16:16:00.2337463Z     response = await self._send_single_request(request)
+2026-04-18T16:16:00.2337757Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2338331Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_client.py", line 1730, in _send_single_request
+2026-04-18T16:16:00.2338942Z     response = await transport.handle_async_request(request)
+2026-04-18T16:16:00.2339285Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2339969Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_transports/default.py", line 393, in handle_async_request
+2026-04-18T16:16:00.2340564Z     with map_httpcore_exceptions():
+2026-04-18T16:16:00.2341140Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/contextlib.py", line 158, in __exit__
+2026-04-18T16:16:00.2341611Z     self.gen.throw(typ, value, traceback)
+2026-04-18T16:16:00.2342253Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+2026-04-18T16:16:00.2342876Z     raise mapped_exc(message) from exc
+2026-04-18T16:16:00.2343174Z httpx.ConnectError: All connection attempts failed
+2026-04-18T16:16:00.2343394Z 
+2026-04-18T16:16:00.2343562Z The above exception was the direct cause of the following exception:
+2026-04-18T16:16:00.2343830Z 
+2026-04-18T16:16:00.2343924Z Traceback (most recent call last):
+2026-04-18T16:16:00.2344671Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/semantic_kernel/connectors/ai/open_ai/services/open_ai_handler.py", line 88, in _send_completion_request
+2026-04-18T16:16:00.2362821Z     response = await self.client.chat.completions.create(**settings_dict)
+2026-04-18T16:16:00.2363337Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2364104Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/resources/chat/completions/completions.py", line 2714, in create
+2026-04-18T16:16:00.2364776Z     return await self._post(
+2026-04-18T16:16:00.2365013Z            ^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2365542Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1913, in post
+2026-04-18T16:16:00.2366441Z     return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+2026-04-18T16:16:00.2366872Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2367468Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1665, in request
+2026-04-18T16:16:00.2368064Z     raise APIConnectionError(request=request) from err
+2026-04-18T16:16:00.2368418Z openai.APIConnectionError: Connection error.
+2026-04-18T16:16:00.2368626Z 
+2026-04-18T16:16:00.2369004Z The above exception was the direct cause of the following exception:
+2026-04-18T16:16:00.2369286Z 
+2026-04-18T16:16:00.2369387Z Traceback (most recent call last):
+2026-04-18T16:16:00.2369837Z   File "/home/runner/work/liminal/liminal/backend/app/main.py", line 54, in log_requests
+2026-04-18T16:16:00.2370271Z     response = await call_next(request)
+2026-04-18T16:16:00.2370521Z                ^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2371088Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/middleware/base.py", line 168, in call_next
+2026-04-18T16:16:00.2371741Z     raise app_exc from app_exc.__cause__ or app_exc.__context__
+2026-04-18T16:16:00.2372362Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/middleware/base.py", line 144, in coro
+2026-04-18T16:16:00.2372974Z     await self.app(scope, receive_or_disconnect, send_no_error)
+2026-04-18T16:16:00.2373628Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/middleware/cors.py", line 88, in __call__
+2026-04-18T16:16:00.2374194Z     await self.app(scope, receive, send)
+2026-04-18T16:16:00.2374781Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+2026-04-18T16:16:00.2375462Z     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+2026-04-18T16:16:00.2376357Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+2026-04-18T16:16:00.2376929Z     raise exc
+2026-04-18T16:16:00.2377430Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+2026-04-18T16:16:00.2378000Z     await app(scope, receive, sender)
+2026-04-18T16:16:00.2378710Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+2026-04-18T16:16:00.2379315Z     await self.app(scope, receive, send)
+2026-04-18T16:16:00.2379848Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/routing.py", line 660, in __call__
+2026-04-18T16:16:00.2380401Z     await self.middleware_stack(scope, receive, send)
+2026-04-18T16:16:00.2380985Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/routing.py", line 680, in app
+2026-04-18T16:16:00.2381522Z     await route.handle(scope, receive, send)
+2026-04-18T16:16:00.2382064Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/routing.py", line 276, in handle
+2026-04-18T16:16:00.2382578Z     await self.app(scope, receive, send)
+2026-04-18T16:16:00.2383081Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/fastapi/routing.py", line 134, in app
+2026-04-18T16:16:00.2383681Z     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+2026-04-18T16:16:00.2384375Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+2026-04-18T16:16:00.2384936Z     raise exc
+2026-04-18T16:16:00.2385437Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+2026-04-18T16:16:00.2386010Z     await app(scope, receive, sender)
+2026-04-18T16:16:00.2386654Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/fastapi/routing.py", line 120, in app
+2026-04-18T16:16:00.2387153Z     response = await f(request)
+2026-04-18T16:16:00.2387371Z                ^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2387831Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/fastapi/routing.py", line 674, in app
+2026-04-18T16:16:00.2388352Z     raw_response = await run_endpoint_function(
+2026-04-18T16:16:00.2388632Z                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2389212Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+2026-04-18T16:16:00.2389910Z     return await dependant.call(**values)
+2026-04-18T16:16:00.2390166Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2390615Z   File "/home/runner/work/liminal/liminal/backend/app/routers/tasks.py", line 21, in parse_task
+2026-04-18T16:16:00.2391141Z     return await parsing_service.parse_task(request.input_text)
+2026-04-18T16:16:00.2391479Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2391953Z   File "/home/runner/work/liminal/liminal/backend/app/agents/parsing.py", line 82, in parse_task
+2026-04-18T16:16:00.2392453Z     response = await chat_service.get_chat_message_content(
+2026-04-18T16:16:00.2392767Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2393522Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/semantic_kernel/connectors/ai/chat_completion_client_base.py", line 190, in get_chat_message_content
+2026-04-18T16:16:00.2394452Z     results = await self.get_chat_message_contents(chat_history=chat_history, settings=settings, **kwargs)
+2026-04-18T16:16:00.2394969Z               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2395777Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/semantic_kernel/connectors/ai/chat_completion_client_base.py", line 134, in get_chat_message_contents
+2026-04-18T16:16:00.2396866Z     return await self._inner_get_chat_message_contents(chat_history, settings)
+2026-04-18T16:16:00.2397261Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2398028Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/semantic_kernel/utils/telemetry/model_diagnostics/decorators.py", line 110, in wrapper_decorator
+2026-04-18T16:16:00.2398889Z     return await completion_func(*args, **kwargs)
+2026-04-18T16:16:00.2399184Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2400001Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/semantic_kernel/connectors/ai/open_ai/services/open_ai_chat_completion_base.py", line 88, in _inner_get_chat_message_contents
+2026-04-18T16:16:00.2400823Z     response = await self._send_request(settings)
+2026-04-18T16:16:00.2401097Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2401798Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/semantic_kernel/connectors/ai/open_ai/services/open_ai_handler.py", line 60, in _send_request
+2026-04-18T16:16:00.2402524Z     return await self._send_completion_request(settings)
+2026-04-18T16:16:00.2402825Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2403580Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/semantic_kernel/connectors/ai/open_ai/services/open_ai_handler.py", line 105, in _send_completion_request
+2026-04-18T16:16:00.2404346Z     raise ServiceResponseException(
+2026-04-18T16:16:00.2405379Z semantic_kernel.exceptions.service_exceptions.ServiceResponseException: ("<class 'semantic_kernel.connectors.ai.open_ai.services.open_ai_chat_completion.OpenAIChatCompletion'> service failed to complete the prompt", APIConnectionError('Connection error.'))
+2026-04-18T16:16:00.2406668Z __________________________ test_parse_task_title_only __________________________
+2026-04-18T16:16:00.2407088Z tests/test_tasks_parse.py:28: in test_parse_task_title_only
+2026-04-18T16:16:00.2407420Z     assert response.status_code == 200
+2026-04-18T16:16:00.2407670Z E   assert 500 == 200
+2026-04-18T16:16:00.2407939Z E    +  where 500 = <Response [500 Internal Server Error]>.status_code
+2026-04-18T16:16:00.2408358Z ----------------------------- Captured stdout call -----------------------------
+2026-04-18T16:16:00.2409336Z CRITICAL ERROR: POST /tasks/parse - ("<class 'semantic_kernel.connectors.ai.open_ai.services.open_ai_chat_completion.OpenAIChatCompletion'> service failed to complete the prompt", APIConnectionError('Connection error.'))
+2026-04-18T16:16:00.2410417Z ----------------------------- Captured stderr call -----------------------------
+2026-04-18T16:16:00.2410763Z Traceback (most recent call last):
+2026-04-18T16:16:00.2411398Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_transports/default.py", line 101, in map_httpcore_exceptions
+2026-04-18T16:16:00.2411991Z     yield
+2026-04-18T16:16:00.2412518Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_transports/default.py", line 394, in handle_async_request
+2026-04-18T16:16:00.2413137Z     resp = await self._pool.handle_async_request(req)
+2026-04-18T16:16:00.2413440Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2414078Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_async/connection_pool.py", line 256, in handle_async_request
+2026-04-18T16:16:00.2414706Z     raise exc from None
+2026-04-18T16:16:00.2415285Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_async/connection_pool.py", line 236, in handle_async_request
+2026-04-18T16:16:00.2415922Z     response = await connection.handle_async_request(
+2026-04-18T16:16:00.2416425Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2417070Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_async/connection.py", line 101, in handle_async_request
+2026-04-18T16:16:00.2417664Z     raise exc
+2026-04-18T16:16:00.2418194Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_async/connection.py", line 78, in handle_async_request
+2026-04-18T16:16:00.2418790Z     stream = await self._connect(request)
+2026-04-18T16:16:00.2419044Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2419731Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_async/connection.py", line 124, in _connect
+2026-04-18T16:16:00.2420350Z     stream = await self._network_backend.connect_tcp(**kwargs)
+2026-04-18T16:16:00.2420687Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2421267Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_backends/auto.py", line 31, in connect_tcp
+2026-04-18T16:16:00.2421830Z     return await self._backend.connect_tcp(
+2026-04-18T16:16:00.2422087Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2422645Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_backends/anyio.py", line 113, in connect_tcp
+2026-04-18T16:16:00.2423206Z     with map_exceptions(exc_map):
+2026-04-18T16:16:00.2423655Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/contextlib.py", line 158, in __exit__
+2026-04-18T16:16:00.2424118Z     self.gen.throw(typ, value, traceback)
+2026-04-18T16:16:00.2424679Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpcore/_exceptions.py", line 14, in map_exceptions
+2026-04-18T16:16:00.2425243Z     raise to_exc(exc) from exc
+2026-04-18T16:16:00.2425520Z httpcore.ConnectError: All connection attempts failed
+2026-04-18T16:16:00.2425741Z 
+2026-04-18T16:16:00.2425923Z The above exception was the direct cause of the following exception:
+2026-04-18T16:16:00.2426318Z 
+2026-04-18T16:16:00.2426408Z Traceback (most recent call last):
+2026-04-18T16:16:00.2426939Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1630, in request
+2026-04-18T16:16:00.2427475Z     response = await self._send_request(
+2026-04-18T16:16:00.2427724Z                ^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2428255Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_client.py", line 829, in _send_request
+2026-04-18T16:16:00.2428888Z     return await self._send_with_auth_retry(request, stream=stream, **kwargs)
+2026-04-18T16:16:00.2429398Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2430005Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_client.py", line 807, in _send_with_auth_retry
+2026-04-18T16:16:00.2430659Z     response = await super()._send_request(request, stream=stream, **kwargs)
+2026-04-18T16:16:00.2431035Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2431620Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1553, in _send_request
+2026-04-18T16:16:00.2432239Z     return await self._client.send(request, stream=stream, **kwargs)
+2026-04-18T16:16:00.2432590Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2433150Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_client.py", line 1629, in send
+2026-04-18T16:16:00.2433665Z     response = await self._send_handling_auth(
+2026-04-18T16:16:00.2433931Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2434480Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_client.py", line 1657, in _send_handling_auth
+2026-04-18T16:16:00.2435051Z     response = await self._send_handling_redirects(
+2026-04-18T16:16:00.2435340Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2435925Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_client.py", line 1694, in _send_handling_redirects
+2026-04-18T16:16:00.2436756Z     response = await self._send_single_request(request)
+2026-04-18T16:16:00.2437055Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2437628Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_client.py", line 1730, in _send_single_request
+2026-04-18T16:16:00.2438369Z     response = await transport.handle_async_request(request)
+2026-04-18T16:16:00.2438707Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2439325Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_transports/default.py", line 393, in handle_async_request
+2026-04-18T16:16:00.2439924Z     with map_httpcore_exceptions():
+2026-04-18T16:16:00.2440373Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/contextlib.py", line 158, in __exit__
+2026-04-18T16:16:00.2440831Z     self.gen.throw(typ, value, traceback)
+2026-04-18T16:16:00.2441452Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+2026-04-18T16:16:00.2442069Z     raise mapped_exc(message) from exc
+2026-04-18T16:16:00.2442361Z httpx.ConnectError: All connection attempts failed
+2026-04-18T16:16:00.2442586Z 
+2026-04-18T16:16:00.2442759Z The above exception was the direct cause of the following exception:
+2026-04-18T16:16:00.2443024Z 
+2026-04-18T16:16:00.2443127Z Traceback (most recent call last):
+2026-04-18T16:16:00.2443872Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/semantic_kernel/connectors/ai/open_ai/services/open_ai_handler.py", line 88, in _send_completion_request
+2026-04-18T16:16:00.2444702Z     response = await self.client.chat.completions.create(**settings_dict)
+2026-04-18T16:16:00.2445095Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2445769Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/resources/chat/completions/completions.py", line 2714, in create
+2026-04-18T16:16:00.2446584Z     return await self._post(
+2026-04-18T16:16:00.2446797Z            ^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2447279Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1913, in post
+2026-04-18T16:16:00.2447920Z     return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+2026-04-18T16:16:00.2448474Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2449045Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1665, in request
+2026-04-18T16:16:00.2449639Z     raise APIConnectionError(request=request) from err
+2026-04-18T16:16:00.2449974Z openai.APIConnectionError: Connection error.
+2026-04-18T16:16:00.2450175Z 
+2026-04-18T16:16:00.2450359Z The above exception was the direct cause of the following exception:
+2026-04-18T16:16:00.2450621Z 
+2026-04-18T16:16:00.2450710Z Traceback (most recent call last):
+2026-04-18T16:16:00.2451140Z   File "/home/runner/work/liminal/liminal/backend/app/main.py", line 54, in log_requests
+2026-04-18T16:16:00.2451559Z     response = await call_next(request)
+2026-04-18T16:16:00.2451805Z                ^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2452350Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/middleware/base.py", line 168, in call_next
+2026-04-18T16:16:00.2452995Z     raise app_exc from app_exc.__cause__ or app_exc.__context__
+2026-04-18T16:16:00.2453603Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/middleware/base.py", line 144, in coro
+2026-04-18T16:16:00.2454200Z     await self.app(scope, receive_or_disconnect, send_no_error)
+2026-04-18T16:16:00.2454830Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/middleware/cors.py", line 88, in __call__
+2026-04-18T16:16:00.2455377Z     await self.app(scope, receive, send)
+2026-04-18T16:16:00.2455960Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+2026-04-18T16:16:00.2456836Z     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+2026-04-18T16:16:00.2457706Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+2026-04-18T16:16:00.2458274Z     raise exc
+2026-04-18T16:16:00.2458774Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+2026-04-18T16:16:00.2459341Z     await app(scope, receive, sender)
+2026-04-18T16:16:00.2459927Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+2026-04-18T16:16:00.2460511Z     await self.app(scope, receive, send)
+2026-04-18T16:16:00.2461038Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/routing.py", line 660, in __call__
+2026-04-18T16:16:00.2461585Z     await self.middleware_stack(scope, receive, send)
+2026-04-18T16:16:00.2462133Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/routing.py", line 680, in app
+2026-04-18T16:16:00.2462653Z     await route.handle(scope, receive, send)
+2026-04-18T16:16:00.2463181Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/routing.py", line 276, in handle
+2026-04-18T16:16:00.2463693Z     await self.app(scope, receive, send)
+2026-04-18T16:16:00.2464191Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/fastapi/routing.py", line 134, in app
+2026-04-18T16:16:00.2464777Z     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+2026-04-18T16:16:00.2465458Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+2026-04-18T16:16:00.2466007Z     raise exc
+2026-04-18T16:16:00.2466627Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+2026-04-18T16:16:00.2467197Z     await app(scope, receive, sender)
+2026-04-18T16:16:00.2467686Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/fastapi/routing.py", line 120, in app
+2026-04-18T16:16:00.2468175Z     response = await f(request)
+2026-04-18T16:16:00.2468520Z                ^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2468997Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/fastapi/routing.py", line 674, in app
+2026-04-18T16:16:00.2469514Z     raw_response = await run_endpoint_function(
+2026-04-18T16:16:00.2469789Z                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2470357Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+2026-04-18T16:16:00.2470923Z     return await dependant.call(**values)
+2026-04-18T16:16:00.2471174Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2471614Z   File "/home/runner/work/liminal/liminal/backend/app/routers/tasks.py", line 21, in parse_task
+2026-04-18T16:16:00.2472122Z     return await parsing_service.parse_task(request.input_text)
+2026-04-18T16:16:00.2472459Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2472932Z   File "/home/runner/work/liminal/liminal/backend/app/agents/parsing.py", line 82, in parse_task
+2026-04-18T16:16:00.2473433Z     response = await chat_service.get_chat_message_content(
+2026-04-18T16:16:00.2473741Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2474499Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/semantic_kernel/connectors/ai/chat_completion_client_base.py", line 190, in get_chat_message_content
+2026-04-18T16:16:00.2475415Z     results = await self.get_chat_message_contents(chat_history=chat_history, settings=settings, **kwargs)
+2026-04-18T16:16:00.2475933Z               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2477063Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/semantic_kernel/connectors/ai/chat_completion_client_base.py", line 134, in get_chat_message_contents
+2026-04-18T16:16:00.2477909Z     return await self._inner_get_chat_message_contents(chat_history, settings)
+2026-04-18T16:16:00.2478307Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2479070Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/semantic_kernel/utils/telemetry/model_diagnostics/decorators.py", line 110, in wrapper_decorator
+2026-04-18T16:16:00.2479801Z     return await completion_func(*args, **kwargs)
+2026-04-18T16:16:00.2480082Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2480888Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/semantic_kernel/connectors/ai/open_ai/services/open_ai_chat_completion_base.py", line 88, in _inner_get_chat_message_contents
+2026-04-18T16:16:00.2481711Z     response = await self._send_request(settings)
+2026-04-18T16:16:00.2481983Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2482680Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/semantic_kernel/connectors/ai/open_ai/services/open_ai_handler.py", line 60, in _send_request
+2026-04-18T16:16:00.2483417Z     return await self._send_completion_request(settings)
+2026-04-18T16:16:00.2483719Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-04-18T16:16:00.2484477Z   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/semantic_kernel/connectors/ai/open_ai/services/open_ai_handler.py", line 105, in _send_completion_request
+2026-04-18T16:16:00.2485231Z     raise ServiceResponseException(
+2026-04-18T16:16:00.9232440Z semantic_kernel.exceptions.service_exceptions.ServiceResponseException: ("<class 'semantic_kernel.connectors.ai.open_ai.services.open_ai_chat_completion.OpenAIChatCompletion'> service failed to complete the prompt", APIConnectionError('Connection error.'))
+2026-04-18T16:16:00.9234357Z =========================== short test summary info ============================
+2026-04-18T16:16:00.9235037Z FAILED tests/test_tasks_parse.py::test_parse_task_basic - assert 500 == 200
+2026-04-18T16:16:00.9236013Z  +  where 500 = <Response [500 Internal Server Error]>.status_code
+2026-04-18T16:16:00.9237025Z FAILED tests/test_tasks_parse.py::test_parse_task_title_only - assert 500 == 200
+2026-04-18T16:16:00.9237537Z  +  where 500 = <Response [500 Internal Server Error]>.status_code
+2026-04-18T16:16:00.9237969Z ================== 2 failed, 99 passed, 8 warnings in 10.52s ===================
+2026-04-18T16:16:01.5998665Z ##[error]Process completed with exit code 1.
+2026-04-18T16:16:01.6109174Z Post job cleanup.
+2026-04-18T16:16:01.7047513Z [command]/usr/bin/git version
+2026-04-18T16:16:01.7082793Z git version 2.53.0
+2026-04-18T16:16:01.7126214Z Temporarily overriding HOME='/home/runner/work/_temp/849dc92c-3846-474a-9ac2-6f011ffac5e2' before making global git config changes
+2026-04-18T16:16:01.7127409Z Adding repository directory to the temporary git global config as a safe directory
+2026-04-18T16:16:01.7138723Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/liminal/liminal
+2026-04-18T16:16:01.7171815Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-04-18T16:16:01.7202502Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-04-18T16:16:01.7421903Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-04-18T16:16:01.7441919Z http.https://github.com/.extraheader
+2026-04-18T16:16:01.7453803Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-04-18T16:16:01.7483688Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-04-18T16:16:01.7700237Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-04-18T16:16:01.7730587Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-04-18T16:16:01.8063126Z Cleaning up orphan processes
+2026-04-18T16:16:01.8355737Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-python@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
