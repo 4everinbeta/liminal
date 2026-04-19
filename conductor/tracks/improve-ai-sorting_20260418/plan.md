@@ -4,11 +4,12 @@
 - [x] Task: Extend task scoring schema in `backend/app/models.py`. (5df0154)
     - [x] Write failing test for new schema (including `reasoning` string).
     - [x] Implement schema changes.
-- [ ] Task: Refine `AIPrioritizationService` prompt logic.
-    - [ ] Update prompt to inject current time-of-day and recent completion history context.
-    - [ ] Ensure LLM returns a one-sentence `reasoning` alongside the `ai_relevance_score`.
-    - [ ] Write failing test in `backend/tests/test_ai_prioritization.py` to check prompt formatting.
-    - [ ] Implement the prompt change and pass tests.
+- [x] Task: Refine `AIPrioritizationService` prompt logic and config. (f36e95d)
+    - [x] Update `backend/app/config.py` to ensure `groq_api_key` is correctly loaded and prioritized when `llm_provider` is "groq".
+    - [x] Update prompt to inject current time-of-day and recent completion history context.
+    - [x] Ensure LLM returns a one-sentence `reasoning` alongside the `ai_relevance_score`.
+    - [x] Write failing test in `backend/tests/test_ai_prioritization.py` to check prompt formatting and Groq config.
+    - [x] Implement the prompt change and pass tests.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Contextual Backend Prompts' (Protocol in workflow.md)
 
 ## Phase 2: Balanced Hybrid Algorithm
