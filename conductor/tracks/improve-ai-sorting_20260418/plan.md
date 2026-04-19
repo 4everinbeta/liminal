@@ -1,6 +1,6 @@
 # Implementation Plan: Improve AI Sorting and Prioritization
 
-## Phase 1: Contextual Backend Prompts
+## Phase 1: Contextual Backend Prompts [checkpoint: a20e3e2]
 - [x] Task: Extend task scoring schema in `backend/app/models.py`. (5df0154)
     - [x] Write failing test for new schema (including `reasoning` string).
     - [x] Implement schema changes.
@@ -10,7 +10,7 @@
     - [x] Ensure LLM returns a one-sentence `reasoning` alongside the `ai_relevance_score`.
     - [x] Write failing test in `backend/tests/test_ai_prioritization.py` to check prompt formatting and Groq config.
     - [x] Implement the prompt change and pass tests.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Contextual Backend Prompts' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Contextual Backend Prompts' (Protocol in workflow.md) (a20e3e2)
 
 ## Phase 2: Balanced Hybrid Algorithm
 - [ ] Task: Implement the "Balanced Hybrid" scoring function.
