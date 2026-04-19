@@ -4,19 +4,18 @@
 - [ ] Task: Extend task scoring schema in `backend/app/models.py`.
     - [ ] Write failing test for new schema (including `reasoning` string).
     - [ ] Implement schema changes.
-- [ ] Task: Refine `AIPrioritizationService` prompt logic and config.
-    - [ ] Update `backend/app/config.py` to ensure `groq_api_key` is correctly loaded and prioritized when `llm_provider` is "groq".
+- [ ] Task: Refine `AIPrioritizationService` prompt logic.
     - [ ] Update prompt to inject current time-of-day and recent completion history context.
     - [ ] Ensure LLM returns a one-sentence `reasoning` alongside the `ai_relevance_score`.
-    - [ ] Write failing test in `backend/tests/test_ai_prioritization.py` to check prompt formatting and Groq config.
+    - [ ] Write failing test in `backend/tests/test_ai_prioritization.py` to check prompt formatting.
     - [ ] Implement the prompt change and pass tests.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Backend' (Protocol in workflow.md)
+- [ ] Task: Conductor - User Manual Verification 'Phase 1: Contextual Backend Prompts' (Protocol in workflow.md)
 
 ## Phase 2: Balanced Hybrid Algorithm
 - [ ] Task: Implement the "Balanced Hybrid" scoring function.
     - [ ] Write failing test for sorting tasks by AI Score, Urgency, and Priority.
     - [ ] Update the core task retrieval API or `AIPrioritizationService` to apply the hybrid mathematical formula.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Backend' (Protocol in workflow.md)
+- [ ] Task: Conductor - User Manual Verification 'Phase 2: Balanced Hybrid Algorithm' (Protocol in workflow.md)
 
 ## Phase 3: Frontend Explainability and Feedback
 - [ ] Task: Display AI reasoning on high-priority tasks.
@@ -28,4 +27,4 @@
     - [ ] Connect buttons to the existing `POST /tasks/{id}/ai-feedback` endpoint.
     - [ ] Write failing test for feedback click interactions.
     - [ ] Implement and pass tests.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Frontend' (Protocol in workflow.md)
+- [ ] Task: Conductor - User Manual Verification 'Phase 3: Frontend Explainability and Feedback' (Protocol in workflow.md)
