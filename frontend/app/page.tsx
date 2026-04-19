@@ -31,6 +31,7 @@ function PlanningTaskRow({
   onComplete,
   onEdit,
   onPause,
+  onVote,
   isWhereYouLeftOff,
   isInterrupted,
   onResumeFromInterrupt,
@@ -42,6 +43,7 @@ function PlanningTaskRow({
   onComplete: () => void
   onEdit: () => void
   onPause: () => void
+  onVote: (status: 'accepted' | 'dismissed') => void
   isWhereYouLeftOff?: boolean
   isInterrupted?: boolean
   onResumeFromInterrupt?: () => void
@@ -67,10 +69,16 @@ function PlanningTaskRow({
             {task.title}
             {isPaused && <span className="text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded uppercase tracking-wider">Paused</span>}
           </div>
-          <div className="text-xs text-gray-500 mt-1 flex items-center gap-3">
+          <div className="text-xs text-gray-500 mt-1 flex flex-wrap items-center gap-3">
             <span className="uppercase tracking-wide">{task.priority} priority</span>
             <span>{task.estimated_duration != null ? `${task.estimated_duration}m` : 'short task'}</span>
             <UrgencyIndicator dueDate={task.due_date} size="sm" />
+            {task.ai_relevance_score != null && task.ai_relevance_score >= 80 && task.ai_reasoning && (
+              <div className="flex items-center gap-1 text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded-md font-medium border border-indigo-100">
+                <span>✨</span>
+                <span>{task.ai_reasoning}</span>
+              </div>
+            )}
           </div>
         </button>
         <TaskActionMenu
@@ -78,6 +86,7 @@ function PlanningTaskRow({
           onToggleComplete={onComplete}
           onEdit={onEdit}
           onPause={onPause}
+          onVote={onVote}
           isCompleted={false}
           isPaused={isPaused}
         />
@@ -423,6 +432,15 @@ export default function Home() {
     }
   }
 
+  const handleVoteTask = async (taskId: string, status: 'accepted' | 'dismissed') => {
+    try {
+      await sendAiFeedback(taskId, status)
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, ai_suggestion_status: status } : t))
+    } catch (err) {
+      console.error('Vote failed', err)
+    }
+  }
+
   const handleSaveTask = async (task: Task) => {
       await updateTask(task.id, {
         title: task.title,
@@ -713,6 +731,7 @@ export default function Home() {
                       onComplete={() => handleCompleteTask(task.id)}
                       onEdit={() => setEditingTask(task)}
                       onPause={() => handlePauseTask(task.id)}
+                      onVote={(status) => handleVoteTask(task.id, status)}
                     />
                   </SwipeableTaskCard>
                 ))}

@@ -1,7 +1,7 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { MoreHorizontal, Trash2, Edit2, ArrowUpCircle, ArrowDownCircle, CheckCircle } from 'lucide-react'
+import { MoreHorizontal, Trash2, Edit2, ArrowUpCircle, ArrowDownCircle, CheckCircle, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface TaskActionMenuProps {
@@ -9,11 +9,12 @@ interface TaskActionMenuProps {
   onEdit?: () => void
   onToggleComplete?: () => void
   onPause?: () => void
+  onVote?: (status: 'accepted' | 'dismissed') => void
   isCompleted?: boolean
   isPaused?: boolean
 }
 
-export default function TaskActionMenu({ onDelete, onEdit, onToggleComplete, onPause, isCompleted, isPaused }: TaskActionMenuProps) {
+export default function TaskActionMenu({ onDelete, onEdit, onToggleComplete, onPause, onVote, isCompleted, isPaused }: TaskActionMenuProps) {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
@@ -56,6 +57,26 @@ export default function TaskActionMenu({ onDelete, onEdit, onToggleComplete, onP
               <Edit2 size={14} />
               Edit
             </DropdownMenu.Item>
+          )}
+
+          {onVote && !isCompleted && (
+            <>
+              <DropdownMenu.Separator className="h-px bg-gray-100 my-1" />
+              <DropdownMenu.Item
+                onSelect={() => onVote('accepted')}
+                className="flex items-center gap-2 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg cursor-pointer outline-none"
+              >
+                <ThumbsUp size={14} className="text-green-600" />
+                Correct Priority
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                onSelect={() => onVote('dismissed')}
+                className="flex items-center gap-2 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg cursor-pointer outline-none"
+              >
+                <ThumbsDown size={14} className="text-red-600" />
+                Incorrect Priority
+              </DropdownMenu.Item>
+            </>
           )}
 
           {onDelete && (

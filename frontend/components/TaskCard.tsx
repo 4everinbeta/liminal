@@ -19,15 +19,18 @@ interface TaskProps {
     due_date?: string
     created_at?: string
     status?: string
+    ai_relevance_score?: number
+    ai_reasoning?: string
   }
   onComplete?: (id: string) => void
   onDelete?: (id: string) => void
+  onVote?: (id: string, status: 'accepted' | 'dismissed') => void
   isWhereYouLeftOff?: boolean
   isInterrupted?: boolean
   onResumeFromInterrupt?: () => void
 }
 
-const TaskCard = memo(forwardRef<HTMLDivElement, TaskProps>(({ task, onComplete, onDelete, isWhereYouLeftOff, isInterrupted, onResumeFromInterrupt }, ref) => {
+const TaskCard = memo(forwardRef<HTMLDivElement, TaskProps>(({ task, onComplete, onDelete, onVote, isWhereYouLeftOff, isInterrupted, onResumeFromInterrupt }, ref) => {
   const [isCompleting, setIsCompleting] = useState(false)
 
   const urgencyColor = useUrgencyColor(task.due_date, task.created_at || '', task.status || '')
@@ -98,13 +101,19 @@ const TaskCard = memo(forwardRef<HTMLDivElement, TaskProps>(({ task, onComplete,
       
       <div className={`flex-1 transition-opacity ${isCompleting ? 'opacity-50 line-through' : ''}`}>
         <h3 className="font-medium text-text">{task.title}</h3>
-        <div className="flex items-center gap-2 mt-0.5">
+        <div className="flex flex-wrap items-center gap-2 mt-0.5">
           {effortLabel && (
             <span className="text-xs text-muted font-mono bg-gray-100 px-2 py-0.5 rounded">
               {effortLabel}
             </span>
           )}
           <UrgencyIndicator dueDate={task.due_date} size="sm" />
+          {task.status !== 'done' && task.ai_relevance_score && task.ai_relevance_score >= 80 && task.ai_reasoning && (
+            <div className="flex items-center gap-1 text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded-md font-medium border border-indigo-100">
+              <span>✨</span>
+              <span>{task.ai_reasoning}</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -112,7 +121,8 @@ const TaskCard = memo(forwardRef<HTMLDivElement, TaskProps>(({ task, onComplete,
         <TaskActionMenu
             onDelete={onDelete ? () => onDelete(task.id) : undefined}
             onToggleComplete={onComplete ? handleComplete : undefined}
-            isCompleted={false}
+            onVote={onVote ? (status) => onVote(task.id, status) : undefined}
+            isCompleted={task.status === 'done'}
         />
       </div>
       <AnimatePresence>

@@ -209,6 +209,15 @@ export default function BoardPage() {
     setEditingTask(null)
   }
 
+  const handleVoteTask = async (taskId: string, status: 'accepted' | 'dismissed') => {
+    try {
+        await sendAiFeedback(taskId, status)
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, ai_suggestion_status: status } : t))
+    } catch (err) {
+        console.error("Vote failed", err)
+    }
+  }
+
   if (!enabled) return null
 
   if (error) {
@@ -277,6 +286,7 @@ export default function BoardPage() {
                                             index={index}
                                             handleComplete={handleComplete}
                                             handleDelete={handleDelete}
+                                            handleVote={handleVoteTask}
                                             setEditingTask={setEditingTask}
                                             isBacklog={true}
                                             isMobile={isMobile}
@@ -361,6 +371,7 @@ export default function BoardPage() {
                                                             index={index}
                                                             handleComplete={handleComplete}
                                                             handleDelete={handleDelete}
+                                                            handleVote={handleVoteTask}
                                                             setEditingTask={setEditingTask}
                                                             isMobile={isMobile}
                                                         />
@@ -424,7 +435,7 @@ export default function BoardPage() {
   )
 }
 
-function TaskItem({ task, index, handleComplete, handleDelete, setEditingTask, isBacklog = false, isMobile = false }: any) {
+function TaskItem({ task, index, handleComplete, handleDelete, handleVote, setEditingTask, isBacklog = false, isMobile = false }: any) {
     const isIncomplete = task.status !== 'done' && (!task.value_score || !(task.effort_score ?? task.estimated_duration))
 
     const cardContent = (
@@ -444,14 +455,20 @@ function TaskItem({ task, index, handleComplete, handleDelete, setEditingTask, i
 
             <div className="flex-1 min-w-0">
                 <h4 className={`font-medium mb-2 ${task.status === 'done' ? 'line-through text-muted' : ''}`}>{task.title}</h4>
-                <div className="flex justify-between items-center text-xs text-muted">
+                <div className="flex flex-wrap justify-between items-center text-xs text-muted gap-2">
                     <div className="flex gap-2">
                         {task.value_score > 0 && <span className="text-green-600 font-mono">v:{task.value_score}</span>}
                         {(task.effort_score || task.estimated_duration) && (
                         <span className="text-blue-600 font-mono">e:{task.effort_score ?? task.estimated_duration}</span>
                         )}
                     </div>
-                     <span className={`w-2 h-2 rounded-full ${
+                    {task.status !== 'done' && task.ai_relevance_score != null && task.ai_relevance_score >= 80 && task.ai_reasoning && (
+                        <div className="flex items-center gap-1 text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded-md font-medium border border-indigo-100">
+                            <span>✨</span>
+                            <span>{task.ai_reasoning}</span>
+                        </div>
+                    )}
+                     <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
                         task.priority_score >= 90 ? 'bg-red-400' :
                         task.priority_score >= 60 ? 'bg-yellow-400' : 'bg-blue-400'
                      }`} />
@@ -468,8 +485,9 @@ function TaskItem({ task, index, handleComplete, handleDelete, setEditingTask, i
 
             <div onClick={e => e.stopPropagation()}>
                 <TaskActionMenu
-                    onDelete={() => handleDelete({ stopPropagation: () => {} }, task.id)}
+                    onDelete={() => handleDelete({ stopPropagation: () => {} } as any, task.id)}
                     onEdit={() => setEditingTask(task)}
+                    onVote={handleVote ? (status) => handleVote(task.id, status) : undefined}
                     isCompleted={task.status === 'done'}
                 />
             </div>

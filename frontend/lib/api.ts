@@ -65,6 +65,7 @@ export interface Task {
   created_at: string;
   updated_at?: string;
   ai_relevance_score?: number;
+  ai_reasoning?: string;
   ai_suggestion_status?: 'none' | 'suggested' | 'accepted' | 'dismissed' | 'ignored';
 }
 
@@ -72,6 +73,7 @@ export interface TaskCreate {
   title: string;
   description?: string;
   notes?: string;
+  ai_reasoning?: string;
   priority?: 'high' | 'medium' | 'low';
   priority_score?: number;
   status?: 'backlog' | 'todo' | 'in_progress' | 'blocked' | 'paused' | 'done';
@@ -262,6 +264,7 @@ export interface TaskParseResponse {
   priority_score?: number;
   effort_score?: number;
   value_score?: number;
+  reasoning?: string;
 }
 
 export async function parseTaskWithLlm(inputText: string): Promise<TaskParseResponse> {

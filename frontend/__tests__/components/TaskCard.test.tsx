@@ -84,4 +84,24 @@ describe('TaskCard Component', () => {
     const badge = document.querySelector('.bg-orange-50')
     expect(badge).toBeNull()
   })
+
+  it('should render AI reasoning badge when provided with high score', () => {
+    const aiTask = { 
+      ...mockTask, 
+      ai_relevance_score: 85, 
+      ai_reasoning: 'AI Suggestion' 
+    }
+    render(<TaskCard task={aiTask} />)
+    expect(screen.getByText('AI Suggestion')).toBeInTheDocument()
+  })
+
+  it('should not render AI reasoning badge when score is low', () => {
+    const lowAiTask = { 
+      ...mockTask, 
+      ai_relevance_score: 40, 
+      ai_reasoning: 'AI Suggestion' 
+    }
+    render(<TaskCard task={lowAiTask} />)
+    expect(screen.queryByText('AI Suggestion')).not.toBeInTheDocument()
+  })
 });

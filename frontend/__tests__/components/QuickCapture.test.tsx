@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import QuickCapture from '@/components/QuickCapture'
 import { useAppStore, INITIAL_CHAT_MESSAGES } from '@/lib/store'
@@ -46,7 +46,9 @@ describe('QuickCapture chat intake', () => {
     const user = userEvent.setup()
     render(<QuickCapture />)
     const input = screen.getByPlaceholderText(/ask liminal/i)
-    await user.type(input, 'Draft investor update')
+    await act(async () => {
+      await user.type(input, 'Draft investor update')
+    })
     expect(input).toHaveValue('Draft investor update')
   })
 
@@ -58,11 +60,15 @@ describe('QuickCapture chat intake', () => {
     render(<QuickCapture />)
     const input = screen.getByPlaceholderText(/ask liminal/i)
 
-    await user.type(input, 'Update roadmap v:90 e:60m !high')
-    await user.keyboard('{Enter}')
+    await act(async () => {
+        await user.type(input, 'Update roadmap v:90 e:60m !high')
+        await user.keyboard('{Enter}')
+    })
 
     const confirmButton = await screen.findByRole('button', { name: /create task/i })
-    await user.click(confirmButton)
+    await act(async () => {
+        await user.click(confirmButton)
+    })
 
     await waitFor(() => {
       expect(api.createTask).toHaveBeenCalled()
@@ -79,15 +85,23 @@ describe('QuickCapture chat intake', () => {
     const user = userEvent.setup()
     render(<QuickCapture />)
     const input = screen.getByPlaceholderText(/ask liminal/i)
-    await user.type(input, 'Create task Refine me{Enter}')
+    await act(async () => {
+        await user.type(input, 'Create task Refine me{Enter}')
+    })
 
     const valueButton = await screen.findByTestId('value-80')
-    await user.click(valueButton)
+    await act(async () => {
+        await user.click(valueButton)
+    })
     const effortButton = await screen.findByTestId('effort-50')
-    await user.click(effortButton)
+    await act(async () => {
+        await user.click(effortButton)
+    })
 
     const confirmButton = await screen.findByRole('button', { name: /create task/i })
-    await user.click(confirmButton)
+    await act(async () => {
+        await user.click(confirmButton)
+    })
 
     const payload = vi.mocked(api.createTask).mock.calls[0][0]
     expect(payload.value_score).toBe(80)
@@ -105,14 +119,18 @@ describe('QuickCapture chat intake', () => {
 
     render(<QuickCapture />)
     const input = screen.getByPlaceholderText(/ask liminal/i)
-    await user.type(input, 'Call Mom tomorrow 15m !high{Enter}')
+    await act(async () => {
+        await user.type(input, 'Call Mom tomorrow 15m !high{Enter}')
+    })
 
     await waitFor(() => {
       expect(api.parseTaskWithLlm).toHaveBeenCalledWith('Call Mom tomorrow 15m !high')
     })
 
     const confirmButton = await screen.findByRole('button', { name: /create task/i })
-    await user.click(confirmButton)
+    await act(async () => {
+        await user.click(confirmButton)
+    })
 
     await waitFor(() => {
       expect(api.createTask).toHaveBeenCalled()
