@@ -28,4 +28,4 @@
     - [x] Connect buttons to the existing `POST /tasks/{id}/ai-feedback` endpoint.
     - [x] Write failing test for feedback click interactions.
     - [x] Implement and pass tests.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Frontend Explainability and Feedback' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Frontend Explainability and Feedback' (Protocol in workflow.md) (21e2e03)
