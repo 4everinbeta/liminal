@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     llm_base_url: str = "http://localhost:11434/v1/chat/completions"
     llm_model: str = "ai/llama3.2:3B-Q4_0"
     llm_api_key: Optional[str] = None
+    groq_api_key: Optional[str] = None
     llm_provider: str = "local"
     azure_openai_api_version: str = "2023-09-01-preview"
 

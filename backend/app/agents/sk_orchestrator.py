@@ -221,7 +221,7 @@ class SKOrchestrator:
             # Use AsyncOpenAI client with custom base_url
             custom_client = AsyncOpenAI(
                 base_url=base_url,
-                api_key=self.settings.llm_api_key or "not-needed"
+                api_key=self.settings.groq_api_key or self.settings.llm_api_key or "not-needed"
             )
             service = OpenAIChatCompletion(
                 service_id="chat",

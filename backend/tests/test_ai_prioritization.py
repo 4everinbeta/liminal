@@ -132,3 +132,80 @@ async def test_update_task_scores(mock_session, mock_user, sample_tasks):
         assert sample_tasks[0].ai_relevance_score == 90
         assert sample_tasks[1].ai_relevance_score == 60
         assert sample_tasks[2].ai_relevance_score == 30
+
+@pytest.mark.asyncio
+async def test_contextual_prompt_generation(mock_session, mock_user, sample_tasks):
+    """Test that the prompt includes contextual information like current time and history."""
+    with patch("app.agents.prioritization.get_settings") as mock_settings:
+        mock_settings.return_value.llm_provider = "local"
+        mock_settings.return_value.llm_model = "mock-model"
+        mock_settings.return_value.llm_base_url = "http://localhost:1234/v1"
+
+        service = AIPrioritizationService(mock_session, mock_user.id)
+        
+        history_context = "Completed: Task A, Task B"
+        prompt = await service.get_list_prioritization_prompt(sample_tasks, "6 hours remaining", history_context)
+        
+        assert "User's Historical Context:" in prompt
+        assert "Completed: Task A, Task B" in prompt
+        assert "Current Local Time:" in prompt
+
+@pytest.mark.asyncio
+async def test_update_task_scores_with_reasoning(mock_session, mock_user, sample_tasks):
+    """Test that individual task reasoning is stored during score updates."""
+    import json
+    
+    response_data = {
+        "scores": [
+            { "task_id": "1", "score": 95, "reasoning": "Highest urgency due to imminent deadline." },
+            { "task_id": "2", "score": 70, "reasoning": "Good quick win for momentum." },
+            { "task_id": "3", "score": 40, "reasoning": "Low urgency project." }
+        ],
+        "strategy_summary": "Prioritizing by deadline and momentum."
+    }
+    mock_result = MagicMock()
+    mock_result.__str__.return_value = json.dumps(response_data)
+    
+    with patch("app.agents.prioritization.get_settings") as mock_settings, \
+         patch("app.agents.prioritization.crud.get_tasks", new=AsyncMock(return_value=sample_tasks)), \
+         patch("semantic_kernel.Kernel.invoke_prompt", new=AsyncMock(return_value=mock_result)):
+        
+        mock_settings.return_value.llm_provider = "local"
+        mock_settings.return_value.llm_model = "mock-model"
+        mock_settings.return_value.llm_base_url = "http://localhost:1234/v1"
+
+        service = AIPrioritizationService(mock_session, mock_user.id)
+        
+        mock_session.execute = AsyncMock()
+        mock_session.execute.side_effect = [
+            MagicMock(scalar_one_or_none=lambda: sample_tasks[0]),
+            MagicMock(scalar_one_or_none=lambda: sample_tasks[1]),
+            MagicMock(scalar_one_or_none=lambda: sample_tasks[2])
+        ]
+        
+        await service.update_task_scores()
+        
+        assert sample_tasks[0].ai_reasoning == "Highest urgency due to imminent deadline."
+        assert sample_tasks[1].ai_reasoning == "Good quick win for momentum."
+        assert sample_tasks[2].ai_reasoning == "Low urgency project."
+
+@pytest.mark.asyncio
+async def test_groq_config_prioritization(mock_session, mock_user):
+    """Test that groq_api_key is prioritized for the Groq provider."""
+    with patch("app.agents.prioritization.get_settings") as mock_settings, \
+         patch("app.agents.prioritization.AsyncOpenAI") as mock_openai, \
+         patch("app.agents.prioritization.OpenAIChatCompletion") as mock_sk_service:
+        
+        mock_settings.return_value.llm_provider = "groq"
+        mock_settings.return_value.llm_model = "groq-model"
+        mock_settings.return_value.llm_base_url = "https://api.groq.com"
+        mock_settings.return_value.llm_api_key = "generic-key"
+        mock_settings.return_value.groq_api_key = "special-groq-key"
+
+        AIPrioritizationService(mock_session, mock_user.id)
+        
+        # Verify AsyncOpenAI was called with the groq-specific key
+        mock_openai.assert_called_once()
+        args, kwargs = mock_openai.call_args
+        assert kwargs["api_key"] == "special-groq-key"
+        assert "openai/v1" in kwargs["base_url"]

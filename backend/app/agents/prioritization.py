@@ -64,7 +64,7 @@ class AIPrioritizationService:
 
             custom_client = AsyncOpenAI(
                 base_url=base_url,
-                api_key=self.settings.llm_api_key or "not-needed"
+                api_key=self.settings.groq_api_key or self.settings.llm_api_key or "not-needed"
             )
             service = OpenAIChatCompletion(
                 service_id="chat",
@@ -123,7 +123,7 @@ Explain your reasoning briefly, focusing on urgency and momentum.
 """
         return prompt
 
-    async def get_list_prioritization_prompt(self, tasks: List[Task], current_capacity: str) -> str:
+    async def get_list_prioritization_prompt(self, tasks: List[Task], current_capacity: str, history_context: Optional[str] = None) -> str:
         """
         Generates a prompt for the LLM to score all active tasks.
         """
@@ -142,9 +142,15 @@ Explain your reasoning briefly, focusing on urgency and momentum.
                 f"  Feedback: {task.ai_suggestion_status.value}\n\n"
             )
 
+        history_str = f"\n**User's Historical Context:**\n{history_context}\n" if history_context else ""
+        current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+
         prompt = f"""You are an AI assistant designed to help a user with ADHD prioritize their entire task list.
-Your goal is to assign an 'AI Relevance Score' (0-100) to each task.
+Your goal is to assign an 'AI Relevance Score' (0-100) and a short 'Reasoning' (one sentence) to each task.
 High scores (80-100) mean "Do This Now". Low scores (0-20) mean "Can wait".
+
+**Current Local Time:** {current_time}
+{history_str}
 
 **Prioritization Principles (critical for ADHD user):**
 1. **Urgency above all else:** Tasks with impending deadlines or that are overdue get the highest scores.
@@ -157,13 +163,13 @@ High scores (80-100) mean "Do This Now". Low scores (0-20) mean "Can wait".
 
 **User's Active Tasks:**
 {task_list_str}
-Assign a score to EVERY task listed above. Explain the overall prioritization strategy in one sentence.
+Assign a score and one-sentence reasoning to EVERY task listed above. Explain the overall prioritization strategy in one sentence.
 
 **Respond ONLY in the following JSON format:**
 ```json
 {{
   "scores": [
-    {{ "task_id": "string", "score": number }},
+    {{ "task_id": "string", "score": number, "reasoning": "string" }},
     ...
   ],
   "strategy_summary": "string"
@@ -193,8 +199,14 @@ Assign a score to EVERY task listed above. Explain the overall prioritization st
         remaining_capacity_minutes = (capacity_hours * 60) - minutes_done_today
         current_capacity = f"{remaining_capacity_minutes // 60} hours and {remaining_capacity_minutes % 60} minutes remaining today."
 
+        # Get historical context (last 10 completed tasks)
+        completed_tasks = [t for t in tasks if t.status == TaskStatus.done]
+        completed_tasks.sort(key=lambda t: t.updated_at or datetime.min, reverse=True)
+        recent_completed = completed_tasks[:10]
+        history_context = "Recent completions:\n" + "\n".join([f"- {t.title}" for t in recent_completed]) if recent_completed else "No recent completions."
+
         # Generate prompt
-        prompt = await self.get_list_prioritization_prompt(active_tasks, current_capacity)
+        prompt = await self.get_list_prioritization_prompt(active_tasks, current_capacity, history_context)
 
         # Call LLM
         try:
@@ -206,6 +218,7 @@ Assign a score to EVERY task listed above. Explain the overall prioritization st
                 for score_entry in data["scores"]:
                     task_id = score_entry.get("task_id")
                     score = score_entry.get("score")
+                    reasoning = score_entry.get("reasoning")
                     if task_id and score is not None:
                         # Direct update to avoid overhead
                         from sqlmodel import select
@@ -214,6 +227,7 @@ Assign a score to EVERY task listed above. Explain the overall prioritization st
                         task = res.scalar_one_or_none()
                         if task:
                             task.ai_relevance_score = score
+                            task.ai_reasoning = reasoning
                 
                 await self.session.commit()
                 return data
