@@ -12,11 +12,11 @@
     - [x] Implement the prompt change and pass tests.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Contextual Backend Prompts' (Protocol in workflow.md) (a20e3e2)
 
-## Phase 2: Balanced Hybrid Algorithm
+## Phase 2: Balanced Hybrid Algorithm [checkpoint: 9825509]
 - [x] Task: Implement the "Balanced Hybrid" scoring function. (698938b)
     - [x] Write failing test for sorting tasks by AI Score, Urgency, and Priority.
     - [x] Update the core task retrieval API or `AIPrioritizationService` to apply the hybrid mathematical formula.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Balanced Hybrid Algorithm' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Balanced Hybrid Algorithm' (Protocol in workflow.md) (9825509)
 
 ## Phase 3: Frontend Explainability and Feedback
 - [ ] Task: Display AI reasoning on high-priority tasks.
