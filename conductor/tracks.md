@@ -25,8 +25,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 - [x] **Track: phase-6**
   *Link: [./tracks/phase-6/index.md](./tracks/phase-6/index.md)*
-
----
-- [x] **Track: Improve the AI sorting and prioritization**
-*Link: [./tracks/improve-ai-sorting_20260418/index.md](./tracks/improve-ai-sorting_20260418/index.md)*
-
