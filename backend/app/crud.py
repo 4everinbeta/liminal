@@ -115,13 +115,26 @@ async def create_task(session: AsyncSession, task_data: TaskCreate, user_id: str
     return new_task
 
 async def get_tasks(session: AsyncSession, user_id: str) -> List[Task]:
+    from .agents.prioritization import calculate_hybrid_score
+
     statement = (
         select(Task)
         .where(Task.user_id == user_id, Task.is_deleted == False)
-        .order_by(Task.created_at.desc())
     )
     result = await session.execute(statement)
-    return result.scalars().all()
+    tasks = result.scalars().all()
+    
+    # Sort by hybrid score in memory since it's a dynamic calculation 
+    # (unless we want to store it in DB, but ai_relevance_score is already stored)
+    def get_sort_key(t: Task):
+        # We use a high score for completed tasks to push them to bottom if needed,
+        # but this function is for active tasks usually.
+        if t.status == TaskStatus.done:
+            return -1
+        return calculate_hybrid_score(t.ai_relevance_score or 0, t.due_date, t.priority_score)
+
+    tasks.sort(key=get_sort_key, reverse=True)
+    return tasks
 
 async def get_deleted_tasks(session: AsyncSession, user_id: str) -> List[Task]:
     threshold = datetime.utcnow() - timedelta(hours=24)

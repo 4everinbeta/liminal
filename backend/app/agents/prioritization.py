@@ -22,6 +22,40 @@ def _extract_json_from_response(response_str: str) -> Optional[Dict[str, Any]]:
     except json.JSONDecodeError:
         return None
 
+def calculate_urgency_score(due_date: Optional[datetime]) -> int:
+    """
+    Calculates an urgency score (0-100) based on the due date.
+    - Overdue or due now: 100
+    - Due in 7 days or more: 0
+    - Interpolated in between.
+    """
+    if not due_date:
+        return 0
+    
+    now = datetime.utcnow()
+    if due_date <= now:
+        return 100
+    
+    diff = due_date - now
+    days_left = diff.total_seconds() / (24 * 3600)
+    
+    if days_left >= 7:
+        return 0
+    
+    # Linear interpolation from 100 at 0 days to 0 at 7 days
+    score = 100 * (1 - days_left / 7)
+    return int(round(score))
+
+def calculate_hybrid_score(ai_score: int, due_date: Optional[datetime], priority_score: int) -> int:
+    """
+    Calculates a balanced hybrid score (0-100).
+    Weights: 50% AI, 30% Urgency, 20% Priority.
+    """
+    urgency_score = calculate_urgency_score(due_date)
+    
+    hybrid = (0.5 * ai_score) + (0.3 * urgency_score) + (0.2 * priority_score)
+    return int(round(hybrid))
+
 class AIPrioritizationService:
     def __init__(self, session: AsyncSession, user_id: str):
         self.session = session
