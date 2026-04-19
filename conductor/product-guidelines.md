@@ -12,6 +12,7 @@
 
 ## UX Principles
 - **Progressive Disclosure:** Hide complex settings or advanced metadata until the user explicitly requests them. Keep the primary capture and focus views extremely simple.
+- **Transparent AI:** AI suggestions should always include a brief reasoning snippet to reduce the "black box" feeling and build trust with the user.
 - **Immediate Feedback:** Provide satisfying visual cues (animations, confetti, color shifts) for every task completion or status change. Ensure the UI feels alive and responsive.
 - **Forgiveness by Design:** Every action should be easily reversible. Mistakes are expected and should be trivial to fix. Use "Undo" banners and non-destructive deletion.
 

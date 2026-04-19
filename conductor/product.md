@@ -18,7 +18,7 @@ Liminal is an ADHD-optimized productivity system designed to reduce cognitive lo
 - **Focus Mode:** A single-task view with an adaptive Pomodoro timer (tailored to task effort), integrated ambient noise (Pink/Brown/White), and Spotify/Last.fm integration for a personalized deep-work environment.
 - **Natural Language Capture:** Ubiquitous, LLM-powered parsing for free-form task creation across all interfaces (Global FAB, Capture Tab, Board, and Dashboard).
 - **Urgency Visualization:** Visual cues (gradients, aging) that indicate task pressure without causing shame.
-- **AI Coach:** Natural language interface for prioritizing tasks and breaking down complex goals.
+- **AI Coach & Prioritization:** Context-aware prioritization with transparent reasoning (explainability) and a user feedback loop to improve accuracy over time.
 - **Strategic Layers:** Themes and Initiatives to provide context without cluttering the daily view.
 
 ## Success Metrics
