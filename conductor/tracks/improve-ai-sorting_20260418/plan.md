@@ -19,13 +19,13 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Balanced Hybrid Algorithm' (Protocol in workflow.md) (9825509)
 
 ## Phase 3: Frontend Explainability and Feedback
-- [ ] Task: Display AI reasoning on high-priority tasks.
-    - [ ] Update frontend UI components (`TaskCard.tsx` or similar) to render the new `reasoning` field as a tooltip or small badge.
-    - [ ] Write failing unit test in `frontend/__tests__/components/TaskCard.test.tsx` for the new display.
-    - [ ] Implement and pass tests.
-- [ ] Task: Implement explicit upvote/downvote feedback controls.
-    - [ ] Add feedback buttons to the UI near the AI reasoning badge.
-    - [ ] Connect buttons to the existing `POST /tasks/{id}/ai-feedback` endpoint.
-    - [ ] Write failing test for feedback click interactions.
-    - [ ] Implement and pass tests.
+- [x] Task: Display AI reasoning on high-priority tasks. (9ed6fe4)
+    - [x] Update frontend UI components (`TaskCard.tsx` or similar) to render the new `reasoning` field as a tooltip or small badge.
+    - [x] Write failing unit test in `frontend/__tests__/components/TaskCard.test.tsx` for the new display.
+    - [x] Implement and pass tests.
+- [x] Task: Implement explicit upvote/downvote feedback controls. (9ed6fe4)
+    - [x] Add feedback buttons to the UI near the AI reasoning badge.
+    - [x] Connect buttons to the existing `POST /tasks/{id}/ai-feedback` endpoint.
+    - [x] Write failing test for feedback click interactions.
+    - [x] Implement and pass tests.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Frontend Explainability and Feedback' (Protocol in workflow.md)
