@@ -127,6 +127,7 @@ class Task(SQLModel, table=True):
     
     # AI Prioritization
     ai_relevance_score: Optional[int] = Field(default=0, ge=0, le=100)
+    ai_reasoning: Optional[str] = None
     ai_suggestion_status: AISuggestionStatus = Field(default=AISuggestionStatus.none)
     
     # Recursive relation
@@ -195,6 +196,7 @@ class TaskCreate(SQLModel):
     actual_duration: Optional[int] = None
     value_score: int = Field(default=50, ge=1, le=100)
     notes: Optional[str] = None
+    ai_reasoning: Optional[str] = None
     parent_id: Optional[str] = None
     initiative_id: Optional[str] = None
     theme_id: Optional[str] = None
