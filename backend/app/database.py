@@ -77,6 +77,7 @@ async def init_db():
             await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS start_date TIMESTAMP WITHOUT TIME ZONE"))
             await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE"))
             await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS ai_relevance_score INTEGER DEFAULT 0"))
+            await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS ai_reasoning TEXT"))
             await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS ai_suggestion_status TEXT DEFAULT 'none'"))
             await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS parent_id TEXT"))
             await conn.execute(text("ALTER TABLE task ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()"))
