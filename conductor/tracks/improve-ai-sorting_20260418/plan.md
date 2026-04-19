@@ -1,9 +1,9 @@
 # Implementation Plan: Improve AI Sorting and Prioritization
 
 ## Phase 1: Contextual Backend Prompts
-- [ ] Task: Extend task scoring schema in `backend/app/models.py`.
-    - [ ] Write failing test for new schema (including `reasoning` string).
-    - [ ] Implement schema changes.
+- [x] Task: Extend task scoring schema in `backend/app/models.py`. (5df0154)
+    - [x] Write failing test for new schema (including `reasoning` string).
+    - [x] Implement schema changes.
 - [ ] Task: Refine `AIPrioritizationService` prompt logic.
     - [ ] Update prompt to inject current time-of-day and recent completion history context.
     - [ ] Ensure LLM returns a one-sentence `reasoning` alongside the `ai_relevance_score`.
